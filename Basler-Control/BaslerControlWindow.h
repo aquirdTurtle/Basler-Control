@@ -43,6 +43,7 @@ class BaslerControlWindow : public CDialogEx
 		PictureStats stats;
 		PictureSaver saver;
 		unsigned int currentRepNumber;
+		std::string runExposureMode;
 		std::vector<std::vector<long>> images;
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support

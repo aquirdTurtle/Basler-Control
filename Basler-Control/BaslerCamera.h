@@ -17,6 +17,7 @@ struct cameraWatchThreadInput
 // wrapper class for modifying for safemode and to standardize error handling.
 class usbBasler : public Pylon::CBaslerUsbInstantCamera
 {
+	using CBaslerUsbInstantCamera::CBaslerUsbInstantCamera;
 	public:
 		void init( HWND* parent );
 		
@@ -111,8 +112,8 @@ class ImageEventHandler : public Pylon::CImageEventHandler
 					{
 						elem *= 256.0 / 1024.0;
 					}
-					str( PostMessage( *parent, ACE_PIC_READY, grabResult->GetWidth() * grabResult->GetHeight(),
-						(LPARAM)image ) );
+					PostMessage( *parent, ACE_PIC_READY, grabResult->GetWidth() * grabResult->GetHeight(),
+								 (LPARAM)image );
 					//pic->drawBitmap( dc, image );
 				}
 				else

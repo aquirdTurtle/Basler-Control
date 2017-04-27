@@ -17,7 +17,7 @@ BaslerCameras::BaslerCameras(HWND* parent)
 	if (!BASLER_ACE_SAFEMODE)
 	{
 		Pylon::CBaslerUsbInstantCamera* temp;
-		temp = new Pylon::CBaslerUsbInstantCamera( Pylon::CTlFactory::GetInstance().CreateFirstDevice( info ) ); 
+		temp = new usbBasler( Pylon::CTlFactory::GetInstance().CreateFirstDevice( info ) );
 		camera = dynamic_cast<usbBasler*>(temp);
 	}
 	camera->init(parent);
@@ -27,7 +27,7 @@ BaslerCameras::BaslerCameras(HWND* parent)
 
 void BaslerCameras::softwareTrigger()
 {
-	camera->WaitForFrameTriggerReady( 500, Pylon::TimeoutHandling_ThrowException );
+	camera->WaitForFrameTriggerReady( 5000, Pylon::TimeoutHandling_ThrowException );
 	camera->ExecuteSoftwareTrigger();
 }
 
@@ -85,14 +85,15 @@ void BaslerCameras::setParameters( baslerSettings settings )
 
 	//errBox( str( camera->OffsetX.GetMin() ) );
 	//errBox( str( camera->OffsetX.GetMax() ) );
-	camera->setOffsetX( settings.dimensions.leftBorder );
-	camera->setOffsetY( settings.dimensions.topBorder );
-	
 	camera->setWidth( settings.dimensions.horRawPixelNumber );
 	camera->setHeight( settings.dimensions.vertRawPixelNumber );
-	
+
 	camera->setHorBin( settings.dimensions.horPixelsPerBin );
 	camera->setVertBin( settings.dimensions.vertPixelsPerBin );
+	
+	camera->setOffsetX( settings.dimensions.leftBorder );
+	camera->setOffsetY( settings.dimensions.topBorder );
+
 
 	camera->setPixelFormat( Basler_UsbCameraParams::PixelFormat_Mono10 );
 
@@ -302,14 +303,14 @@ void BaslerCameras::triggerThread( void* input )
 		{
 			// Execute the software trigger. The call waits up to 100 ms for the camera
 			// to be ready to be triggered.
-			camera->WaitForFrameTriggerReady( 500, Pylon::TimeoutHandling_ThrowException );
-			Sleep( 10 );
+			camera->WaitForFrameTriggerReady( 5000, Pylon::TimeoutHandling_ThrowException );
+			Sleep( 30 );
 			camera->ExecuteSoftwareTrigger();
 		}
 	}
 	catch (Pylon::TimeoutException& timeoutErr)
 	{
-		errBox( "Timeout!" + std::string(timeoutErr.what()) );
+		errBox( "Trigger Thread Timeout Error!" + std::string(timeoutErr.what()) );
 	}
 	catch (Pylon::RuntimeException& err)
 	{
@@ -693,7 +694,7 @@ void usbBasler::setGainMode( std::string mode )
 	{
 		try
 		{
-			Gain.FromString( mode.c_str() );
+			GainAuto.FromString( mode.c_str() );
 		}
 		catch (Pylon::GenericException& err)
 		{

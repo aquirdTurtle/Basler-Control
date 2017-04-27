@@ -22,14 +22,14 @@ BEGIN_MESSAGE_MAP( BaslerControlWindow, CDialogEx )
 	ON_CBN_SELENDOK(IDC_CAMERA_MODE_COMBO, BaslerControlWindow::passCameraMode)
 	ON_CONTROL_RANGE( EN_CHANGE, IDC_BASLER_MIN_SLIDER_MIN_EDIT, IDC_BASLER_MIN_SLIDER_MIN_EDIT, &BaslerControlWindow::handlePictureRangeEditChange )
 	ON_CONTROL_RANGE( EN_CHANGE, IDC_BASLER_MIN_SLIDER_MAX_EDIT, IDC_BASLER_MIN_SLIDER_MAX_EDIT, &BaslerControlWindow::handlePictureRangeEditChange )
-	ON_WM_MOUSEMOVE()
+	//ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
 void BaslerControlWindow::OnMouseMove( UINT flags, CPoint point )
 {
 	try
 	{
-		picture.handleMouse( point );
+		//picture.handleMouse( point );
 	}
 	catch (Error& err)
 	{
@@ -100,11 +100,11 @@ LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 	{
 		currentRepNumber++;
 		picture.drawBitmap( GetDC(), *image );
-		if (settings.getCurrentSettings().exposureMode == "Auto Exposure Continuous")
+		if (runExposureMode == "Auto Exposure Continuous")
 		{
 			settings.updateExposure( cameraController->getCurrentExposure() );
 		}
-		stats.update( image, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, 0, 0 );
+		//stats.update( image, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, 0, 0 );
 		if (currentRepNumber == 1 || cameraController->isContinuous())
 		{
 			saver.save( image, settings.getCurrentSettings().dimensions.horBinNumber );
@@ -112,6 +112,11 @@ LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		else
 		{
 			saver.append( image, settings.getCurrentSettings().dimensions.horBinNumber );
+			if (currentRepNumber == cameraController->getRepCounts())
+			{
+				cameraController->disarm();
+				saver.close();
+			}
 		}
 	}
 	catch (Error* err)
@@ -155,6 +160,7 @@ void BaslerControlWindow::handleArmPress()
 		currentRepNumber = 0;
 		cameraController->setParameters( settings.getCurrentSettings() );
 		picture.updateGridSpecs( settings.getCurrentSettings().dimensions );
+		runExposureMode = settings.getCurrentSettings().exposureMode;
 		HWND* win = new HWND;
 		win = &m_hWnd;
 		cameraController->armCamera( win );

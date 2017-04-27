@@ -5,11 +5,11 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 {
 	saveLocationText.ID = id++;
 	saveLocationText.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 25 };
-	saveLocationText.Create( "Save Location:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, saveLocationText.sPos, parent,
+	saveLocationText.Create( "Save Location:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY , saveLocationText.sPos, parent,
 							 saveLocationText.ID );
 	saveLocationEdit.ID = id++;
 	saveLocationEdit.sPos = { pos.x + 100, pos.y, pos.x + 300, pos.y += 25 };
-	saveLocationEdit.Create( WS_CHILD | WS_VISIBLE, saveLocationEdit.sPos, parent, saveLocationEdit.ID );
+	saveLocationEdit.Create( WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, saveLocationEdit.sPos, parent, saveLocationEdit.ID );
 	
 	saveCheckButton.ID = id++;
 	saveCheckButton.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 20 };
@@ -55,8 +55,8 @@ void PictureSaver::append( std::vector<long>* pic, int width )
 	if (!file.is_open())
 	{
 		thrower( "ERROR! Save file failed to open! Full address was: " + address + "_" + str( fileNumber ) + ".txt" );
-	}	
-	file << "\n;\n";
+	}
+	file << ";\n";
 	int count = 0;
 	for (auto elem : (*pic))
 	{
@@ -65,6 +65,10 @@ void PictureSaver::append( std::vector<long>* pic, int width )
 		if (count % width == 0)
 		{
 			file << "\n";
+		}
+		else
+		{
+			file << " ";
 		}
 	}
 }
@@ -95,6 +99,8 @@ void PictureSaver::save( std::vector<long>* pic, int width )
 	{
 		thrower( "ERROR: Please enter a valid number in the file number edit box!" );
 	}
+
+
 	if (file.is_open())
 	{
 		file.close();
@@ -108,7 +114,7 @@ void PictureSaver::save( std::vector<long>* pic, int width )
 	int count = 0;
 	for (auto elem : (*pic))
 	{
-		file << elem;
+		file << elem << " ";
 		count++;
 		if (count % width == 0)
 		{
@@ -168,3 +174,10 @@ void PictureSaver::save( std::vector<std::vector<long>> pics, int width )
 
 }
 
+void PictureSaver::close()
+{
+	if (file.is_open())
+	{
+		file.close();
+	}
+}

@@ -9,6 +9,7 @@ class PictureSaver
 		void save(std::vector<long>* pic, int width);
 		void save( std::vector<std::vector<long>> pics, int width );
 		void append( std::vector<long>* pic, int width );
+		void close();
 	private:
 		std::ofstream file;
 		Control<CStatic> saveLocationText;
