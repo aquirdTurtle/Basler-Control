@@ -16,15 +16,19 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 	pos.y += 25;
 	/// CURRENT IMAGE DATA
 	// Current Accumulation Number Display
-	repetitionIndicator.sPos = { pos.x, pos.y, pos.x + 272, pos.y + 25 };
+	repetitionIndicator.sPos = { pos.x, pos.y, pos.x + 272, pos.y += 25 };
 	repetitionIndicator.ID = id++;
 	repetitionIndicator.Create( "Repetition ?/?", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY | ES_CENTER, repetitionIndicator.sPos,
 								parent, repetitionIndicator.ID );
 	repetitionIndicator.fontType = "Normal";
-	pos.y += 25;
-	/// Picture labels ////////////////////////////////////////////////////////////
 
-	//ePictureText
+	updateButton.sPos = { pos.x, pos.y, pos.x + 272, pos.y += 25 };
+	updateButton.ID = id++;
+	updateButton.Create( "Update?", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | WS_BORDER, updateButton.sPos, parent, updateButton.ID );
+
+	/// Picture labels ///
+
+	// 
 	collumnHeaders[0].sPos = { pos.x, pos.y, pos.x + 54, pos.y + 25 };
 	collumnHeaders[0].ID = id++;
 	collumnHeaders[0].Create( "Pic:", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, collumnHeaders[0].sPos, parent, collumnHeaders[0].ID );
@@ -181,7 +185,10 @@ bool PictureStats::updateType(std::string typeText)
 void PictureStats::update( std::vector<long>* image, unsigned int imageNumber, std::pair<int, int> selectedPixel, int pictureWidth, 
 						   int currentRepetitionNumber, int totalRepetitionCount)
 {
-	
+	if (!updateButton.GetCheck())
+	{
+		return;
+	}
 	repetitionIndicator.SetWindowTextA( ("Repetition " + str( currentRepetitionNumber ) + "/" + str( totalRepetitionCount )).c_str() );
 	
 	long selCounts = (*image)[selectedPixel.first + selectedPixel.second * pictureWidth];

@@ -41,11 +41,13 @@ class PictureStats
 					 int pictureWidth, int currentRepetitionNumbar, int totalRepetitionCount );
 		bool reset();
 		bool updateType( std::string typeText );
+
 	private:
 		std::string displayDataType;
 		conversions convs;
 		Control<CStatic> pictureStatsHeader;
 		Control<CStatic> repetitionIndicator;
+		Control<CButton> updateButton;
 		std::array<Control<CStatic>, 5> collumnHeaders;
 		std::array<Control<CStatic>, 1> picNumberIndicators;
 		std::array<Control<CStatic>, 1> maxCounts;
@@ -53,7 +55,7 @@ class PictureStats
 		// average counts in the picture.
 		std::array<Control<CStatic>, 1> avgCounts;
 		std::array<Control<CStatic>, 1> selCounts;
-
+		
 };
 
 

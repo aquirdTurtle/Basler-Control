@@ -7,15 +7,16 @@
 #include "BaslerControlApp.h"
 
 class BaslerCameras;
+class UsbBasler;
 
-struct cameraWatchThreadInput
+struct triggerThreadInput
 {
-	HWND* parent;
-	BaslerCameras* thisObj;
+	double frameRate;
+	UsbBasler* camera;
 };
 
 // wrapper class for modifying for safemode and to standardize error handling.
-class usbBasler : public Pylon::CBaslerUsbInstantCamera
+class UsbBasler : public Pylon::CBaslerUsbInstantCamera
 {
 	using CBaslerUsbInstantCamera::CBaslerUsbInstantCamera;
 	public:
@@ -43,6 +44,9 @@ class usbBasler : public Pylon::CBaslerUsbInstantCamera
 		void stopGrabbing();
 		bool isGrabbing();
 
+		void waitForFrameTriggerReady(unsigned int timeout);
+		void executeSoftwareTrigger();
+		void startGrabbing( unsigned int picturesToGrab, Pylon::EGrabStrategy grabStrat );
 		std::vector<long> retrieveResult( unsigned int timeout );
 
 		void setPixelFormat( Basler_UsbCameraParams::PixelFormatEnums pixelFormat );
@@ -61,7 +65,7 @@ class BaslerCameras
 		~BaslerCameras();
 		void setParameters( baslerSettings settings );
 		void setDefaultParameters();
-		void armCamera( HWND* parent );
+		void armCamera( double frameRate );
 		void disarm();
 		static void triggerThread(void* input);
 		void softwareTrigger();
@@ -80,11 +84,12 @@ class BaslerCameras
 		// If the value doesn't meet these criteria, it will be rounded down so that it does.
 		int64_t Adjust( int64_t val, int64_t minimum, int64_t maximum, int64_t inc );
 	private:
-		usbBasler* camera;
+		UsbBasler* camera;
+		// official copy.
+		baslerSettings runSettings;
 		bool continuousImaging;
 		bool autoTrigger;
 		unsigned int repCounts;
-		static void cameraWatchThread( void* inputPtr );
 };
 
 

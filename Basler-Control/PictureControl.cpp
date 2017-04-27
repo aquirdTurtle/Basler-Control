@@ -405,10 +405,6 @@ void PictureControl::drawBackground(CWnd* parent)
 	RECT rectArea = { currentBackgroundArea.left, currentBackgroundArea.top, currentBackgroundArea.right, currentBackgroundArea.bottom};
 	//RECT rectArea = { 0, 100, 105, 105 };
 	int result = colorObj->Rectangle(&rectArea);
-	if (!result)
-	{
-		errBox( "!" );
-	}
 	parent->ReleaseDC(colorObj);
 }
 

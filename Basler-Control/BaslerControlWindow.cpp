@@ -83,6 +83,7 @@ void BaslerControlWindow::handleDisarmPress()
 	try
 	{
 		cameraController->disarm();
+		isRunning = false;
 	}
 	catch (Error& err)
 	{
@@ -106,7 +107,10 @@ LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		{
 			settings.updateExposure( cameraController->getCurrentExposure() );
 		}
-		//stats.update( image, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, 0, 0 );
+		
+		stats.update( image, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, currentRepNumber, 
+					  cameraController->getRepCounts() );
+
 		if (currentRepNumber == 1 || cameraController->isContinuous())
 		{
 			saver.save( image, imageWidth );
@@ -118,6 +122,7 @@ LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 			{
 				cameraController->disarm();
 				saver.close();
+				isRunning = false;
 			}
 		}
 	}
@@ -167,7 +172,8 @@ void BaslerControlWindow::handleArmPress()
 		imageWidth = tempSettings.dimensions.horBinNumber;
 		HWND* win = new HWND;
 		win = &m_hWnd;
-		cameraController->armCamera( win );
+		cameraController->armCamera( tempSettings.frameRate );
+		isRunning = true;
 	}
 	catch (Error& err)
 	{

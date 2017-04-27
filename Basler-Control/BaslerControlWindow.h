@@ -46,6 +46,7 @@ class BaslerControlWindow : public CDialogEx
 		std::string runExposureMode;
 		std::vector<std::vector<long>> images;
 		unsigned int imageWidth;
+		bool isRunning;
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 		HICON m_hIcon;

@@ -26,7 +26,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 
 	repText.sPos = { pos.x, pos.y, pos.x + 200, pos.y + 25 };
 	repText.ID = id++;
-	repText.Create( "Repetitions:", WS_CHILD | WS_VISIBLE, repText.sPos, parent, repText.ID );
+	repText.Create( "Total Picture Number:", WS_CHILD | WS_VISIBLE, repText.sPos, parent, repText.ID );
 
 	repEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
 	repEdit.ID = id++;
@@ -165,6 +165,19 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	triggerCombo.SelectString( 0, "Automatic Software Trigger" );
 	pos.y += 25;
 
+	frameRateText.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 25 };
+	frameRateText.ID = id++;
+	frameRateText.Create( "Frame Rate (pics/s): ", WS_CHILD | WS_VISIBLE, frameRateText.sPos, parent, frameRateText.ID );
+
+	frameRateEdit.sPos = { pos.x + 100, pos.y, pos.x + 200, pos.y + 25 };
+	frameRateEdit.ID = id++;
+	frameRateEdit.Create( WS_CHILD | WS_VISIBLE, frameRateEdit.sPos, parent, frameRateEdit.ID );
+	frameRateEdit.SetWindowTextA( "30" );
+
+
+	realFrameRate.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
+	realFrameRate.ID = id++;
+	realFrameRate.Create( "", WS_CHILD | WS_VISIBLE, realFrameRate.sPos, parent, realFrameRate.ID );
 	/*
 	// gain
 	Control<CStatic> gainText;
@@ -199,12 +212,6 @@ void BaslerSettingsControl::handleCameraMode()
 void BaslerSettingsControl::setSettings( baslerSettings settings )
 {
 	currentSettings = settings;
-}
-
-
-void BaslerSettingsControl::handleTriggerChange()
-{
-
 }
 
 
@@ -375,6 +382,15 @@ baslerSettings BaslerSettingsControl::getCurrentSettings()
 	triggerCombo.GetLBText( selection, text );
 	currentSettings.triggerMode = std::string( text );
 
+	frameRateEdit.GetWindowTextA( text );
+	try
+	{
+		currentSettings.frameRate = std::stod( std::string( text ) );
+	}
+	catch (std::invalid_argument& err)
+	{
+		thrower( std::string("ERROR! Please enter a valid float for the frame rate. ") + err.what() );
+	}
 	isReady = true;
 
 	return currentSettings;

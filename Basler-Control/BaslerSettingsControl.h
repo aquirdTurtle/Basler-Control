@@ -28,6 +28,7 @@ struct baslerSettings
 	std::string cameraMode;
 	unsigned int repCount;
 	std::string triggerMode;
+	double frameRate;
 	imageDimensions dimensions;
 };
 
@@ -36,7 +37,6 @@ class BaslerSettingsControl
 {
 	public:
 		void initialize( POINT& pos, int& id, CWnd* parent, int width, int height );
-		void handleTriggerChange();
 		void handleGain();
 		void handleExposureMode();
 		void handleCameraMode();
@@ -82,6 +82,10 @@ class BaslerSettingsControl
 		Control<CComboBox> cameraMode;
 		Control<CStatic> repText;
 		Control<CEdit> repEdit;
-		
+
+		Control<CStatic> frameRateText;
+		Control<CEdit> frameRateEdit;
+		Control<CStatic> realFrameRate;
+
 		bool isReady;
 };

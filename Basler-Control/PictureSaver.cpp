@@ -7,10 +7,12 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 	saveLocationText.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 25 };
 	saveLocationText.Create( "Save Location:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY , saveLocationText.sPos, parent,
 							 saveLocationText.ID );
+
 	saveLocationEdit.ID = id++;
 	saveLocationEdit.sPos = { pos.x + 100, pos.y, pos.x + 300, pos.y += 25 };
 	saveLocationEdit.Create( WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, saveLocationEdit.sPos, parent, saveLocationEdit.ID );
-	
+	saveLocationEdit.SetWindowTextA( "\\\\Andor\\share\\data and documents\\data repository\\170427\\Raw Data\\AceData" );
+
 	saveCheckButton.ID = id++;
 	saveCheckButton.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 20 };
 	saveCheckButton.Create( "Save?", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, saveCheckButton.sPos, parent, saveCheckButton.ID );
