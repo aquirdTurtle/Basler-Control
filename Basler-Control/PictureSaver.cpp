@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "PictureSaver.h"
-#include <fstream>
 
 void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 {
@@ -24,6 +23,50 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 	fileNumberEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y + 20 };
 	fileNumberEdit.Create( WS_CHILD | WS_VISIBLE, fileNumberEdit.sPos, parent, fileNumberEdit.ID );
 	fileNumberEdit.SetWindowTextA( "0" );
+}
+
+void PictureSaver::append( std::vector<long>* pic, int width )
+{
+	// check if it's actually supposed to save.
+	if (!saveCheckButton.GetCheck())
+	{
+		return;
+	}
+	CString text;
+	saveLocationEdit.GetWindowTextA( text );
+	std::string address = std::string( text );
+	if (address == "")
+	{
+		thrower( "ERROR: Please enter an address for saved pictures." );
+	}
+	int fileNumber;
+	text;
+	fileNumberEdit.GetWindowTextA( text );
+	try
+	{
+		fileNumber = std::stoi( std::string( text ) );
+	}
+	catch (std::invalid_argument& err)
+	{
+		thrower( "ERROR: Please enter a valid number in the file number edit box!" );
+	}
+
+	// file should already be open.
+	if (!file.is_open())
+	{
+		thrower( "ERROR! Save file failed to open! Full address was: " + address + "_" + str( fileNumber ) + ".txt" );
+	}	
+	file << "\n;\n";
+	int count = 0;
+	for (auto elem : (*pic))
+	{
+		file << elem;
+		count++;
+		if (count % width == 0)
+		{
+			file << "\n";
+		}
+	}
 }
 
 // save a picture with width width.
@@ -52,20 +95,24 @@ void PictureSaver::save( std::vector<long>* pic, int width )
 	{
 		thrower( "ERROR: Please enter a valid number in the file number edit box!" );
 	}
-
-	std::ofstream saveFile( address + "_" + str(fileNumber) + ".txt");
-	if (!saveFile.is_open())
+	if (file.is_open())
+	{
+		file.close();
+	}
+	
+	file.open( address + "_" + str(fileNumber) + ".txt");
+	if (!file.is_open())
 	{
 		thrower( "ERROR! Save file failed to open! Full address was: " + address + "_" + str( fileNumber ) + ".txt" );
 	}
 	int count = 0;
 	for (auto elem : (*pic))
 	{
-		saveFile << elem;
+		file << elem;
 		count++;
 		if (count % width == 0)
 		{
-			saveFile << "\n";
+			file << "\n";
 		}
 	}
 	fileNumber++;

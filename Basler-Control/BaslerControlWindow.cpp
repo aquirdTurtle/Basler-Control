@@ -23,19 +23,25 @@ BEGIN_MESSAGE_MAP( BaslerControlWindow, CDialogEx )
 	ON_CONTROL_RANGE( EN_CHANGE, IDC_BASLER_MIN_SLIDER_MIN_EDIT, IDC_BASLER_MIN_SLIDER_MIN_EDIT, &BaslerControlWindow::handlePictureRangeEditChange )
 	ON_CONTROL_RANGE( EN_CHANGE, IDC_BASLER_MIN_SLIDER_MAX_EDIT, IDC_BASLER_MIN_SLIDER_MAX_EDIT, &BaslerControlWindow::handlePictureRangeEditChange )
 	ON_WM_MOUSEMOVE()
-
 END_MESSAGE_MAP()
 
 void BaslerControlWindow::OnMouseMove( UINT flags, CPoint point )
 {
-	picture.handleMouse( point );
+	try
+	{
+		picture.handleMouse( point );
+	}
+	catch (Error& err)
+	{
+		errBox( "Error! " + err.whatStr() );
+	}
 }
 
 void BaslerControlWindow::handleSoftwareTrigger()
 {
 	try
 	{
-		camera->softwareTrigger();
+		cameraController->softwareTrigger();
 	}
 	catch (Pylon::TimeoutException& err)
 	{
@@ -48,35 +54,65 @@ void BaslerControlWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scroll
 	if (nSBCode == SB_THUMBPOSITION || nSBCode == SB_THUMBTRACK)
 	{
 		int id = scrollbar->GetDlgCtrlID();
-		picture.handleScroll( id, nPos );
+		try
+		{
+			picture.handleScroll( id, nPos );
+		}
+		catch (Error& err)
+		{
+			errBox( "Error! " + err.whatStr() );
+		}
 	}
 }
 
 void BaslerControlWindow::handlePictureRangeEditChange( UINT id )
 {
-	picture.handleEditChange( id );
+	try
+	{
+		picture.handleEditChange( id );
+	}
+	catch (Error& err)
+	{
+		errBox( "Error! " + err.whatStr() );
+	}
 }
 
 
 void BaslerControlWindow::handleDisarmPress()
 {
-	camera->disarm();
+	try
+	{
+		cameraController->disarm();
+	}
+	catch (Error& err)
+	{
+		errBox( "Error! " + err.whatStr() );
+	}
+
 }
 
 
 LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 {
-	long size = long( wParam );
-	std::vector<long>* image = (std::vector<long>*) lParam;
-	try
+ 	long size = long( wParam );
+ 	std::vector<long>* image = (std::vector<long>*) lParam;
+ 	try
 	{
+		currentRepNumber++;
 		picture.drawBitmap( GetDC(), *image );
 		if (settings.getCurrentSettings().exposureMode == "Auto Exposure Continuous")
 		{
-			settings.updateExposure( camera->getCurrentExposure() );
+			settings.updateExposure( cameraController->getCurrentExposure() );
 		}
 		stats.update( image, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, 0, 0 );
-		saver.save( image, settings.getCurrentSettings().dimensions.horBinNumber );
+		if (currentRepNumber == 1 || cameraController->isContinuous())
+		{
+			saver.save( image, settings.getCurrentSettings().dimensions.horBinNumber );
+		}
+		else
+		{
+			saver.append( image, settings.getCurrentSettings().dimensions.horBinNumber );
+		}
 	}
 	catch (Error* err)
 	{
@@ -89,24 +125,39 @@ LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 
 void BaslerControlWindow::passCameraMode()
 {
-	settings.handleCameraMode();
+	try
+	{
+		settings.handleCameraMode();
+	}
+	catch (Error& err)
+	{
+		errBox( "Error! " + err.whatStr() );
+	}
 }
 
 
 void BaslerControlWindow::passExposureMode()
 {
-	settings.handleExposureMode();
+	try
+	{
+		settings.handleExposureMode();
+	}
+	catch (Error& err)
+	{
+		errBox( "Error! " + err.whatStr() );
+	}
 }
 
 void BaslerControlWindow::handleArmPress()
 {
 	try
 	{
-		camera->setParameters( settings.getCurrentSettings() );
+		currentRepNumber = 0;
+		cameraController->setParameters( settings.getCurrentSettings() );
 		picture.updateGridSpecs( settings.getCurrentSettings().dimensions );
 		HWND* win = new HWND;
 		win = &m_hWnd;
-		camera->armCamera( win );
+		cameraController->armCamera( win );
 	}
 	catch (Error& err)
 	{
@@ -184,25 +235,31 @@ HCURSOR BaslerControlWindow::OnQueryDragIcon()
 
 void BaslerControlWindow::initializeControls()
 {
-	CMenu menu;
-	menu.LoadMenu( IDR_MENU1 );
-	SetMenu( &menu );
-
-	HWND* temp = new HWND( GetSafeHwnd() );
-	camera = new BaslerCameras( temp );
-	int id = 1000;
-	POINT pos = { 0,0 };
-	settings.initialize( pos, id, this );
-	settings.setSettings( camera->getDefaultSettings() );
-	std::unordered_map<std::string, CFont*> fontDummy;
-	std::vector<CToolTipCtrl*> toolTipDummy;
-	stats.initialize( pos, this, id, fontDummy, toolTipDummy);
-	saver.initialize( pos, id, this );
-	POINT picPos = { 300, 0 };
-	POINT dims = camera->getCameraDimensions();
-	picture.initialize( picPos, this, id, dims.x + picPos.x + 100, dims.y + picPos.y);
-	picture.updateGridSpecs( camera->getDefaultSettings().dimensions );
-	picture.drawBackground( this );
-	
+	try
+	{
+		CMenu menu;
+		menu.LoadMenu( IDR_MENU1 );
+		SetMenu( &menu );
+		HWND* temp = new HWND( GetSafeHwnd() );
+		cameraController = new BaslerCameras( temp );
+		int id = 1000;
+		POINT pos = { 0,0 };
+		POINT cameraDims = cameraController->getCameraDimensions();
+		settings.initialize( pos, id, this, cameraDims.x, cameraDims.y );
+		settings.setSettings( cameraController->getDefaultSettings() );
+		std::unordered_map<std::string, CFont*> fontDummy;
+		std::vector<CToolTipCtrl*> toolTipDummy;
+		stats.initialize( pos, this, id, fontDummy, toolTipDummy );
+		saver.initialize( pos, id, this );
+		POINT picPos = { 300, 0 };
+		POINT dims = cameraController->getCameraDimensions();
+		picture.initialize( picPos, this, id, dims.x + picPos.x + 100, dims.y + picPos.y );
+		picture.updateGridSpecs( cameraController->getDefaultSettings().dimensions );
+		picture.drawBackground( this );
+	}
+	catch (Error& err)
+	{
+		errBox( "Initialization Error! " + err.whatStr() );
+	}
 }
 

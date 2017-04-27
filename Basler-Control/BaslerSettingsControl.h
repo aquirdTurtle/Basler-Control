@@ -35,7 +35,7 @@ struct baslerSettings
 class BaslerSettingsControl
 {
 	public:
-		void initialize( POINT& pos, int& id, CWnd* parent );
+		void initialize( POINT& pos, int& id, CWnd* parent, int width, int height );
 		void handleTriggerChange();
 		void handleGain();
 		void handleExposureMode();

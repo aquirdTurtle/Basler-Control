@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <fstream>
 
 class PictureSaver
 {
@@ -7,7 +8,9 @@ class PictureSaver
 		void initialize( POINT& pos, int& id, CWnd* parent );
 		void save(std::vector<long>* pic, int width);
 		void save( std::vector<std::vector<long>> pics, int width );
+		void append( std::vector<long>* pic, int width );
 	private:
+		std::ofstream file;
 		Control<CStatic> saveLocationText;
 		Control<CEdit> saveLocationEdit;
 		Control<CButton> saveCheckButton;

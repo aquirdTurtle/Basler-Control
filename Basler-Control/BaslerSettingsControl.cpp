@@ -3,7 +3,7 @@
 #include "BaslerSettingsControl.h"
 #include "constants.h"
 
-void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent )
+void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight )
 {
 	int width = 300;
 	// arm
@@ -104,7 +104,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent )
 	rightEdit.sPos = { pos.x + width/3, pos.y, pos.x + 2* width/3, pos.y + 25 };
 	rightEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, rightEdit.sPos, parent, rightEdit.ID );
 	rightEdit.fontType = "Normal";
-	rightEdit.SetWindowTextA( "15" );
+	rightEdit.SetWindowTextA( cstr(picWidth-1) );
 	//
 	horizontalBinningEdit.ID = id++;
 	horizontalBinningEdit.sPos = { pos.x + 2* width/3, pos.y, pos.x + width, pos.y += 25 };
@@ -140,7 +140,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent )
 	bottomEdit.sPos = { pos.x + width/3, pos.y, pos.x + 2* width/3, pos.y + 25 };
 	bottomEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, bottomEdit.sPos, parent, bottomEdit.ID );
 	bottomEdit.fontType = "Normal";
-	bottomEdit.SetWindowTextA( "15" );
+	bottomEdit.SetWindowTextA( cstr(picHeight-1) );
 	//
 	verticalBinningEdit.ID = id++;
 	verticalBinningEdit.sPos = { pos.x + 2* width/3, pos.y, pos.x + width, pos.y += 25 };
@@ -165,17 +165,12 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent )
 	triggerCombo.SelectString( 0, "Automatic Software Trigger" );
 	pos.y += 25;
 
-
-
 	/*
 	// gain
 	Control<CStatic> gainText;
 	Control<CSliderCtrl> gainSlider;
 	Control<CEdit> rawGainEdit;
 	Control<CEdit> realGainText;
-	// trigger
-	Control<CStatic> triggerText;
-	Control<CComboBox> triggerCombo;
 	*/
 }
 
@@ -280,6 +275,11 @@ baslerSettings BaslerSettingsControl::getCurrentSettings()
 	try
 	{
 		currentSettings.dimensions.rightBorder = std::stoi( std::string( tempStr ) );
+		// round up to nearest multiple of 16
+		int width = currentSettings.dimensions.rightBorder - currentSettings.dimensions.leftBorder + 1;
+		width = ((width + 16 - 1) / 16) * 16;
+		currentSettings.dimensions.rightBorder = currentSettings.dimensions.leftBorder + width - 1;
+		rightEdit.SetWindowTextA( cstr( currentSettings.dimensions.rightBorder ) );
 	}
 	catch (std::invalid_argument&)
 	{
@@ -302,6 +302,11 @@ baslerSettings BaslerSettingsControl::getCurrentSettings()
 	try
 	{
 		currentSettings.dimensions.bottomBorder = std::stoi( std::string( tempStr ) );
+		// round up to nearest multiple of 16
+		int height = currentSettings.dimensions.bottomBorder - currentSettings.dimensions.topBorder + 1;
+		height = ((height + 16 - 1) / 16) * 16;
+		currentSettings.dimensions.bottomBorder = currentSettings.dimensions.topBorder + height - 1;
+		bottomEdit.SetWindowTextA( cstr(currentSettings.dimensions.bottomBorder) );
 	}
 	catch (std::invalid_argument&)
 	{

@@ -39,9 +39,11 @@ class BaslerControlWindow : public CDialogEx
 	private:
 		PictureControl picture;
 		BaslerSettingsControl settings;
-		BaslerCameras* camera;
+		BaslerCameras* cameraController;
 		PictureStats stats;
 		PictureSaver saver;
+		unsigned int currentRepNumber;
+		std::vector<std::vector<long>> images;
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 		HICON m_hIcon;

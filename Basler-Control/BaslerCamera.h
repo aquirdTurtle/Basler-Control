@@ -14,6 +14,43 @@ struct cameraWatchThreadInput
 	BaslerCameras* thisObj;
 };
 
+// wrapper class for modifying for safemode and to standardize error handling.
+class usbBasler : public Pylon::CBaslerUsbInstantCamera
+{
+	public:
+		void init( HWND* parent );
+		
+		int getMinOffsetX();
+		int getCurrentOffsetX();
+		void setOffsetX( int offset );
+
+		int getMinOffsetY();
+		int getCurrentOffsetY();
+		void setOffsetY( int offset );
+
+		int getMaxWidth();
+		int getCurrentWidth();
+		int getMaxHeight();
+		int getCurrentHeight();
+		
+
+		void setWidth( int width );
+		void setHeight( int height );
+		void setHorBin( int binning );
+		void setVertBin( int binning );
+
+		void stopGrabbing();
+		bool isGrabbing();
+
+		std::vector<long> retrieveResult( unsigned int timeout );
+
+		void setPixelFormat( Basler_UsbCameraParams::PixelFormatEnums pixelFormat );
+
+		void setGainMode( std::string mode );
+		void setGain(int gainValue);
+		int getMinGain();
+};
+
 // the object for an actual camera.  doesn't handle gui things itself, just the interface from my code to the camera object.
 class BaslerCameras
 {
@@ -29,10 +66,12 @@ class BaslerCameras
 		void softwareTrigger();
 		//void armCamera( PictureControl* pic, CDC* dc );
 		POINT getCameraDimensions();
-		void reOpenCamera();
+		void reOpenCamera( HWND* parent );
 		std::string getCameraInfo();
 		baslerSettings getDefaultSettings();
 		double getCurrentExposure();
+		unsigned int getRepCounts();
+		bool isContinuous();
 		// Adjust value so it complies with range and increment passed.
 		//
 		// The parameter's minimum and maximum are always considered as valid values.
@@ -40,7 +79,7 @@ class BaslerCameras
 		// If the value doesn't meet these criteria, it will be rounded down so that it does.
 		int64_t Adjust( int64_t val, int64_t minimum, int64_t maximum, int64_t inc );
 	private:
-		Pylon::CBaslerUsbInstantCamera* camera;
+		usbBasler* camera;
 		bool continuousImaging;
 		bool autoTrigger;
 		unsigned int repCounts;
@@ -90,3 +129,6 @@ class ImageEventHandler : public Pylon::CImageEventHandler
 		HWND* parent;
 };
 
+
+	
+	

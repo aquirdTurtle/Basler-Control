@@ -39,7 +39,6 @@ class PictureStats
 						std::unordered_map<std::string, CFont*> fonts );
 		void update( std::vector<long>* image, unsigned int imageNumber, std::pair<int, int> selectedPixel,
 					 int pictureWidth, int currentRepetitionNumbar, int totalRepetitionCount );
-		//bool update(unsigned long selCounts, unsigned long maxCounts, unsigned long minCounts, double avgCounts, unsigned int image);
 		bool reset();
 		bool updateType( std::string typeText );
 	private:
