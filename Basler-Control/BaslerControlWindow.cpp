@@ -99,7 +99,9 @@ LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
  	try
 	{
 		currentRepNumber++;
-		picture.drawBitmap( GetDC(), *image );
+		CDC* tempDc = GetDC();
+		picture.drawBitmap( tempDc, *image );
+		ReleaseDC( tempDc );
 		if (runExposureMode == "Auto Exposure Continuous")
 		{
 			settings.updateExposure( cameraController->getCurrentExposure() );
