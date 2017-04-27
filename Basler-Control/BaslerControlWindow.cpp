@@ -107,11 +107,11 @@ LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		//stats.update( image, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, 0, 0 );
 		if (currentRepNumber == 1 || cameraController->isContinuous())
 		{
-			saver.save( image, settings.getCurrentSettings().dimensions.horBinNumber );
+			saver.save( image, imageWidth );
 		}
 		else
 		{
-			saver.append( image, settings.getCurrentSettings().dimensions.horBinNumber );
+			saver.append( image, imageWidth );
 			if (currentRepNumber == cameraController->getRepCounts())
 			{
 				cameraController->disarm();
@@ -158,9 +158,11 @@ void BaslerControlWindow::handleArmPress()
 	try
 	{
 		currentRepNumber = 0;
-		cameraController->setParameters( settings.getCurrentSettings() );
-		picture.updateGridSpecs( settings.getCurrentSettings().dimensions );
-		runExposureMode = settings.getCurrentSettings().exposureMode;
+		baslerSettings tempSettings = settings.getCurrentSettings();
+		cameraController->setParameters( tempSettings );
+		picture.updateGridSpecs( tempSettings.dimensions );
+		runExposureMode = tempSettings.exposureMode;
+		imageWidth = tempSettings.dimensions.horBinNumber;
 		HWND* win = new HWND;
 		win = &m_hWnd;
 		cameraController->armCamera( win );
