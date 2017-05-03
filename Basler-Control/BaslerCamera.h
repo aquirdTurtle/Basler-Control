@@ -4,21 +4,23 @@
 #include <pylon/PylonIncludes.h>
 #include <pylon/PylonGUI.h>
 #include <pylon/usb/BaslerUsbInstantCamera.h>
+#include <pylon/1394/Basler1394InstantCamera.h>
 #include "BaslerControlApp.h"
+#include "constants.h"
 
 class BaslerCameras;
-class UsbBasler;
+class BaslerWrapper;
 
 struct triggerThreadInput
 {
 	double frameRate;
-	UsbBasler* camera;
+	BaslerWrapper* camera;
 };
 
 // wrapper class for modifying for safemode and to standardize error handling.
-class UsbBasler : public Pylon::CBaslerUsbInstantCamera
+class BaslerWrapper : public cameraType
 {
-	using CBaslerUsbInstantCamera::CBaslerUsbInstantCamera;
+	using cameraType::cameraType;
 	public:
 		void init( HWND* parent );
 		
@@ -35,6 +37,10 @@ class UsbBasler : public Pylon::CBaslerUsbInstantCamera
 		int getMaxHeight();
 		int getCurrentHeight();
 		
+		double getExposureMax();
+		double getExposureMin();
+		double getCurrentExposure();
+		void setExposure( double exposureTime );
 
 		void setWidth( int width );
 		void setHeight( int height );
@@ -49,7 +55,7 @@ class UsbBasler : public Pylon::CBaslerUsbInstantCamera
 		void startGrabbing( unsigned int picturesToGrab, Pylon::EGrabStrategy grabStrat );
 		std::vector<long> retrieveResult( unsigned int timeout );
 
-		void setPixelFormat( Basler_UsbCameraParams::PixelFormatEnums pixelFormat );
+		void setPixelFormat( cameraParams::PixelFormatEnums pixelFormat );
 
 		void setGainMode( std::string mode );
 		void setGain(int gainValue);
@@ -84,7 +90,7 @@ class BaslerCameras
 		// If the value doesn't meet these criteria, it will be rounded down so that it does.
 		int64_t Adjust( int64_t val, int64_t minimum, int64_t maximum, int64_t inc );
 	private:
-		UsbBasler* camera;
+		BaslerWrapper* camera;
 		// official copy.
 		baslerSettings runSettings;
 		bool continuousImaging;

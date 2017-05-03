@@ -178,6 +178,33 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	realFrameRate.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
 	realFrameRate.ID = id++;
 	realFrameRate.Create( "", WS_CHILD | WS_VISIBLE, realFrameRate.sPos, parent, realFrameRate.ID );
+
+	gainCombo.sPos = { pos.x, pos.y, pos.x + 300, pos.y + 100 };
+	gainCombo.ID = id++;
+	gainCombo.Create( WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_SORT, gainCombo.sPos, parent, gainCombo.ID );
+	gainCombo.AddString( "Auto Gain Continuous" );
+	gainCombo.AddString( "Auto Gain Once" );
+	gainCombo.AddString( "Auto Gain Off" );
+	gainCombo.SelectString( 0, "Auto Gain Off" );
+	pos.y += 25;
+
+	gainText.sPos = { pos.x, pos.y, pos.x + 150, pos.y + 25 };
+	gainText.ID = id++;
+	gainText.Create( "Raw Gain: ", WS_CHILD | WS_VISIBLE, gainText.sPos, parent, gainText.ID );
+
+	gainEdit.sPos = { pos.x + 150, pos.y, pos.x + 300, pos.y += 25 };
+	gainEdit.ID = id++;
+	gainEdit.Create( WS_CHILD | WS_VISIBLE, gainEdit.sPos, parent, gainEdit.ID );
+	gainEdit.SetWindowTextA( "260" );
+
+	realGainText.sPos = { pos.x, pos.y, pos.x + 150, pos.y + 25 };
+	realGainText.ID = id++;
+	realGainText.Create( "Real Gain: ", WS_CHILD | WS_VISIBLE, realGainText.sPos, parent, realGainText.ID );
+
+	realGainStatus.sPos = { pos.x + 150, pos.y, pos.x + 300, pos.y += 25 };
+	realGainStatus.ID = id++;
+	realGainStatus.Create( "", WS_CHILD | WS_VISIBLE, realGainStatus.sPos, parent, realGainStatus.ID );
+
 	/*
 	// gain
 	Control<CStatic> gainText;

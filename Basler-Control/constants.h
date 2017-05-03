@@ -1,8 +1,24 @@
+#include <pylon/PylonIncludes.h>
+#include <pylon/usb/BaslerUsbInstantCamera.h>
+#include <pylon/1394/Basler1394InstantCamera.h>
 
 #define BASLER_ACE_SAFEMODE true
+// which type of camera
+//#define FIREWIRE_CAMERA 
+#define USB_CAMERA 
 
-#define IDC_BASLER_MIN_SLIDER_MIN_EDIT 1044
-#define IDC_BASLER_MIN_SLIDER_MAX_EDIT 1047
+#ifdef FIREWIRE_CAMERA 
+	typedef Pylon::CBasler1394InstantCamera cameraType;
+	typedef Pylon::CBasler1394GrabResultPtr grabPtr;
+	namespace cameraParams = Basler_IIDC1394CameraParams;
+#elif defined USB_CAMERA
+	typedef Pylon::CBaslerUsbInstantCamera cameraType;
+	typedef Pylon::CBaslerUsbGrabResultPtr grabPtr;
+	namespace cameraParams = Basler_UsbCameraParams;
+#endif
+
+#define IDC_BASLER_MIN_SLIDER_MIN_EDIT 1049
+#define IDC_BASLER_MIN_SLIDER_MAX_EDIT 1052
 #define IDC_CAMERA_MODE_COMBO 1004
 #define IDC_EXPOSURE_MODE_COMBO 1007
 #define IDC_REPETITIONS_EDIT 1003

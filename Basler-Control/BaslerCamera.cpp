@@ -14,14 +14,15 @@ BaslerCameras::BaslerCameras(HWND* parent)
 {
 	Pylon::PylonInitialize();
 	Pylon::CDeviceInfo info;
+	info.SetDeviceClass( cameraType::DeviceClass() );
 	if (!BASLER_ACE_SAFEMODE)
 	{
-		Pylon::CBaslerUsbInstantCamera* temp;
-		temp = new UsbBasler( Pylon::CTlFactory::GetInstance().CreateFirstDevice( info ) );
-		camera = dynamic_cast<UsbBasler*>(temp);
+		cameraType* temp;
+		temp = new BaslerWrapper( Pylon::CTlFactory::GetInstance().CreateFirstDevice( info ) );
+		camera = dynamic_cast<BaslerWrapper*>(temp);
 	}
 	camera->init(parent);
-	info.SetDeviceClass( Pylon::CBaslerUsbInstantCamera::DeviceClass() );
+	
 }
 
 
@@ -112,7 +113,7 @@ void BaslerCameras::setParameters( baslerSettings settings )
 	camera->setHorBin( settings.dimensions.horPixelsPerBin );
 	camera->setVertBin( settings.dimensions.vertPixelsPerBin );
 
-	camera->setPixelFormat( Basler_UsbCameraParams::PixelFormat_Mono10 );
+	camera->setPixelFormat( cameraParams::PixelFormat_Mono10 );
 
 	if (GenApi::IsWritable( camera->GainAuto ))
 	{
@@ -123,21 +124,22 @@ void BaslerCameras::setParameters( baslerSettings settings )
 	// exposure mode
 	if (settings.exposureMode == "Auto Exposure Continuous")
 	{
-		camera->ExposureAuto.SetValue( Basler_UsbCameraParams::ExposureAutoEnums::ExposureAuto_Continuous );
+		camera->ExposureAuto.SetValue( cameraParams::ExposureAutoEnums::ExposureAuto_Continuous );
 	}
 	else if (settings.exposureMode == "Auto Exposure Off")
 	{
-		camera->ExposureAuto.SetValue( Basler_UsbCameraParams::ExposureAutoEnums::ExposureAuto_Off );
-		if (!(settings.exposureTime >= camera->ExposureTime.GetMin() && settings.exposureTime <= camera->ExposureTime.GetMax()))
+		camera->ExposureAuto.SetValue( cameraParams::ExposureAutoEnums::ExposureAuto_Off );
+
+		if (!(settings.exposureTime >= camera->getExposureMin() && settings.exposureTime <= camera->getExposureMax()))
 		{
-			thrower( "ERROR: exposure time must be between " + str( camera->ExposureTime.GetMin() ) + " and " 
-					 + str( camera->ExposureTime.GetMax()) );
+			thrower( "ERROR: exposure time must be between " + str( camera->getExposureMin() ) + " and " 
+					 + str( camera->getExposureMax()) );
 		}
-		camera->ExposureTime.SetValue( settings.exposureTime );
+		camera->setExposure( settings.exposureTime );
 	}
 	else if (settings.exposureMode == "Auto Exposure Once")
 	{
-		camera->ExposureAuto.SetValue( Basler_UsbCameraParams::ExposureAutoEnums::ExposureAuto_Once );
+		camera->ExposureAuto.SetValue( cameraParams::ExposureAutoEnums::ExposureAuto_Once );
 	}
 
 	if (settings.cameraMode == "Finite Acquisition")
@@ -153,17 +155,17 @@ void BaslerCameras::setParameters( baslerSettings settings )
 
 	if (settings.triggerMode == "External Trigger")
 	{
-		camera->TriggerSource.SetValue( Basler_UsbCameraParams::TriggerSource_Line4 );
+		camera->TriggerSource.SetValue( cameraParams::TriggerSource_Line3 );
 		autoTrigger = false;
 	}
 	else if (settings.triggerMode == "Automatic Software Trigger")
 	{
-		camera->TriggerSource.SetValue( Basler_UsbCameraParams::TriggerSource_Software );
+		camera->TriggerSource.SetValue( cameraParams::TriggerSource_Software );
 		autoTrigger = true;
 	}
 	else if (settings.triggerMode == "Manual Software Trigger")
 	{
-		camera->TriggerSource.SetValue( Basler_UsbCameraParams::TriggerSource_Software );
+		camera->TriggerSource.SetValue( cameraParams::TriggerSource_Software );
 		autoTrigger = false;
 	}
 
@@ -175,13 +177,13 @@ void BaslerCameras::setParameters( baslerSettings settings )
 void BaslerCameras::reOpenCamera(HWND* parent)
 {
 	Pylon::CDeviceInfo info;
-	info.SetDeviceClass( Pylon::CBaslerUsbInstantCamera::DeviceClass() );
+	info.SetDeviceClass( cameraType::DeviceClass() );
 	if (!BASLER_ACE_SAFEMODE)
 	{
 		delete camera;
-		Pylon::CBaslerUsbInstantCamera* temp;
-		temp = new Pylon::CBaslerUsbInstantCamera( Pylon::CTlFactory::GetInstance().CreateFirstDevice( info ) );
-		camera = dynamic_cast<UsbBasler*>(temp);
+		cameraType* temp;
+		temp = new cameraType( Pylon::CTlFactory::GetInstance().CreateFirstDevice( info ) );
+		camera = dynamic_cast<BaslerWrapper*>(temp);
 	}
 	camera->init(parent);
 }
@@ -221,7 +223,7 @@ POINT BaslerCameras::getCameraDimensions()
 
 double BaslerCameras::getCurrentExposure()
 {
-	return camera->ExposureTime.GetValue();
+	return camera->getCurrentExposure();
 }
 
 
@@ -336,7 +338,7 @@ int64_t BaslerCameras::Adjust( int64_t val, int64_t minimum, int64_t maximum, in
 }
 
 
-void UsbBasler::init( HWND* parent )
+void BaslerWrapper::init( HWND* parent )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -345,7 +347,7 @@ void UsbBasler::init( HWND* parent )
 			Open();
 			// prepare the image event handler
 			RegisterImageEventHandler( new ImageEventHandler( parent ), Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete );
-			TriggerMode.SetValue( Basler_UsbCameraParams::TriggerMode_On );
+			TriggerMode.SetValue( cameraParams::TriggerMode_On );
 		}
 		catch (Pylon::GenericException& err)
 		{
@@ -356,7 +358,7 @@ void UsbBasler::init( HWND* parent )
 }
 
 
-int UsbBasler::getMinOffsetX()
+int BaslerWrapper::getMinOffsetX()
 {
 	if (BASLER_ACE_SAFEMODE)
 	{
@@ -372,7 +374,7 @@ int UsbBasler::getMinOffsetX()
 	}
 }
 
-int UsbBasler::getMinOffsetY()
+int BaslerWrapper::getMinOffsetY()
 {
 	if (BASLER_ACE_SAFEMODE)
 	{
@@ -388,7 +390,7 @@ int UsbBasler::getMinOffsetY()
 	}
 }
 
-int UsbBasler::getMaxWidth()
+int BaslerWrapper::getMaxWidth()
 {
 	if (BASLER_ACE_SAFEMODE)
 	{
@@ -404,7 +406,7 @@ int UsbBasler::getMaxWidth()
 	}
 }
 
-int UsbBasler::getMaxHeight()
+int BaslerWrapper::getMaxHeight()
 {
 	if (BASLER_ACE_SAFEMODE)
 	{
@@ -420,7 +422,7 @@ int UsbBasler::getMaxHeight()
 	}
 }
 
-int UsbBasler::getMinGain()
+int BaslerWrapper::getMinGain()
 {
 	if (BASLER_ACE_SAFEMODE)
 	{
@@ -428,7 +430,11 @@ int UsbBasler::getMinGain()
 	}
 	try
 	{
-		return Gain.GetMin();
+		#ifdef USB_CAMERA
+			return Gain.GetMin();
+		#elif defined FIREWIRE_CAMERA
+			return GainRaw.GetMin();
+		#endif
 	}
 	catch (Pylon::GenericException& err)
 	{
@@ -437,7 +443,7 @@ int UsbBasler::getMinGain()
 }
 
 
-void UsbBasler::setOffsetX( int offset )
+void BaslerWrapper::setOffsetX( int offset )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -453,7 +459,7 @@ void UsbBasler::setOffsetX( int offset )
 	}
 }
 
-void UsbBasler::setOffsetY( int offset )
+void BaslerWrapper::setOffsetY( int offset )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -461,7 +467,7 @@ void UsbBasler::setOffsetY( int offset )
 	}
 }
 
-void UsbBasler::setWidth( int width )
+void BaslerWrapper::setWidth( int width )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -477,7 +483,7 @@ void UsbBasler::setWidth( int width )
 }
 
 
-void UsbBasler::setHeight( int height )
+void BaslerWrapper::setHeight( int height )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -493,7 +499,7 @@ void UsbBasler::setHeight( int height )
 }
 
 
-void UsbBasler::setHorBin( int binning )
+void BaslerWrapper::setHorBin( int binning )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -509,7 +515,7 @@ void UsbBasler::setHorBin( int binning )
 }
 
 
-void UsbBasler::setVertBin( int binning )
+void BaslerWrapper::setVertBin( int binning )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -524,7 +530,7 @@ void UsbBasler::setVertBin( int binning )
 	}
 }
 
-void UsbBasler::stopGrabbing()
+void BaslerWrapper::stopGrabbing()
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -539,7 +545,7 @@ void UsbBasler::stopGrabbing()
 	}
 }
 
-bool UsbBasler::isGrabbing()
+bool BaslerWrapper::isGrabbing()
 {
 	if (BASLER_ACE_SAFEMODE)
 	{
@@ -555,7 +561,7 @@ bool UsbBasler::isGrabbing()
 	}
 }
 
-std::vector<long> UsbBasler::retrieveResult( unsigned int timeout )
+std::vector<long> BaslerWrapper::retrieveResult( unsigned int timeout )
 {
 	Pylon::CGrabResultPtr resultPtr;
 	RetrieveResult( timeout, resultPtr, Pylon::TimeoutHandling_ThrowException );
@@ -571,7 +577,7 @@ std::vector<long> UsbBasler::retrieveResult( unsigned int timeout )
 }
 
 
-int UsbBasler::getCurrentHeight()
+int BaslerWrapper::getCurrentHeight()
 {
 	if (BASLER_ACE_SAFEMODE)
 	{
@@ -588,7 +594,7 @@ int UsbBasler::getCurrentHeight()
 }
 
 
-int UsbBasler::getCurrentWidth()
+int BaslerWrapper::getCurrentWidth()
 {
 	if (BASLER_ACE_SAFEMODE)
 	{
@@ -605,7 +611,7 @@ int UsbBasler::getCurrentWidth()
 }
 
 
-int UsbBasler::getCurrentOffsetX()
+int BaslerWrapper::getCurrentOffsetX()
 {
 	if (BASLER_ACE_SAFEMODE)
 	{
@@ -622,7 +628,7 @@ int UsbBasler::getCurrentOffsetX()
 }
 
 
-int UsbBasler::getCurrentOffsetY()
+int BaslerWrapper::getCurrentOffsetY()
 {
 	if (BASLER_ACE_SAFEMODE)
 	{
@@ -639,7 +645,7 @@ int UsbBasler::getCurrentOffsetY()
 }
 
 
-void UsbBasler::setPixelFormat(Basler_UsbCameraParams::PixelFormatEnums pixelFormat)
+void BaslerWrapper::setPixelFormat( cameraParams::PixelFormatEnums pixelFormat)
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -654,7 +660,7 @@ void UsbBasler::setPixelFormat(Basler_UsbCameraParams::PixelFormatEnums pixelFor
 	}
 }
 
-void UsbBasler::setGainMode( std::string mode )
+void BaslerWrapper::setGainMode( std::string mode )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -669,13 +675,17 @@ void UsbBasler::setGainMode( std::string mode )
 	}
 }
 
-void UsbBasler::setGain( int gainValue )
+void BaslerWrapper::setGain( int gainValue )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
 		try
 		{
-			Gain.SetValue( gainValue );
+			#ifdef USB_CAMERA
+				Gain.SetValue( gainValue );
+			#elif defined FIREWIRE_CAMERA
+				GainRaw.SetValue( gainValue );
+			#endif
 		}
 		catch (Pylon::GenericException& err)
 		{
@@ -686,7 +696,7 @@ void UsbBasler::setGain( int gainValue )
 }
 
 
-void UsbBasler::waitForFrameTriggerReady( unsigned int timeout )
+void BaslerWrapper::waitForFrameTriggerReady( unsigned int timeout )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -703,7 +713,7 @@ void UsbBasler::waitForFrameTriggerReady( unsigned int timeout )
 
 
 
-void UsbBasler::executeSoftwareTrigger()
+void BaslerWrapper::executeSoftwareTrigger()
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -718,7 +728,7 @@ void UsbBasler::executeSoftwareTrigger()
 	}
 }
 
-void UsbBasler::startGrabbing( unsigned int picturesToGrab, Pylon::EGrabStrategy grabStrat )
+void BaslerWrapper::startGrabbing( unsigned int picturesToGrab, Pylon::EGrabStrategy grabStrat )
 {
 	if (!BASLER_ACE_SAFEMODE)
 	{
@@ -732,3 +742,85 @@ void UsbBasler::startGrabbing( unsigned int picturesToGrab, Pylon::EGrabStrategy
 		}
 	}
 }
+
+// returns in us
+double BaslerWrapper::getExposureMax()
+{
+	if (!BASLER_ACE_SAFEMODE)
+	{
+		try
+		{
+			#ifdef USB_CAMERA
+				return ExposureTime.GetMax();
+			#elif defined FIREWIRE_CAMERA
+				return ExposureTimeRaw.GetMax();
+			#endif
+		}
+		catch (Pylon::GenericException& err)
+		{
+			thrower( err.what() );
+		}
+	}
+	return 1000000;
+}
+
+double BaslerWrapper::getExposureMin()
+{
+	if (!BASLER_ACE_SAFEMODE)
+	{
+		try
+		{
+			#ifdef USB_CAMERA
+				return ExposureTime.GetMin();
+			#elif defined FIREWIRE_CAMERA
+				return ExposureTimeRaw.GetMin();
+			#endif
+		}
+		catch (Pylon::GenericException& err)
+		{
+			thrower( err.what() );
+		}
+	}
+	return 0;
+}
+
+double BaslerWrapper::getCurrentExposure()
+{
+	if (!BASLER_ACE_SAFEMODE)
+	{
+		try
+		{
+			#ifdef USB_CAMERA
+				return ExposureTime.GetValue();
+			#elif defined FIREWIRE_CAMERA
+				return ExposureTimeRaw.GetValue();
+			#endif
+		}
+		catch (Pylon::GenericException& err)
+		{
+			thrower( err.what() );
+		}
+	}
+	return 10000;
+}
+
+void BaslerWrapper::setExposure( double exposureTime )
+{
+	if (!BASLER_ACE_SAFEMODE)
+	{
+		try
+		{
+			#ifdef USB_CAMERA
+				ExposureTime.SetValue( exposureTime );
+			#elif defined FIREWIRE_CAMERA
+				ExposureTimeRaw.SetValue( exposureTime );
+			#endif
+		}
+		catch (Pylon::GenericException& err)
+		{
+			thrower( err.what() );
+		}
+	}
+}
+
+

@@ -55,11 +55,6 @@ class BaslerSettingsControl
 		Control<CComboBox> exposureModeCombo;
 		Control<CEdit> exposureEdit;
 		Control<CButton> setExposure;
-		// gain
-		Control<CStatic> gainText;
-		Control<CSliderCtrl> gainSlider;
-		Control<CEdit> rawGainEdit;
-		Control<CEdit> realGainText;
 		// trigger
 		Control<CStatic> triggerText;
 		Control<CComboBox> triggerCombo;
@@ -86,6 +81,12 @@ class BaslerSettingsControl
 		Control<CStatic> frameRateText;
 		Control<CEdit> frameRateEdit;
 		Control<CStatic> realFrameRate;
+
+		Control<CStatic> gainText;
+		Control<CComboBox> gainCombo;
+		Control<CEdit> gainEdit;
+		Control<CStatic> realGainText;
+		Control<CStatic> realGainStatus;
 
 		bool isReady;
 };
