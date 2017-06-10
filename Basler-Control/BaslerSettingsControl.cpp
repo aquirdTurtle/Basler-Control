@@ -3,6 +3,52 @@
 #include "BaslerSettingsControl.h"
 #include "constants.h"
 
+
+void BaslerSettingsControl::rearrange(int width, int height, fontMap fonts)
+{
+	// arm
+	armCameraButton.rearrange("", "", width, height, fonts);
+	disarmCameraButton.rearrange("", "", width, height, fonts);
+	// exposure
+	exposureText.rearrange("", "", width, height, fonts);
+	exposureModeCombo.rearrange("", "", width, height, fonts);
+	exposureEdit.rearrange("", "", width, height, fonts);
+	setExposure.rearrange("", "", width, height, fonts);
+	// trigger
+	triggerText.rearrange("", "", width, height, fonts);
+	triggerCombo.rearrange("", "", width, height, fonts);
+
+	// Dimensions & Binning
+	leftText.rearrange("", "", width, height, fonts);
+	rightText.rearrange("", "", width, height, fonts);
+	horizontalBinningText.rearrange("", "", width, height, fonts);
+	topText.rearrange("", "", width, height, fonts);
+	bottomText.rearrange("", "", width, height, fonts);
+	verticalBinningText.rearrange("", "", width, height, fonts);
+	leftEdit.rearrange("", "", width, height, fonts);
+	rightEdit.rearrange("", "", width, height, fonts);
+	horizontalBinningEdit.rearrange("", "", width, height, fonts);
+	topEdit.rearrange("", "", width, height, fonts);
+	bottomEdit.rearrange("", "", width, height, fonts);
+	verticalBinningEdit.rearrange("", "", width, height, fonts);
+
+	// camera mode: continuous or set #
+	cameraMode.rearrange("", "", width, height, fonts);
+	repText.rearrange("", "", width, height, fonts);
+	repEdit.rearrange("", "", width, height, fonts);
+
+	frameRateText.rearrange("", "", width, height, fonts);
+	frameRateEdit.rearrange("", "", width, height, fonts);
+	realFrameRate.rearrange("", "", width, height, fonts);
+
+	gainText.rearrange("", "", width, height, fonts);
+	gainCombo.rearrange("", "", width, height, fonts);
+	gainEdit.rearrange("", "", width, height, fonts);
+	realGainText.rearrange("", "", width, height, fonts);
+	realGainStatus.rearrange("", "", width, height, fonts);
+
+}
+
 void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight )
 {
 	int width = 300;
@@ -14,6 +60,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 		throw;
 	}
 	armCameraButton.Create( "Arm Camera", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, armCameraButton.sPos, parent, armCameraButton.ID );
+	armCameraButton.fontType = Normal;
 
 	disarmCameraButton.sPos = { pos.x + 150, pos.y, pos.x + 300, pos.y += 25 };
 	disarmCameraButton.ID = id++;
@@ -23,11 +70,12 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	}
 	disarmCameraButton.Create( "Disarm Camera", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, disarmCameraButton.sPos, parent, 
 							   disarmCameraButton.ID );
+	disarmCameraButton.fontType = Normal;
 
 	repText.sPos = { pos.x, pos.y, pos.x + 200, pos.y + 25 };
 	repText.ID = id++;
 	repText.Create( "Total Picture Number:", WS_CHILD | WS_VISIBLE, repText.sPos, parent, repText.ID );
-
+	repText.fontType = Normal;
 	repEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
 	repEdit.ID = id++;
 	if (repEdit.ID != IDC_REPETITIONS_EDIT)
@@ -97,55 +145,55 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	leftEdit.ID = id++;
 	leftEdit.sPos = { pos.x, pos.y, pos.x + width/3, pos.y + 25 };
 	leftEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, leftEdit.sPos, parent, leftEdit.ID );
-	leftEdit.fontType = "Normal";
+	leftEdit.fontType = Normal;
 	leftEdit.SetWindowTextA( "0" );
 	//
 	rightEdit.ID = id++;
 	rightEdit.sPos = { pos.x + width/3, pos.y, pos.x + 2* width/3, pos.y + 25 };
 	rightEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, rightEdit.sPos, parent, rightEdit.ID );
-	rightEdit.fontType = "Normal";
+	rightEdit.fontType = Normal;
 	rightEdit.SetWindowTextA( cstr(picWidth-1) );
 	//
 	horizontalBinningEdit.ID = id++;
 	horizontalBinningEdit.sPos = { pos.x + 2* width/3, pos.y, pos.x + width, pos.y += 25 };
 	horizontalBinningEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, horizontalBinningEdit.sPos, parent, 
 								  horizontalBinningEdit.ID );
-	horizontalBinningEdit.fontType = "Normal";
+	horizontalBinningEdit.fontType = Normal;
 	horizontalBinningEdit.SetWindowTextA( "1" );
 	//
 	topText.ID = id++;
 	topText.sPos = { pos.x, pos.y, pos.x + width/3, pos.y + 25 };
 	topText.Create( "Top", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, topText.sPos, parent, topText.ID );
-	topText.fontType = "Normal";
+	topText.fontType = Normal;
 
 	//
 	bottomText.ID = id++;
 	bottomText.sPos = { pos.x + width/3, pos.y, pos.x +2* width/3, pos.y + 25 };
 	bottomText.Create( "Bottom", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, bottomText.sPos, parent, bottomText.ID );
-	bottomText.fontType = "Normal";
+	bottomText.fontType = Normal;
 	//
 	verticalBinningText.ID = id++;
-	verticalBinningText.seriesPos = { pos.x + 2* width/3, pos.y, pos.x + width, pos.y += 25 };
+	verticalBinningText.sPos = { pos.x + 2* width/3, pos.y, pos.x + width, pos.y += 25 };
 	verticalBinningText.Create( "V. Bin", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, verticalBinningText.sPos, parent,
 								verticalBinningText.ID );
-	verticalBinningText.fontType = "Normal";
+	verticalBinningText.fontType = Normal;
 	//
 	topEdit.ID = id++;
 	topEdit.sPos = { pos.x, pos.y, pos.x + width/3, pos.y + 25 };
 	topEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, topEdit.sPos, parent, topEdit.ID );
-	topEdit.fontType = "Normal";
+	topEdit.fontType = Normal;
 	topEdit.SetWindowTextA( "0" );
 	//
 	bottomEdit.ID = id++;
 	bottomEdit.sPos = { pos.x + width/3, pos.y, pos.x + 2* width/3, pos.y + 25 };
 	bottomEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, bottomEdit.sPos, parent, bottomEdit.ID );
-	bottomEdit.fontType = "Normal";
+	bottomEdit.fontType = Normal;
 	bottomEdit.SetWindowTextA( cstr(picHeight-1) );
 	//
 	verticalBinningEdit.ID = id++;
 	verticalBinningEdit.sPos = { pos.x + 2* width/3, pos.y, pos.x + width, pos.y += 25 };
 	verticalBinningEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, verticalBinningEdit.sPos, parent, verticalBinningEdit.ID );
-	verticalBinningEdit.fontType = "Normal";
+	verticalBinningEdit.fontType = Normal;
 	verticalBinningEdit.SetWindowTextA( "1" );
 
 	triggerText.ID = id++;

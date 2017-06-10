@@ -15,6 +15,7 @@ struct triggerThreadInput
 {
 	double frameRate;
 	BaslerWrapper* camera;
+	HWND* parent;
 };
 
 // wrapper class for modifying for safemode and to standardize error handling.
@@ -41,6 +42,7 @@ class BaslerWrapper : public cameraType
 		double getExposureMin();
 		double getCurrentExposure();
 		void setExposure( double exposureTime );
+		void setExposureAuto(cameraParams::ExposureAutoEnums mode);
 
 		void setWidth( int width );
 		void setHeight( int height );
@@ -52,6 +54,8 @@ class BaslerWrapper : public cameraType
 
 		void waitForFrameTriggerReady(unsigned int timeout);
 		void executeSoftwareTrigger();
+		
+		void setTriggerSource(Basler_UsbCameraParams::TriggerSourceEnums mode);
 		void startGrabbing( unsigned int picturesToGrab, Pylon::EGrabStrategy grabStrat );
 		std::vector<long> retrieveResult( unsigned int timeout );
 
@@ -71,7 +75,7 @@ class BaslerCameras
 		~BaslerCameras();
 		void setParameters( baslerSettings settings );
 		void setDefaultParameters();
-		void armCamera( double frameRate );
+		void armCamera( double frameRate, HWND* parent );
 		void disarm();
 		static void triggerThread(void* input);
 		void softwareTrigger();
@@ -118,28 +122,31 @@ class ImageEventHandler : public Pylon::CImageEventHandler
 					int width = grabResult->GetWidth();
 					int vertBinNumber = grabResult->GetHeight();
 					std::vector<long>* image;
-					image = new std::vector<long>( pImageBuffer, pImageBuffer + width * vertBinNumber );
+					image = new std::vector<long>(pImageBuffer, pImageBuffer + width * vertBinNumber);
 					for (auto& elem : *image)
 					{
 						elem *= 256.0 / 1024.0;
 					}
-					PostMessage( *parent, ACE_PIC_READY, grabResult->GetWidth() * grabResult->GetHeight(),
-								 (LPARAM)image );
+					PostMessage(*parent, ACE_PIC_READY, grabResult->GetWidth() * grabResult->GetHeight(),
+						(LPARAM)image);
 					//pic->drawBitmap( dc, image );
 				}
 				else
 				{
-					thrower( "Error: " + str( grabResult->GetErrorCode() ) + " " + std::string( grabResult->GetErrorDescription().c_str() ) );
+					thrower("Error: " + str(grabResult->GetErrorCode()) + " " + std::string(grabResult->GetErrorDescription().c_str()));
 				}
 			}
 			catch (Pylon::RuntimeException& err)
 			{
-				thrower( "Error! " + std::string( err.what() ) );
+				thrower("Error! " + std::string(err.what()));
 			}
+
 		}
 	private:
 		HWND* parent;
 };
+
+void onImageGrabbedProcedure(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& grabResult, HWND* parent);
 
 
 	

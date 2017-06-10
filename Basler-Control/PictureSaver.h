@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include <fstream>
+#include "commonTypes.h"
 
 class PictureSaver
 {
@@ -10,6 +11,7 @@ class PictureSaver
 		void save( std::vector<std::vector<long>> pics, int width );
 		void append( std::vector<long>* pic, int width );
 		void close();
+		void rearrange(int width, int height, fontMap fonts);
 	private:
 		std::ofstream file;
 		Control<CStatic> saveLocationText;

@@ -1,17 +1,29 @@
 #include "stdafx.h"
 #include "PictureSaver.h"
+#include "constants.h"
+
+void PictureSaver::rearrange(int width, int height, fontMap fonts)
+{
+	saveLocationText.rearrange("", "", width, height, fonts);
+	saveLocationEdit.rearrange("", "", width, height, fonts);
+	saveCheckButton.rearrange("", "", width, height, fonts);
+	fileNumberText.rearrange("", "", width, height, fonts);
+	fileNumberEdit.rearrange("", "", width, height, fonts);
+}
+		
 
 void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 {
+	/// note: the rest of the save location is hard-set in the constants file. might want to change this.
 	saveLocationText.ID = id++;
 	saveLocationText.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 25 };
-	saveLocationText.Create( "Save Location:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY , saveLocationText.sPos, parent,
-							 saveLocationText.ID );
+	saveLocationText.Create( "End of Save:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY , 
+							 saveLocationText.sPos, parent, saveLocationText.ID );
 
 	saveLocationEdit.ID = id++;
 	saveLocationEdit.sPos = { pos.x + 100, pos.y, pos.x + 300, pos.y += 25 };
 	saveLocationEdit.Create( WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, saveLocationEdit.sPos, parent, saveLocationEdit.ID );
-	saveLocationEdit.SetWindowTextA( "\\\\Andor\\share\\data and documents\\data repository\\170427\\Raw Data\\AceData" );
+	saveLocationEdit.SetWindowTextA( "\\17????\\Raw Data\\AceData" );
 
 	saveCheckButton.ID = id++;
 	saveCheckButton.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 20 };
@@ -36,13 +48,12 @@ void PictureSaver::append( std::vector<long>* pic, int width )
 	}
 	CString text;
 	saveLocationEdit.GetWindowTextA( text );
-	std::string address = std::string( text );
+	std::string address = DATA_SAVE_LOCATION + std::string( text );
 	if (address == "")
 	{
 		thrower( "ERROR: Please enter an address for saved pictures." );
 	}
 	int fileNumber;
-	text;
 	fileNumberEdit.GetWindowTextA( text );
 	try
 	{

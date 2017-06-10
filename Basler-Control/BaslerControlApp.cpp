@@ -1,27 +1,32 @@
 
 // Basler-Control.cpp : Defines the class behaviors for the application.
 //
+/// Important Author's note:
+//		Most of the code in this file was created programatically when I started this project.  A lot of it is probably
+//		superfluous, I've created much simpler apps before, but it does no harm. For a lot of the stuff in this file 
+//		however, I don't really know what it does.
+
 
 #include "stdafx.h"
 #include "BaslerControlApp.h"
 #include "BaslerControlWindow.h"
 
+// something windows programs often do for debugging purposes.
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-// a few globals... could probably do better...
+// a few globals... could probably do this better...
 UINT ACE_PIC_READY = ::RegisterWindowMessageA( "ACE_PIC_READY" );
 
 // CBaslerControlApp
-
+// TODO: Remove this. I think I should be able to remove the following couple lines.
 BEGIN_MESSAGE_MAP(CBaslerControlApp, CWinApp)
 	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 
-// CBaslerControlApp construction
-
+// constructor for the main app.
 CBaslerControlApp::CBaslerControlApp()
 {
 	// support Restart Manager
@@ -32,13 +37,11 @@ CBaslerControlApp::CBaslerControlApp()
 }
 
 
-// The one and only CBaslerControlApp object
-
+// The one and only CBaslerControlApp object. The entire program runs from the construction of this object.
 CBaslerControlApp theApp;
 
 
-// CBaslerControlApp initialization
-
+// this initialization function is called after the constructor.
 BOOL CBaslerControlApp::InitInstance()
 {
 	// InitCommonControlsEx() is required on Windows XP if an application
@@ -52,7 +55,6 @@ BOOL CBaslerControlApp::InitInstance()
 	InitCommonControlsEx(&InitCtrls);
 
 	CWinApp::InitInstance();
-
 
 	AfxEnableControlContainer();
 
@@ -70,28 +72,17 @@ BOOL CBaslerControlApp::InitInstance()
 	// Change the registry key under which our settings are stored
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
-	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
+	SetRegistryKey(_T("Mark Brown's control code"));
 
+	// create the main window object.
 	BaslerControlWindow dlg;
+	// the app class gets a reference.
 	m_pMainWnd = &dlg;
-	
-	INT_PTR nResponse = dlg.DoModal();
 
-	if (nResponse == IDOK)
-	{
-		// TODO: Place code here to handle when the dialog is
-		//  dismissed with OK
-	}
-	else if (nResponse == IDCANCEL)
-	{
-		// TODO: Place code here to handle when the dialog is
-		//  dismissed with Cancel
-	}
-	else if (nResponse == -1)
-	{
-		TRACE(traceAppMsg, 0, "Warning: dialog creation failed, so application is terminating unexpectedly.\n");
-		TRACE(traceAppMsg, 0, "Warning: if you are using MFC controls on the dialog, you cannot #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS.\n");
-	}
+	// create the main dialog. Most of the code sits inside this function, including the main gui looping.
+	INT_PTR nResponse = dlg.DoModal();
+	
+	// at the point the program is ending.
 
 	// Delete the shell manager created above.
 	if (pShellManager != NULL)
@@ -107,4 +98,3 @@ BOOL CBaslerControlApp::InitInstance()
 	//  application, rather than armCamera the application's message pump.
 	return FALSE;
 }
-

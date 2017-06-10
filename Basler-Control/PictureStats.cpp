@@ -12,7 +12,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 	pictureStatsHeader.ID = id++;
 	pictureStatsHeader.Create( "Raw Counts", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY | ES_CENTER,
 							   pictureStatsHeader.sPos, parent, pictureStatsHeader.ID );
-	pictureStatsHeader.fontType = "Heading";
+	pictureStatsHeader.fontType = Heading;
 	pos.y += 25;
 	/// CURRENT IMAGE DATA
 	// Current Accumulation Number Display
@@ -20,19 +20,19 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 	repetitionIndicator.ID = id++;
 	repetitionIndicator.Create( "Repetition ?/?", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY | ES_CENTER, repetitionIndicator.sPos,
 								parent, repetitionIndicator.ID );
-	repetitionIndicator.fontType = "Normal";
+	repetitionIndicator.fontType = Normal;
 
 	updateButton.sPos = { pos.x, pos.y, pos.x + 272, pos.y += 25 };
 	updateButton.ID = id++;
 	updateButton.Create( "Update?", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | WS_BORDER, updateButton.sPos, parent, updateButton.ID );
-
+	updateButton.fontType = Normal;
 	/// Picture labels ///
 
 	// 
 	collumnHeaders[0].sPos = { pos.x, pos.y, pos.x + 54, pos.y + 25 };
 	collumnHeaders[0].ID = id++;
 	collumnHeaders[0].Create( "Pic:", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, collumnHeaders[0].sPos, parent, collumnHeaders[0].ID );
-	collumnHeaders[0].fontType = "Small";
+	collumnHeaders[0].fontType = Small;
 	pos.y += 25;
 	int inc = 0;
 	for (auto& control : picNumberIndicators)
@@ -41,7 +41,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 		control.sPos = { pos.x, pos.y, pos.x + 54, pos.y + 25 };
 		control.ID = id++;
 		control.Create( ("#" + str( inc ) + ":").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, control.sPos, parent, control.ID );
-		control.fontType = "Small";
+		control.fontType = Small;
 		pos.y += 25;
 	}
 	pos.y -= 25 * (picNumberIndicators.size() + 1);
@@ -52,7 +52,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 	collumnHeaders[1].ID = id++;
 	collumnHeaders[1].Create( "Max:", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, collumnHeaders[1].sPos,
 							  parent, collumnHeaders[1].ID );
-	collumnHeaders[1].fontType = "Small";
+	collumnHeaders[1].fontType = Small;
 	pos.y += 25;
 	// #1
 	for (auto& control : maxCounts)
@@ -60,7 +60,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 		control.sPos = { pos.x + 54, pos.y, pos.x + 108, pos.y + 25 };
 		control.ID = id++;
 		control.Create( "-", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, control.sPos, parent, control.ID );
-		control.fontType = "Small";
+		control.fontType = Small;
 		pos.y += 25;
 	}
 	// back to top.
@@ -71,7 +71,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 	collumnHeaders[2].ID = id++;
 	collumnHeaders[2].Create( "Min:", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, collumnHeaders[2].sPos,
 							  parent, collumnHeaders[2].ID );
-	collumnHeaders[2].fontType = "Small";
+	collumnHeaders[2].fontType = Small;
 	pos.y += 25;
 
 	for (auto& control : minCounts)
@@ -79,7 +79,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 		control.sPos = { pos.x + 108, pos.y, pos.x + 162, pos.y + 25 };
 		control.ID = id++;
 		control.Create( "-", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, control.sPos, parent, control.ID );
-		control.fontType = "Small";
+		control.fontType = Small;
 		pos.y += 25;
 	}
 	pos.y -= 25 * (minCounts.size() + 1);
@@ -88,7 +88,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 	collumnHeaders[3].ID = id++;
 	collumnHeaders[3].Create( "Avg:", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, collumnHeaders[3].sPos,
 							  parent, collumnHeaders[3].ID );
-	collumnHeaders[3].fontType = "Small";
+	collumnHeaders[3].fontType = Small;
 	pos.y += 25;
 	// 
 	for (auto& control : avgCounts)
@@ -96,7 +96,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 		control.sPos = { pos.x + 162, pos.y, pos.x + 216, pos.y + 25 };
 		control.ID = id++;
 		control.Create( "-", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, control.sPos, parent, control.ID );
-		control.fontType = "Small";
+		control.fontType = Small;
 		pos.y += 25;
 	}
 
@@ -106,7 +106,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 	collumnHeaders[4].ID = id++;
 	collumnHeaders[4].Create( "Sel:", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, collumnHeaders[4].sPos,
 							  parent, collumnHeaders[4].ID );
-	collumnHeaders[4].fontType = "Small";
+	collumnHeaders[4].fontType = Small;
 	pos.y += 25;
 	// #1
 	for (auto& control : selCounts)
@@ -114,7 +114,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 		control.sPos = { pos.x + 216, pos.y, pos.x + 272, pos.y + 25 };
 		control.ID = id++;
 		control.Create( "-", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_READONLY, control.sPos, parent, control.ID );
-		control.fontType = "Small";
+		control.fontType = Small;
 		pos.y += 25;
 	}
 	return true;
@@ -148,6 +148,7 @@ bool PictureStats::rearrange(std::string cameraMode, std::string trigMode, int w
 	{
 		control.rearrange(cameraMode, trigMode, width, height, fonts);
 	}
+	updateButton.rearrange(cameraMode, trigMode, width, height, fonts);
 	return true;
 }
 
@@ -180,8 +181,6 @@ bool PictureStats::updateType(std::string typeText)
 	return true;
 }
 
-
-
 void PictureStats::update( std::vector<long>* image, unsigned int imageNumber, std::pair<int, int> selectedPixel, int pictureWidth, 
 						   int currentRepetitionNumber, int totalRepetitionCount)
 {
@@ -189,7 +188,9 @@ void PictureStats::update( std::vector<long>* image, unsigned int imageNumber, s
 	{
 		return;
 	}
-	repetitionIndicator.SetWindowTextA( ("Repetition " + str( currentRepetitionNumber ) + "/" + str( totalRepetitionCount )).c_str() );
+
+	repetitionIndicator.SetWindowTextA( ("Repetition " + str( currentRepetitionNumber ) + "/" 
+									   + str( totalRepetitionCount )).c_str() );
 	
 	long selCounts = (*image)[selectedPixel.first + selectedPixel.second * pictureWidth];
 	long maxCounts = 1;
@@ -220,6 +221,6 @@ void PictureStats::update( std::vector<long>* image, unsigned int imageNumber, s
 
 	this->maxCounts[imageNumber].SetWindowTextA( str( maxCounts ).c_str() );
 	this->minCounts[imageNumber].SetWindowTextA( str( minCounts ).c_str() );
-	this->selCounts[imageNumber].SetWindowTextA( str( selCounts ).c_str() );
+	//this->selCounts[imageNumber].SetWindowTextA( str( selCounts ).c_str() );
 	this->avgCounts[imageNumber].SetWindowTextA( doubleToString( avgCounts, 1 ).c_str() );
 }

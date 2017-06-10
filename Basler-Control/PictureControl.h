@@ -24,7 +24,9 @@ class PictureControl
 		std::pair<int, int> checkClickLocation( CPoint clickLocation );
 		void createPalettes( CDC* dc );
 		void handleMouse( CPoint point );
+		void setValue();
 	private:
+		POINT mouseCoordinates;
 		// for replotting.
 		std::vector<long> mostRecentImage;
 		// stores info as to whether the control is currently being used in plotting camera data or was used 

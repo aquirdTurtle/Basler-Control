@@ -120,7 +120,7 @@ void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, in
 	labelMin.sPos = { loc.x, loc.y, loc.x + 50, loc.y + 30 };
 	labelMin.ID = id++;
 	labelMin.Create("MIN", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMin.sPos, parent, labelMin.ID);
-	labelMin.fontType = "Normal";
+	labelMin.fontType = Normal;
 	// minimum number text
 	editMin.sPos = { loc.x, loc.y + 30, loc.x + 50, loc.y + 60 };
 	editMin.ID = id++;
@@ -129,7 +129,7 @@ void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, in
 		throw;
 	}
 	editMin.Create(WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMin.sPos, parent, editMin.ID);
-	editMin.fontType = "Normal";
+	editMin.fontType = Normal;
 	// minimum slider
 	sliderMin.sPos = { loc.x, loc.y + 60, loc.x + 50, loc.y + originalBackgroundArea.bottom - originalBackgroundArea.top};
 	sliderMin.ID = id++;
@@ -140,7 +140,7 @@ void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, in
 	labelMax.sPos = { loc.x + 50, loc.y, loc.x + 100, loc.y + 30 };
 	labelMax.ID = id++;
 	labelMax.Create("MAX", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMax.sPos, parent, labelMax.ID);
-	labelMax.fontType = "Normal";
+	labelMax.fontType = Normal;
 	// maximum number text
 	editMax.sPos = { loc.x + 50, loc.y + 30, loc.x + 100, loc.y + 60 };
 	editMax.ID = id++;
@@ -149,7 +149,7 @@ void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, in
 		throw;
 	}
 	editMax.Create(WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, editMax.ID);
-	editMax.fontType = "Normal";
+	editMax.fontType = Normal;
 	// maximum slider
 	sliderMax.sPos = { loc.x + 50, loc.y + 60, loc.x + 100, loc.y + originalBackgroundArea.bottom - originalBackgroundArea.top};
 	sliderMax.ID = id++;
@@ -160,22 +160,32 @@ void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, in
 	loc.x -= originalBackgroundArea.right - originalBackgroundArea.left;
 	// manually scroll the objects to initial positions.
 	handleScroll( sliderMin.ID, 0);
-	handleScroll( sliderMax.ID, 256);
+	handleScroll( sliderMax.ID, 1024);
 
 	createPalettes( parent->GetDC() );
 	updatePalette( palettes[0] );
 
 	loc.y += height;
 	coordinatesText.ID = id++;
-	coordinatesText.sPos = { loc.x, loc.y, loc.x + 100, loc.y + 20 };
+	coordinatesText.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
 	coordinatesText.Create( "Coordinates: ", WS_CHILD | WS_VISIBLE, coordinatesText.sPos, parent, coordinatesText.ID );
-
+	
 	coordinatesDisp.ID = id++;
-	coordinatesDisp.sPos = { loc.x + 100, loc.y, loc.x + 200, loc.y + 20 };
+	coordinatesDisp.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
 	coordinatesDisp.Create( "", WS_CHILD | WS_VISIBLE | ES_READONLY, coordinatesDisp.sPos, parent, coordinatesDisp.ID );
 	
-	Control<CStatic> valueText;
-	Control<CStatic> valueDisp;
+	valueText.ID = id++;
+	valueText.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
+	valueText.Create("Value: ", WS_CHILD | WS_VISIBLE, valueText.sPos, parent, valueText.ID);
+
+	valueDisp.ID = id++;
+	valueDisp.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
+	valueDisp.Create("", WS_CHILD | WS_VISIBLE | ES_READONLY, valueDisp.sPos, parent, valueDisp.ID);
+}
+
+void PictureControl::setValue()
+{
+	valueDisp.SetWindowTextA(cstr(mostRecentImage[mouseCoordinates.x * grid[0].size() + mouseCoordinates.y]));
 }
 
 void PictureControl::handleMouse( CPoint point )
@@ -189,6 +199,11 @@ void PictureControl::handleMouse( CPoint point )
 			if (point.x < box.right && point.x > box.left && point.y > box.top && point.y < box.bottom)
 			{
 				coordinatesDisp.SetWindowTextA( (str( rowCount ) + ", " + str( colCount ) ).c_str());
+				mouseCoordinates = { rowCount, colCount };
+				if (mostRecentImage.size() != 0 && grid.size() != 0)
+				{
+					setValue();
+				}
 			}
 			colCount += 1;
 		}
@@ -294,9 +309,10 @@ void PictureControl::drawBitmap(CDC* deviceContext, std::vector<long> picData)
 	pbmi->bmiHeader.biHeight = dataHeight;
 	memcpy(pbmi->bmiColors, argbq, sizeof(WORD) * PICTURE_PALETTE_SIZE);
 
-	//errBox( std::to_string( sizeof( DataArray ) / sizeof( DataArray[0] ) ) );
-	//DataArray = (BYTE*)malloc(dataWidth * dataHeight * sizeof(BYTE));
-	//memset(DataArray, 0, dataWidth * dataHeight);
+	// errBox( std::to_string( sizeof( DataArray ) / sizeof( DataArray[0] ) ) );
+	// DataArray = (BYTE*)malloc(dataWidth * dataHeight * sizeof(BYTE));
+	// memset(DataArray, 0, dataWidth * dataHeight);
+
 	DataArray = (BYTE*)malloc( (dataWidth * dataHeight) * sizeof( BYTE ) );
 	memset( DataArray, 255, (dataWidth * dataHeight) * sizeof( BYTE ) );
 	for (int heightInc = 0; heightInc < dataHeight; heightInc++)
@@ -469,6 +485,7 @@ void PictureControl::drawCircle(CWnd* parent, std::pair<int, int> selectedLocati
 	parent->ReleaseDC( dc );
 }
 
+
 void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, int width, int height, std::unordered_map<std::string, CFont*> fonts)
 {
 	editMax.rearrange(cameraMode, triggerMode, width, height, fonts);
@@ -477,6 +494,10 @@ void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, 
 	labelMin.rearrange(cameraMode, triggerMode, width, height, fonts);
 	sliderMax.rearrange(cameraMode, triggerMode, width, height, fonts);
 	sliderMin.rearrange(cameraMode, triggerMode, width, height, fonts);
+	coordinatesText.rearrange(cameraMode, triggerMode, width, height, fonts);
+	coordinatesDisp.rearrange(cameraMode, triggerMode, width, height, fonts);
+	valueText.rearrange(cameraMode, triggerMode, width, height, fonts);
+	valueDisp.rearrange(cameraMode, triggerMode, width, height, fonts);
 	currentBackgroundArea.bottom =  originalBackgroundArea.bottom * height / 997.0;
 	currentBackgroundArea.top = originalBackgroundArea.top * height / 997.0;
 	currentBackgroundArea.left = originalBackgroundArea.left * width / 1920.0;

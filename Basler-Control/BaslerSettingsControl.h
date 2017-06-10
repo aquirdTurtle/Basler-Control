@@ -2,6 +2,7 @@
 
 #include <string>
 #include "Control.h"
+#include "commonTypes.h"
 
 struct imageDimensions
 {
@@ -44,7 +45,7 @@ class BaslerSettingsControl
 		// change all the settings.
 		void setSettings( baslerSettings settings);
 		void updateExposure( double exposure );
-
+		void rearrange(int width, int height, fontMap fonts);
 	private:
 		baslerSettings currentSettings;
 		// arm

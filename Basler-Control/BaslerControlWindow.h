@@ -9,16 +9,17 @@
 #include "BaslerCamera.h"
 #include "PictureStats.h"
 #include "PictureSaver.h"
+#include "commonTypes.h"
 
-// BaslerControlWindow dialog
+
 class BaslerControlWindow : public CDialogEx
 {
-	// Construction
 	public:
-		// standard constructor
+		
 		BaslerControlWindow(CWnd* pParent = NULL);	
 		virtual BOOL OnInitDialog();
 		void OnPaint();
+		HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 		HCURSOR OnQueryDragIcon();
 		void OnSize( UINT nType, int cx, int cy );
 		void handleArmPress();
@@ -46,6 +47,9 @@ class BaslerControlWindow : public CDialogEx
 		std::string runExposureMode;
 		std::vector<std::vector<long>> images;
 		unsigned int imageWidth;
+		brushMap mainBrushes;
+		rgbMap mainRGBs;
+		fontMap mainFonts;
 		bool isRunning;
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support

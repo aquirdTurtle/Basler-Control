@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include <type_traits>
-
+#include "commonTypes.h"
 /*
  * This is a complex class definition. The first line here declares that this is a template class with a class template
  * argument named ControlType.  I.e. my class is based on a class called ControlType.
@@ -30,7 +30,7 @@ template <class ControlType> class Control : public ControlType
 		RECT amPos;
 		// Continuous Single Scan Mode Position
 		RECT videoPos;
-		std::string fontType;
+		fontTypes fontType;
 		int triggerModeSensitive;
 		//
 		int ID;
@@ -134,7 +134,7 @@ template <class ControlType> void Control<ControlType>::rearrange(std::string ca
 		}
 	}
 	/// Set Fonts
-	if (fontType == "Normal")
+	if (fontType == Normal)
 	{
 		if (widthScale * heightScale > 0.8)
 		{
@@ -149,7 +149,7 @@ template <class ControlType> void Control<ControlType>::rearrange(std::string ca
 			SetFont(fonts["Normal Font Small"]);
 		}
 	}
-	else if (fontType == "Code")
+	else if (fontType == Code)
 	{
 		if (widthScale * heightScale > 0.8)
 		{
@@ -164,7 +164,7 @@ template <class ControlType> void Control<ControlType>::rearrange(std::string ca
 			SetFont(fonts["Code Font Small"]);
 		}
 	}
-	else if (fontType == "Heading")
+	else if (fontType == Heading)
 	{
 		if (widthScale * heightScale > 0.8)
 		{
@@ -179,7 +179,7 @@ template <class ControlType> void Control<ControlType>::rearrange(std::string ca
 			SetFont(fonts["Heading Font Small"]);
 		}
 	}
-	else if (this->fontType == "Large")
+	else if (fontType == Large)
 	{
 		if (widthScale * heightScale > 0.8)
 		{
@@ -194,7 +194,7 @@ template <class ControlType> void Control<ControlType>::rearrange(std::string ca
 			SetFont(fonts["Larger Font Small"]);
 		}
 	}
-	else if (fontType == "Small")
+	else if (fontType == Small)
 	{
 		if (widthScale * heightScale > 0.8)
 		{

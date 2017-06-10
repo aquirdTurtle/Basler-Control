@@ -8,6 +8,10 @@
 #include "stdint.h"
 #include "constants.h"
 
+void onImageGrabbedProcedure(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& grabResult, HWND* parent)
+{
+}
+
 // important constructor;
 // Create an instant camera object with the camera device found first.
 BaslerCameras::BaslerCameras(HWND* parent)
@@ -25,21 +29,21 @@ BaslerCameras::BaslerCameras(HWND* parent)
 	
 }
 
-
+// send a software trigger to the camera after waiting to make sure it's ready to recieve said trigger.
 void BaslerCameras::softwareTrigger()
 {
 	camera->waitForFrameTriggerReady( 5000 );
 	camera->executeSoftwareTrigger();
 }
 
-
+// important deconstructor.
 BaslerCameras::~BaslerCameras()
 {
 	Pylon::PylonTerminate();
 	delete camera;
 }
 
-
+// get some information about the camera from the camera itself through pylon.
 std::string BaslerCameras::getCameraInfo()
 {
 	// Get camera device information.
@@ -49,6 +53,7 @@ std::string BaslerCameras::getCameraInfo()
 }
 
 
+// Can change this for nicer defaults.
 baslerSettings BaslerCameras::getDefaultSettings()
 {
 	baslerSettings defaultSettings;
@@ -62,7 +67,8 @@ baslerSettings BaslerCameras::getDefaultSettings()
 	defaultSettings.dimensions.bottomBorder = camera->getMinOffsetY() + camera->getMaxHeight();
 	defaultSettings.dimensions.vertPixelsPerBin = 1;
 	defaultSettings.exposureMode = "Auto Exposure Continuous";
-	defaultSettings.exposureTime = 0; // doesn't matter for continuous.
+	// doesn't matter for continuous.
+	defaultSettings.exposureTime = 0; 
 	defaultSettings.frameRate = 30;
 	defaultSettings.rawGain = camera->getMinGain();
 
@@ -70,13 +76,13 @@ baslerSettings BaslerCameras::getDefaultSettings()
 	return defaultSettings;
 }
 
+// set the default parameters defined in the function above.
 void BaslerCameras::setDefaultParameters()
 {
 	setParameters( getDefaultSettings() );
 }
 
-
-
+// general function you should use for setting camera settings based on the input.
 void BaslerCameras::setParameters( baslerSettings settings )
 {
 	// Set the AOI:
@@ -114,21 +120,17 @@ void BaslerCameras::setParameters( baslerSettings settings )
 	camera->setVertBin( settings.dimensions.vertPixelsPerBin );
 
 	camera->setPixelFormat( cameraParams::PixelFormat_Mono10 );
-
-	if (GenApi::IsWritable( camera->GainAuto ))
-	{
-		camera->setGainMode( "Off" );
-	}
+	camera->setGainMode("Off");
 	camera->setGain( camera->getMinGain() );
 
 	// exposure mode
 	if (settings.exposureMode == "Auto Exposure Continuous")
 	{
-		camera->ExposureAuto.SetValue( cameraParams::ExposureAutoEnums::ExposureAuto_Continuous );
+		camera->setExposureAuto( cameraParams::ExposureAutoEnums::ExposureAuto_Continuous );
 	}
 	else if (settings.exposureMode == "Auto Exposure Off")
 	{
-		camera->ExposureAuto.SetValue( cameraParams::ExposureAutoEnums::ExposureAuto_Off );
+		camera->setExposureAuto( cameraParams::ExposureAutoEnums::ExposureAuto_Off );
 
 		if (!(settings.exposureTime >= camera->getExposureMin() && settings.exposureTime <= camera->getExposureMax()))
 		{
@@ -139,7 +141,7 @@ void BaslerCameras::setParameters( baslerSettings settings )
 	}
 	else if (settings.exposureMode == "Auto Exposure Once")
 	{
-		camera->ExposureAuto.SetValue( cameraParams::ExposureAutoEnums::ExposureAuto_Once );
+		camera->setExposureAuto( cameraParams::ExposureAutoEnums::ExposureAuto_Once );
 	}
 
 	if (settings.cameraMode == "Finite Acquisition")
@@ -155,25 +157,25 @@ void BaslerCameras::setParameters( baslerSettings settings )
 
 	if (settings.triggerMode == "External Trigger")
 	{
-		camera->TriggerSource.SetValue( cameraParams::TriggerSource_Line3 );
+		camera->setTriggerSource( cameraParams::TriggerSource_Line3 );
 		autoTrigger = false;
 	}
 	else if (settings.triggerMode == "Automatic Software Trigger")
 	{
-		camera->TriggerSource.SetValue( cameraParams::TriggerSource_Software );
+		camera->setTriggerSource( cameraParams::TriggerSource_Software );
 		autoTrigger = true;
 	}
 	else if (settings.triggerMode == "Manual Software Trigger")
 	{
-		camera->TriggerSource.SetValue( cameraParams::TriggerSource_Software );
+		camera->setTriggerSource( cameraParams::TriggerSource_Software );
 		autoTrigger = false;
 	}
-
 	runSettings = settings;
-
 }
 
-// i can potentially use this to reopen the camera if e.g. the user disconnects.
+
+// I can potentially use this to reopen the camera if e.g. the user disconnects. Don't think this is really implemented
+// yet.
 void BaslerCameras::reOpenCamera(HWND* parent)
 {
 	Pylon::CDeviceInfo info;
@@ -188,6 +190,9 @@ void BaslerCameras::reOpenCamera(HWND* parent)
 	camera->init(parent);
 }
 
+// get the dimensions of the camera. This is tricky because while I can get info about each parameter easily through
+// pylon, several of the parameters, such as the width, are context-sensitive and return the max values as possible 
+// given other camera settings at the moment (e.g. the binning).
 POINT BaslerCameras::getCameraDimensions()
 {
 	if (BASLER_ACE_SAFEMODE)
@@ -219,15 +224,9 @@ POINT BaslerCameras::getCameraDimensions()
 }
 
 
-
-
-double BaslerCameras::getCurrentExposure()
-{
-	return camera->getCurrentExposure();
-}
-
-
-void BaslerCameras::armCamera( double frameRate )
+// get the camera "armed" (ready for aquisition). Actual start of camera taking pictures depends on things like the 
+// trigger mode.
+void BaslerCameras::armCamera( double frameRate, HWND* parent )
 {
 	Pylon::EGrabStrategy grabStrat;
 	if (continuousImaging)
@@ -243,6 +242,7 @@ void BaslerCameras::armCamera( double frameRate )
 	triggerThreadInput* input = new triggerThreadInput;
 	input->camera = camera;
 	input->frameRate = frameRate;
+	input->parent = parent;
 	if (autoTrigger)
 	{
 		_beginthread( triggerThread, NULL, input );
@@ -250,18 +250,26 @@ void BaslerCameras::armCamera( double frameRate )
 }
 
 
+// 
+double BaslerCameras::getCurrentExposure()
+{
+	return camera->getCurrentExposure();
+}
+
+//
 unsigned int BaslerCameras::getRepCounts()
 {
 	return repCounts;
 }
 
-
+//
 bool BaslerCameras::isContinuous()
 {
 	return continuousImaging;
 }
 
 
+// this is the thread that programatically software-triggers the camera when triggering internally.
 void BaslerCameras::triggerThread( void* rawInput )
 {
 	triggerThreadInput* input = (triggerThreadInput*)rawInput;
@@ -272,8 +280,26 @@ void BaslerCameras::triggerThread( void* rawInput )
 			// Execute the software trigger. The call waits up to 100 ms for the camera
 			// to be ready to be triggered.
 			input->camera->waitForFrameTriggerReady( 5000 );
-			Sleep( int(1.0 / input->frameRate ));
+			Sleep( int(1000.0 / input->frameRate ));
 			input->camera->executeSoftwareTrigger();
+			if (BASLER_ACE_SAFEMODE)
+			{
+				// simulate successful grab
+				// need some way to communicate the width and height of the pic to this function...
+				std::vector<long>* image;
+				image = new std::vector<long>(672*512);
+				for (auto& elem : *image)
+				{
+					// picture comes in as 10-Bit number.
+					elem = rand() % 1024;
+				}
+				for (auto& elem : *image)
+				{
+					elem *= 256.0 / 1024.0;
+				}
+				PostMessage(*input->parent, ACE_PIC_READY, 672 * 512, (LPARAM)(image));
+				//pic->drawBitmap( dc, image );
+			}
 		}
 	}
 	catch (Pylon::TimeoutException& timeoutErr)
@@ -287,16 +313,21 @@ void BaslerCameras::triggerThread( void* rawInput )
 }
 
 
+// stop the camera from taking any pictures, even if triggered afterwards.
 void BaslerCameras::disarm()
 {
 	camera->stopGrabbing();
 }
 
-// Adjust value so it complies with range and increment passed.
-//
-// The parameter's minimum and maximum are always considered as valid values.
-// If the increment is larger than one, the returned value will be: min + (n * inc).
-// If the value doesn't meet these criteria, it will be rounded down so that it does.
+/*
+ * Adjust value so it complies with range and increment passed.
+ *
+ * The parameter's minimum and maximum are always considered as valid values.
+ * If the increment is larger than one, the returned value will be: min + (n * inc).
+ * If the value doesn't meet these criteria, it will be rounded down so that it does.
+
+ * this function comes from basler example code. Not sure if I'm using it right now.
+ */
 int64_t BaslerCameras::Adjust( int64_t val, int64_t minimum, int64_t maximum, int64_t inc )
 {
 	// Check the input parameters.
@@ -338,6 +369,7 @@ int64_t BaslerCameras::Adjust( int64_t val, int64_t minimum, int64_t maximum, in
 }
 
 
+// initialize the camera using the fundamental settings I use for all cameras. 
 void BaslerWrapper::init( HWND* parent )
 {
 	if (!BASLER_ACE_SAFEMODE)
@@ -356,6 +388,26 @@ void BaslerWrapper::init( HWND* parent )
 
 	}
 }
+
+
+/// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// 
+///					Pylon Wrappers
+/// 
+/// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+ * The rest of the functions in this file are simple wrappers for pylon functinos. They serve several purposes. 
+ *		- they allow easy handling of errors.
+		- More specifically, they allow me to standardize error handling. All my API wrappers handle errors by throwing
+			an "Error" Object of my own making.
+			- Pylon's error handling is actually already pretty close to my own error handling, in that it throws
+				a specialized exception. However, I oftentimes here just make it return /my/ specialized exception 
+				instead so that I can catch all errors simultaneously in my larger programs.
+		- They allow easy bypass of the function call if the program is being run in safemode, oftentimes returning 
+			dummy values that should allow the code to continue sensibly.
+		- For the basler code specifically, they allow me to taylor the call to the situations when I'm using a 
+			firewire camera or a usb camera without interupting the logical flow above. 
+ */
 
 
 int BaslerWrapper::getMinOffsetX()
@@ -561,6 +613,7 @@ bool BaslerWrapper::isGrabbing()
 	}
 }
 
+// not being used???
 std::vector<long> BaslerWrapper::retrieveResult( unsigned int timeout )
 {
 	Pylon::CGrabResultPtr resultPtr;
@@ -728,6 +781,21 @@ void BaslerWrapper::executeSoftwareTrigger()
 	}
 }
 
+void BaslerWrapper::setTriggerSource(Basler_UsbCameraParams::TriggerSourceEnums mode)
+{
+	if (!BASLER_ACE_SAFEMODE)
+	{
+		try
+		{
+			TriggerSource.SetValue(mode);
+		}
+		catch (Pylon::GenericException& err)
+		{
+			thrower(err.what());
+		}
+	}
+}
+
 void BaslerWrapper::startGrabbing( unsigned int picturesToGrab, Pylon::EGrabStrategy grabStrat )
 {
 	if (!BASLER_ACE_SAFEMODE)
@@ -824,3 +892,17 @@ void BaslerWrapper::setExposure( double exposureTime )
 }
 
 
+void BaslerWrapper::setExposureAuto(cameraParams::ExposureAutoEnums mode)
+{
+	if (!BASLER_ACE_SAFEMODE)
+	{
+		try
+		{
+			ExposureTime.SetValue(mode);
+		}
+		catch (Pylon::GenericException& err)
+		{
+			thrower(err.what());
+		}
+	}
+}

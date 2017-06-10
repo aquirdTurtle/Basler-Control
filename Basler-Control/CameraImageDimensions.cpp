@@ -405,6 +405,7 @@ imageParameters CameraImageDimensionsControl::getImageParameters()
 	return currentImageParameters;
 }
 
+
 /*
 HBRUSH CameraImageDimensionsControl::colorEdits( HWND window, UINT message, WPARAM wParam, LPARAM lParam, BaslerCameraWindow* mainWin )
 {
@@ -651,8 +652,8 @@ HBRUSH CameraImageDimensionsControl::colorEdits( HWND window, UINT message, WPAR
 }
 */
 
-void CameraImageDimensionsControl::rearrange( std::string cameraMode, std::string triggerMode, int horBinNumber, int vertBinNumber, 
-											  std::unordered_map<std::string, CFont*> fonts )
+void CameraImageDimensionsControl::rearrange( std::string cameraMode, std::string triggerMode, int horBinNumber, 
+											 int vertBinNumber, std::unordered_map<std::string, CFont*> fonts )
 {
 	leftText.rearrange( cameraMode, triggerMode, horBinNumber, vertBinNumber, fonts );
 	rightText.rearrange( cameraMode, triggerMode, horBinNumber, vertBinNumber, fonts );
