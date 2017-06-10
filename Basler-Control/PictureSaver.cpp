@@ -17,7 +17,7 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 	/// note: the rest of the save location is hard-set in the constants file. might want to change this.
 	saveLocationText.ID = id++;
 	saveLocationText.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 25 };
-	saveLocationText.Create( "End of Save:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY , 
+	saveLocationText.Create( "Save Location:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY , 
 							 saveLocationText.sPos, parent, saveLocationText.ID );
 
 	saveLocationEdit.ID = id++;

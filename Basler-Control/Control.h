@@ -136,9 +136,13 @@ template <class ControlType> void Control<ControlType>::rearrange(std::string ca
 	/// Set Fonts
 	if (fontType == Normal)
 	{
-		if (widthScale * heightScale > 0.8)
+		if (widthScale * heightScale > 2)
 		{
 			SetFont(fonts["Normal Font Max"]);
+		}
+		else if (widthScale * heightScale > 0.8)
+		{
+			SetFont(fonts["Normal Font Large"]);
 		}
 		else if (widthScale * heightScale > 0.6)
 		{
@@ -151,9 +155,13 @@ template <class ControlType> void Control<ControlType>::rearrange(std::string ca
 	}
 	else if (fontType == Code)
 	{
-		if (widthScale * heightScale > 0.8)
+		if (widthScale * heightScale > 2)
 		{
 			SetFont(fonts["Code Font Max"]);
+		}
+		else if (widthScale * heightScale > 0.8)
+		{
+			SetFont(fonts["Code Font Large"]);
 		}
 		else if (widthScale * heightScale > 0.6)
 		{
@@ -166,9 +174,13 @@ template <class ControlType> void Control<ControlType>::rearrange(std::string ca
 	}
 	else if (fontType == Heading)
 	{
-		if (widthScale * heightScale > 0.8)
+		if (widthScale * heightScale > 2)
 		{
 			SetFont(fonts["Heading Font Max"]);
+		}
+		else if (widthScale * heightScale > 0.8)
+		{
+			SetFont(fonts["Heading Font Large"]);
 		}
 		else if (widthScale * heightScale > 0.6)
 		{
@@ -181,9 +193,13 @@ template <class ControlType> void Control<ControlType>::rearrange(std::string ca
 	}
 	else if (fontType == Large)
 	{
-		if (widthScale * heightScale > 0.8)
+		if (widthScale * heightScale > 2)
 		{
 			SetFont(fonts["Larger Font Max"]);
+		}
+		else if (widthScale * heightScale > 0.8)
+		{
+			SetFont(fonts["Larger Font Large"]);
 		}
 		else if (widthScale * heightScale > 0.6)
 		{
@@ -196,9 +212,13 @@ template <class ControlType> void Control<ControlType>::rearrange(std::string ca
 	}
 	else if (fontType == Small)
 	{
-		if (widthScale * heightScale > 0.8)
+		if (widthScale * heightScale > 2)
 		{
 			SetFont(fonts["Smaller Font Max"]);
+		}
+		else if (widthScale * heightScale > 0.8)
+		{
+			SetFont(fonts["Smaller Font Large"]);
 		}
 		else if (widthScale * heightScale > 0.6)
 		{
