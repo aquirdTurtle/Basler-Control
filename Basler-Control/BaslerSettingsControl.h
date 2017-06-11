@@ -41,6 +41,7 @@ class BaslerSettingsControl
 		void handleGain();
 		void handleExposureMode();
 		void handleCameraMode();
+		baslerSettings loadCurrentSettings();
 		baslerSettings getCurrentSettings();
 		// change all the settings.
 		void setSettings( baslerSettings settings);
@@ -57,7 +58,6 @@ class BaslerSettingsControl
 		Control<CEdit> exposureEdit;
 		Control<CButton> setExposure;
 		// trigger
-		Control<CStatic> triggerText;
 		Control<CComboBox> triggerCombo;
 
 		// Dimensions & Binning

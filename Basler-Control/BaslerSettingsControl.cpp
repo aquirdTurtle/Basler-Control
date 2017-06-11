@@ -3,7 +3,6 @@
 #include "BaslerSettingsControl.h"
 #include "constants.h"
 
-
 void BaslerSettingsControl::rearrange(int width, int height, fontMap fonts)
 {
 	// arm
@@ -15,7 +14,6 @@ void BaslerSettingsControl::rearrange(int width, int height, fontMap fonts)
 	exposureEdit.rearrange("", "", width, height, fonts);
 	setExposure.rearrange("", "", width, height, fonts);
 	// trigger
-	triggerText.rearrange("", "", width, height, fonts);
 	triggerCombo.rearrange("", "", width, height, fonts);
 
 	// Dimensions & Binning
@@ -106,7 +104,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	exposureEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
 	exposureEdit.ID = id++;
 	exposureEdit.Create( WS_CHILD | WS_VISIBLE, exposureEdit.sPos, parent, exposureEdit.ID );
-	exposureEdit.SetWindowTextA( "---" );
+	exposureEdit.SetWindowTextA( "5000" );
 
 	exposureModeCombo.sPos = { pos.x, pos.y, pos.x + 300, pos.y + 100 };
 	exposureModeCombo.ID = id++;
@@ -121,8 +119,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	exposureModeCombo.AddString( "Auto Exposure Continuous" );
 	exposureModeCombo.AddString( "Auto Exposure Off" );
 	exposureModeCombo.AddString( "Auto Exposure Once" );
-	exposureModeCombo.SelectString( 0, "Auto Exposure Continuous" );
-	exposureEdit.EnableWindow( false );
+	exposureModeCombo.SelectString( 0, "Auto Exposure Off" );
 
 	/// image dimensions
 	//
@@ -133,7 +130,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	//
 	rightText.ID = id++;
 	rightText.sPos = { pos.x + width/3, pos.y, pos.x + 2* width/3, pos.y + 25 };
-	rightText.Create( "Right", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, rightText.sPos, parent, rightText.ID );
+	rightText.Create( "Right (/671)", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, rightText.sPos, parent, rightText.ID );
 	
 	//
 	horizontalBinningText.ID = id++;
@@ -169,7 +166,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	//
 	bottomText.ID = id++;
 	bottomText.sPos = { pos.x + width/3, pos.y, pos.x +2* width/3, pos.y + 25 };
-	bottomText.Create( "Bottom", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, bottomText.sPos, parent, bottomText.ID );
+	bottomText.Create( "Bottom (/511)", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, bottomText.sPos, parent, bottomText.ID );
 	bottomText.fontType = Normal;
 	//
 	verticalBinningText.ID = id++;
@@ -196,16 +193,12 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	verticalBinningEdit.fontType = Normal;
 	verticalBinningEdit.SetWindowTextA( "1" );
 
-	triggerText.ID = id++;
-	triggerText.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 25 };
-	triggerText.Create( "Trigger Mode", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, triggerText.sPos, parent, triggerText.ID );
-
 	triggerCombo.ID = id++;
 	if (triggerCombo.ID != IDC_TRIGGER_MODE_COMBO)
 	{
 		throw;
 	}
-	triggerCombo.sPos = { pos.x + 100, pos.y, pos.x + 300, pos.y + 100 };
+	triggerCombo.sPos = { pos.x, pos.y, pos.x + 300, pos.y + 100 };
 	triggerCombo.Create( WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_SORT, triggerCombo.sPos, parent, triggerCombo.ID );
 	triggerCombo.AddString( "External Trigger" );
 	triggerCombo.AddString( "Automatic Software Trigger" );
@@ -213,17 +206,17 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	triggerCombo.SelectString( 0, "Automatic Software Trigger" );
 	pos.y += 25;
 
-	frameRateText.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 25 };
+	frameRateText.sPos = { pos.x, pos.y, pos.x + 150, pos.y + 25 };
 	frameRateText.ID = id++;
 	frameRateText.Create( "Frame Rate (pics/s): ", WS_CHILD | WS_VISIBLE, frameRateText.sPos, parent, frameRateText.ID );
 
-	frameRateEdit.sPos = { pos.x + 100, pos.y, pos.x + 200, pos.y + 25 };
+	frameRateEdit.sPos = { pos.x + 150, pos.y, pos.x + 225, pos.y + 25 };
 	frameRateEdit.ID = id++;
 	frameRateEdit.Create( WS_CHILD | WS_VISIBLE, frameRateEdit.sPos, parent, frameRateEdit.ID );
-	frameRateEdit.SetWindowTextA( "30" );
+	frameRateEdit.SetWindowTextA( "2" );
 
 
-	realFrameRate.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
+	realFrameRate.sPos = { pos.x + 225, pos.y, pos.x + 300, pos.y += 25 };
 	realFrameRate.ID = id++;
 	realFrameRate.Create( "", WS_CHILD | WS_VISIBLE, realFrameRate.sPos, parent, realFrameRate.ID );
 
@@ -291,6 +284,11 @@ void BaslerSettingsControl::setSettings( baslerSettings settings )
 
 
 baslerSettings BaslerSettingsControl::getCurrentSettings()
+{
+	return currentSettings;
+}
+
+baslerSettings BaslerSettingsControl::loadCurrentSettings()
 {	
 	isReady = false;
 	int selection = exposureModeCombo.GetCurSel();
@@ -345,7 +343,10 @@ baslerSettings BaslerSettingsControl::getCurrentSettings()
 	leftEdit.GetWindowTextA( tempStr );
 	try
 	{
-		currentSettings.dimensions.leftBorder = std::stoi( std::string( tempStr ) );
+		int val = currentSettings.dimensions.leftBorder = std::stoi( std::string( tempStr ) );
+		// round down to nearest multiple of 16
+		currentSettings.dimensions.leftBorder = int(val / 16) * 16;
+		leftEdit.SetWindowTextA(cstr(currentSettings.dimensions.leftBorder));
 	}
 	catch (std::invalid_argument&)
 	{
@@ -353,14 +354,44 @@ baslerSettings BaslerSettingsControl::getCurrentSettings()
 		thrower( "Left border argument not an integer!\r\n" );
 	}
 	leftEdit.RedrawWindow();
+
+	horizontalBinningEdit.GetWindowTextA(tempStr);
+	try
+	{
+		currentSettings.dimensions.horPixelsPerBin = std::stoi(std::string(tempStr));
+	}
+	catch (std::invalid_argument&)
+	{
+		thrower("Horizontal binning argument not an integer!\r\n");
+	}
+	horizontalBinningEdit.RedrawWindow();
+
 	rightEdit.GetWindowTextA( tempStr );
 	try
 	{
 		currentSettings.dimensions.rightBorder = std::stoi( std::string( tempStr ) );
-		// round up to nearest multiple of 16
+		int roundVal = 1;
+		if (currentSettings.dimensions.horPixelsPerBin == 1)
+		{
+			roundVal = 16;
+		}
+		else if (currentSettings.dimensions.horPixelsPerBin == 2)
+		{
+			roundVal = 32;
+		}
+		else if (currentSettings.dimensions.horPixelsPerBin == 4)
+		{
+			roundVal = 64;
+		}
+		// round up to nearest multiple of 16 or 32 or 64 depending on binning.
 		int width = currentSettings.dimensions.rightBorder - currentSettings.dimensions.leftBorder + 1;
-		width = ((width + 16 - 1) / 16) * 16;
+		width = ((width + roundVal - 1) / roundVal) * roundVal;
 		currentSettings.dimensions.rightBorder = currentSettings.dimensions.leftBorder + width - 1;
+		// compensate in case the extra rounding over-shoots, which is possible if roundVal > 16.
+		if (currentSettings.dimensions.rightBorder > 671)
+		{
+			currentSettings.dimensions.rightBorder -= roundVal;
+		}
 		rightEdit.SetWindowTextA( cstr( currentSettings.dimensions.rightBorder ) );
 	}
 	catch (std::invalid_argument&)
@@ -372,7 +403,10 @@ baslerSettings BaslerSettingsControl::getCurrentSettings()
 	topEdit.GetWindowTextA( tempStr );
 	try
 	{
-		currentSettings.dimensions.topBorder = std::stoi( std::string( tempStr ) );
+		int val = currentSettings.dimensions.topBorder = std::stoi(std::string(tempStr));
+		// round down to nearest multiple of 16
+		currentSettings.dimensions.topBorder = int(val / 16) * 16;
+		topEdit.SetWindowTextA(cstr(currentSettings.dimensions.topBorder));
 	}
 	catch (std::invalid_argument&)
 	{
@@ -380,14 +414,43 @@ baslerSettings BaslerSettingsControl::getCurrentSettings()
 	}
 	topEdit.RedrawWindow();
 	//
+	verticalBinningEdit.GetWindowTextA(tempStr);
+	try
+	{
+		currentSettings.dimensions.vertPixelsPerBin = std::stoi(std::string(tempStr));
+	}
+	catch (std::invalid_argument&)
+	{
+		thrower("Vertical binning argument not an integer!\r\n");
+	}
+	verticalBinningEdit.RedrawWindow();
+	//
 	bottomEdit.GetWindowTextA( tempStr );
 	try
 	{
 		currentSettings.dimensions.bottomBorder = std::stoi( std::string( tempStr ) );
-		// round up to nearest multiple of 16
+		// round up to nearest multiple of 16 or 32 or 64 depending on binning.
+		int roundVal = 1;
+		if (currentSettings.dimensions.vertPixelsPerBin == 1)
+		{
+			roundVal = 16;
+		}
+		else if (currentSettings.dimensions.vertPixelsPerBin == 2)
+		{
+			roundVal = 32;
+		}
+		else if (currentSettings.dimensions.vertPixelsPerBin == 4)
+		{
+			roundVal = 64;
+		}
 		int height = currentSettings.dimensions.bottomBorder - currentSettings.dimensions.topBorder + 1;
-		height = ((height + 16 - 1) / 16) * 16;
+		height = ((height + roundVal - 1) / roundVal) * roundVal;
 		currentSettings.dimensions.bottomBorder = currentSettings.dimensions.topBorder + height - 1;
+		// compensate in case the extra rounding over-shoots, which is possible if roundVal > 16.
+		if (currentSettings.dimensions.bottomBorder > 511)
+		{
+			currentSettings.dimensions.bottomBorder -= roundVal;
+		}
 		bottomEdit.SetWindowTextA( cstr(currentSettings.dimensions.bottomBorder) );
 	}
 	catch (std::invalid_argument&)
@@ -395,26 +458,8 @@ baslerSettings BaslerSettingsControl::getCurrentSettings()
 		thrower( "Bottom border argument not an integer!\r\n" );
 	}
 	bottomEdit.RedrawWindow();
-	horizontalBinningEdit.GetWindowTextA( tempStr );
-	try
-	{
-		currentSettings.dimensions.horPixelsPerBin = std::stoi( std::string( tempStr ) );
-	}
-	catch (std::invalid_argument&)
-	{
-		thrower( "Horizontal binning argument not an integer!\r\n" );
-	}
-	horizontalBinningEdit.RedrawWindow();
-	verticalBinningEdit.GetWindowTextA( tempStr );
-	try
-	{
-		currentSettings.dimensions.vertPixelsPerBin = std::stoi( std::string( tempStr ) );
-	}
-	catch (std::invalid_argument&)
-	{
-		thrower( "Vertical binning argument not an integer!\r\n" );
-	}
-	verticalBinningEdit.RedrawWindow();
+
+
 	
 	currentSettings.dimensions.horRawPixelNumber = currentSettings.dimensions.rightBorder - currentSettings.dimensions.leftBorder + 1;
 	currentSettings.dimensions.vertRawPixelNumber = currentSettings.dimensions.bottomBorder - currentSettings.dimensions.topBorder + 1;
@@ -475,7 +520,6 @@ void BaslerSettingsControl::handleGain()
 {
 
 }
-
 
 
 void BaslerSettingsControl::handleExposureMode()

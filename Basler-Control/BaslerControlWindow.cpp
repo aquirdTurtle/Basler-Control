@@ -39,6 +39,7 @@ void BaslerControlWindow::OnMouseMove( UINT flags, CPoint point )
 	}
 }
 
+
 void BaslerControlWindow::handleSoftwareTrigger()
 {
 	try
@@ -51,6 +52,7 @@ void BaslerControlWindow::handleSoftwareTrigger()
 	}
 }
 
+
 void BaslerControlWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scrollbar )
 {
 	if (nSBCode == SB_THUMBPOSITION || nSBCode == SB_THUMBTRACK)
@@ -59,6 +61,7 @@ void BaslerControlWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scroll
 		try
 		{
 			picture.handleScroll( id, nPos );
+			picture.redrawImage(this);
 		}
 		catch (Error& err)
 		{
@@ -66,6 +69,7 @@ void BaslerControlWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scroll
 		}
 	}
 }
+
 
 void BaslerControlWindow::handlePictureRangeEditChange( UINT id )
 {
@@ -91,14 +95,13 @@ void BaslerControlWindow::handleDisarmPress()
 	{
 		errBox( "Error! " + err.whatStr() );
 	}
-
 }
 
 
 LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 {
+	std::vector<long>* image = (std::vector<long>*) lParam;
  	long size = long( wParam );
- 	std::vector<long>* image = (std::vector<long>*) lParam;
  	try
 	{
 		currentRepNumber++;
@@ -112,7 +115,7 @@ LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		}
 		
 		stats.update( image, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, currentRepNumber, 
-					  cameraController->getRepCounts() );
+						cameraController->getRepCounts() );
 
 		if (currentRepNumber == 1 || cameraController->isContinuous())
 		{
@@ -169,7 +172,7 @@ void BaslerControlWindow::handleArmPress()
 	try
 	{
 		currentRepNumber = 0;
-		baslerSettings tempSettings = settings.getCurrentSettings();
+		baslerSettings tempSettings = settings.loadCurrentSettings();
 		cameraController->setParameters( tempSettings );
 		picture.updateGridSpecs( tempSettings.dimensions );
 		runExposureMode = tempSettings.exposureMode;

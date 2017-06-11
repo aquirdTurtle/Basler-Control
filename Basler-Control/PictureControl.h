@@ -6,6 +6,7 @@
 class PictureControl
 {
 	public:
+		PictureControl::PictureControl();
 		void initialize(POINT& loc, CWnd* parent, int& id, int width, int height);
 		void updateGridSpecs( imageDimensions newParameters );
 		void setPictureArea( POINT loc, int width, int height );
@@ -31,7 +32,7 @@ class PictureControl
 		std::vector<long> mostRecentImage;
 		// stores info as to whether the control is currently being used in plotting camera data or was used 
 		// in the most recent run.
-		bool active;
+		bool active = true;
 		// Arguably I should make these static controls instead of keeping track explicitly of these things. 
 		RECT originalBackgroundArea;
 		RECT currentBackgroundArea;

@@ -8,9 +8,6 @@
 #include "stdint.h"
 #include "constants.h"
 
-void onImageGrabbedProcedure(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& grabResult, HWND* parent)
-{
-}
 
 // important constructor;
 // Create an instant camera object with the camera device found first.
@@ -19,14 +16,13 @@ BaslerCameras::BaslerCameras(HWND* parent)
 	Pylon::PylonInitialize();
 	Pylon::CDeviceInfo info;
 	info.SetDeviceClass( cameraType::DeviceClass() );
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		cameraType* temp;
 		temp = new BaslerWrapper( Pylon::CTlFactory::GetInstance().CreateFirstDevice( info ) );
 		camera = dynamic_cast<BaslerWrapper*>(temp);
 	}
 	camera->init(parent);
-	
 }
 
 // send a software trigger to the camera after waiting to make sure it's ready to recieve said trigger.
@@ -88,49 +84,49 @@ void BaslerCameras::setParameters( baslerSettings settings )
 	// Set the AOI:
 
 	/* 
+		there is never a problem making things smaller. the danger is over-reaching the maximum whose bounds change dynamically.
 		the basler API is very picky about the order of these things. Ways for this to crash:
 		- Setting offset large (before making width smaller) pushes the right border past max width
 		- setting width large (before making offset smaller) pushes right border past max width
+		- setting the binning large (before changing the width)
 	*/
 
-	// if width is getting larger, set offset first. else set width first.
-	if (settings.dimensions.horRawPixelNumber > runSettings.dimensions.horRawPixelNumber)
-	{
-		camera->setOffsetX( settings.dimensions.leftBorder );
-		camera->setWidth( settings.dimensions.horRawPixelNumber );
-	}
-	else
-	{
-		camera->setWidth( settings.dimensions.horRawPixelNumber );
-		camera->setOffsetX( settings.dimensions.leftBorder );
-	}
-	
-	if (settings.dimensions.vertRawPixelNumber > runSettings.dimensions.vertRawPixelNumber)
-	{
-		camera->setOffsetY( settings.dimensions.topBorder );
-		camera->setHeight( settings.dimensions.vertRawPixelNumber );
-	}
-	else
-	{
-		camera->setHeight( settings.dimensions.vertRawPixelNumber );
-		camera->setOffsetY( settings.dimensions.topBorder );
-	}
+	// start from a safe place.
+	camera->setOffsetX(0);
+	camera->setWidth(16);
+	camera->setHorBin(1);
+	camera->setOffsetY(0);
+	camera->setHeight(16);
+	camera->setVertBin(1);
 
-	camera->setHorBin( settings.dimensions.horPixelsPerBin );
-	camera->setVertBin( settings.dimensions.vertPixelsPerBin );
-
+	// suppose you start real small. 16 1x1 pixels.  then, this always works:
+	// set x offset (no chance of pushing right because width is small)
+	// set width (no chance of pushing right off because of binning because binning is minimal so potential value for rightmost point is 
+	//		maximal.
+	// set binning 
+	camera->setOffsetX(settings.dimensions.leftBorder);
+	camera->setWidth(settings.dimensions.horRawPixelNumber);
+	camera->setHorBin(settings.dimensions.horPixelsPerBin);
+	camera->setOffsetY(settings.dimensions.topBorder);
+	camera->setHeight(settings.dimensions.vertRawPixelNumber);
+	camera->setVertBin(settings.dimensions.vertPixelsPerBin);
+	#ifdef USB_CAMERA
 	camera->setPixelFormat( cameraParams::PixelFormat_Mono10 );
+	#endif
 	camera->setGainMode("Off");
 	camera->setGain( camera->getMinGain() );
-
+	//amera->AcquisitionFrameRateEnable.SetValue(true);
+	//Basler_UsbCameraParams::AcquisitionModeEnums::AcquisitionMode_Continuous
+	//camera->AcquisitionMode.SetValue(Basler_UsbCameraParams::AcquisitionModeEnums::AcquisitionMode_Continuous);
+	//camera->AcquisitionFrameRate.SetValue(settings.frameRate);
 	// exposure mode
 	if (settings.exposureMode == "Auto Exposure Continuous")
 	{
-		camera->setExposureAuto( cameraParams::ExposureAutoEnums::ExposureAuto_Continuous );
+		camera->setExposureAuto( cameraParams::ExposureAuto_Continuous );
 	}
 	else if (settings.exposureMode == "Auto Exposure Off")
 	{
-		camera->setExposureAuto( cameraParams::ExposureAutoEnums::ExposureAuto_Off );
+		camera->setExposureAuto( cameraParams::ExposureAuto_Off );
 
 		if (!(settings.exposureTime >= camera->getExposureMin() && settings.exposureTime <= camera->getExposureMax()))
 		{
@@ -141,7 +137,7 @@ void BaslerCameras::setParameters( baslerSettings settings )
 	}
 	else if (settings.exposureMode == "Auto Exposure Once")
 	{
-		camera->setExposureAuto( cameraParams::ExposureAutoEnums::ExposureAuto_Once );
+		camera->setExposureAuto( cameraParams::ExposureAuto_Once );
 	}
 
 	if (settings.cameraMode == "Finite Acquisition")
@@ -180,7 +176,7 @@ void BaslerCameras::reOpenCamera(HWND* parent)
 {
 	Pylon::CDeviceInfo info;
 	info.SetDeviceClass( cameraType::DeviceClass() );
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		delete camera;
 		cameraType* temp;
@@ -195,7 +191,7 @@ void BaslerCameras::reOpenCamera(HWND* parent)
 // given other camera settings at the moment (e.g. the binning).
 POINT BaslerCameras::getCameraDimensions()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return { 672, 512 };
 	}
@@ -272,17 +268,28 @@ bool BaslerCameras::isContinuous()
 // this is the thread that programatically software-triggers the camera when triggering internally.
 void BaslerCameras::triggerThread( void* rawInput )
 {
+	int count = 0;
 	triggerThreadInput* input = (triggerThreadInput*)rawInput;
 	try
 	{
 		while (input->camera->isGrabbing())
 		{
-			// Execute the software trigger. The call waits up to 100 ms for the camera
-			// to be ready to be triggered.
-			input->camera->waitForFrameTriggerReady( 5000 );
-			Sleep( int(1000.0 / input->frameRate ));
-			input->camera->executeSoftwareTrigger();
-			if (BASLER_ACE_SAFEMODE)
+			Sleep(int(1000.0 / input->frameRate));
+			try
+			{
+				// Execute the software trigger. The call waits up to 100 ms for the camera
+				// to be ready to be triggered.
+				input->camera->waitForFrameTriggerReady(1000);
+				input->camera->executeSoftwareTrigger();			
+				count++;
+			}
+			catch (Error& err)
+			{
+				// continue... should be stopping grabbing.
+				break;
+			}
+
+			if (BASLER_SAFEMODE)
 			{
 				// simulate successful grab
 				// need some way to communicate the width and height of the pic to this function...
@@ -291,14 +298,15 @@ void BaslerCameras::triggerThread( void* rawInput )
 				for (auto& elem : *image)
 				{
 					// picture comes in as 10-Bit number.
-					elem = rand() % 1024;
+					elem = rand() % 10;
 				}
 				for (auto& elem : *image)
 				{
 					elem *= 256.0 / 1024.0;
 				}
+				(*image)[0] = 1000;
+				(*image)[1] = 500;
 				PostMessage(*input->parent, ACE_PIC_READY, 672 * 512, (LPARAM)(image));
-				//pic->drawBitmap( dc, image );
 			}
 		}
 	}
@@ -372,7 +380,7 @@ int64_t BaslerCameras::Adjust( int64_t val, int64_t minimum, int64_t maximum, in
 // initialize the camera using the fundamental settings I use for all cameras. 
 void BaslerWrapper::init( HWND* parent )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -412,7 +420,7 @@ void BaslerWrapper::init( HWND* parent )
 
 int BaslerWrapper::getMinOffsetX()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return 0;
 	}
@@ -428,7 +436,7 @@ int BaslerWrapper::getMinOffsetX()
 
 int BaslerWrapper::getMinOffsetY()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return 0;
 	}
@@ -444,7 +452,7 @@ int BaslerWrapper::getMinOffsetY()
 
 int BaslerWrapper::getMaxWidth()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return 672;
 	}
@@ -460,7 +468,7 @@ int BaslerWrapper::getMaxWidth()
 
 int BaslerWrapper::getMaxHeight()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return 512;
 	}
@@ -476,7 +484,7 @@ int BaslerWrapper::getMaxHeight()
 
 int BaslerWrapper::getMinGain()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return 260;
 	}
@@ -497,7 +505,7 @@ int BaslerWrapper::getMinGain()
 
 void BaslerWrapper::setOffsetX( int offset )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -513,15 +521,22 @@ void BaslerWrapper::setOffsetX( int offset )
 
 void BaslerWrapper::setOffsetY( int offset )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
-		OffsetY.SetValue( offset );
+		try
+		{
+			OffsetY.SetValue(offset);
+		}
+		catch (Pylon::GenericException& err)
+		{
+			thrower(err.what());
+		}
 	}
 }
 
 void BaslerWrapper::setWidth( int width )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -537,7 +552,7 @@ void BaslerWrapper::setWidth( int width )
 
 void BaslerWrapper::setHeight( int height )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{	
@@ -553,7 +568,7 @@ void BaslerWrapper::setHeight( int height )
 
 void BaslerWrapper::setHorBin( int binning )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -569,7 +584,7 @@ void BaslerWrapper::setHorBin( int binning )
 
 void BaslerWrapper::setVertBin( int binning )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{			
@@ -584,7 +599,7 @@ void BaslerWrapper::setVertBin( int binning )
 
 void BaslerWrapper::stopGrabbing()
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -599,7 +614,7 @@ void BaslerWrapper::stopGrabbing()
 
 bool BaslerWrapper::isGrabbing()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return true;
 	}
@@ -632,7 +647,7 @@ std::vector<long> BaslerWrapper::retrieveResult( unsigned int timeout )
 
 int BaslerWrapper::getCurrentHeight()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return 512;
 	}
@@ -649,7 +664,7 @@ int BaslerWrapper::getCurrentHeight()
 
 int BaslerWrapper::getCurrentWidth()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return 672;
 	}
@@ -666,7 +681,7 @@ int BaslerWrapper::getCurrentWidth()
 
 int BaslerWrapper::getCurrentOffsetX()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return 0;
 	}
@@ -683,7 +698,7 @@ int BaslerWrapper::getCurrentOffsetX()
 
 int BaslerWrapper::getCurrentOffsetY()
 {
-	if (BASLER_ACE_SAFEMODE)
+	if (BASLER_SAFEMODE)
 	{
 		return 0;
 	}
@@ -700,7 +715,7 @@ int BaslerWrapper::getCurrentOffsetY()
 
 void BaslerWrapper::setPixelFormat( cameraParams::PixelFormatEnums pixelFormat)
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -715,7 +730,7 @@ void BaslerWrapper::setPixelFormat( cameraParams::PixelFormatEnums pixelFormat)
 
 void BaslerWrapper::setGainMode( std::string mode )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -730,7 +745,7 @@ void BaslerWrapper::setGainMode( std::string mode )
 
 void BaslerWrapper::setGain( int gainValue )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -745,13 +760,12 @@ void BaslerWrapper::setGain( int gainValue )
 			thrower( err.what() );
 		}
 	}
-	
 }
 
 
 void BaslerWrapper::waitForFrameTriggerReady( unsigned int timeout )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -768,10 +782,11 @@ void BaslerWrapper::waitForFrameTriggerReady( unsigned int timeout )
 
 void BaslerWrapper::executeSoftwareTrigger()
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
+			
 			ExecuteSoftwareTrigger();
 		}
 		catch (Pylon::GenericException& err)
@@ -781,9 +796,9 @@ void BaslerWrapper::executeSoftwareTrigger()
 	}
 }
 
-void BaslerWrapper::setTriggerSource(Basler_UsbCameraParams::TriggerSourceEnums mode)
+void BaslerWrapper::setTriggerSource(cameraParams::TriggerSourceEnums mode)
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -798,7 +813,7 @@ void BaslerWrapper::setTriggerSource(Basler_UsbCameraParams::TriggerSourceEnums 
 
 void BaslerWrapper::startGrabbing( unsigned int picturesToGrab, Pylon::EGrabStrategy grabStrat )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -814,7 +829,7 @@ void BaslerWrapper::startGrabbing( unsigned int picturesToGrab, Pylon::EGrabStra
 // returns in us
 double BaslerWrapper::getExposureMax()
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -834,7 +849,7 @@ double BaslerWrapper::getExposureMax()
 
 double BaslerWrapper::getExposureMin()
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -854,7 +869,7 @@ double BaslerWrapper::getExposureMin()
 
 double BaslerWrapper::getCurrentExposure()
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -874,7 +889,7 @@ double BaslerWrapper::getCurrentExposure()
 
 void BaslerWrapper::setExposure( double exposureTime )
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
@@ -894,11 +909,11 @@ void BaslerWrapper::setExposure( double exposureTime )
 
 void BaslerWrapper::setExposureAuto(cameraParams::ExposureAutoEnums mode)
 {
-	if (!BASLER_ACE_SAFEMODE)
+	if (!BASLER_SAFEMODE)
 	{
 		try
 		{
-			ExposureTime.SetValue(mode);
+			ExposureAuto.SetValue(mode);
 		}
 		catch (Pylon::GenericException& err)
 		{

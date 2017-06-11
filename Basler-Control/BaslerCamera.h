@@ -55,7 +55,7 @@ class BaslerWrapper : public cameraType
 		void waitForFrameTriggerReady(unsigned int timeout);
 		void executeSoftwareTrigger();
 		
-		void setTriggerSource(Basler_UsbCameraParams::TriggerSourceEnums mode);
+		void setTriggerSource(cameraParams::TriggerSourceEnums mode);
 		void startGrabbing( unsigned int picturesToGrab, Pylon::EGrabStrategy grabStrat );
 		std::vector<long> retrieveResult( unsigned int timeout );
 
@@ -128,8 +128,7 @@ class ImageEventHandler : public Pylon::CImageEventHandler
 						elem *= 256.0 / 1024.0;
 					}
 					PostMessage(*parent, ACE_PIC_READY, grabResult->GetWidth() * grabResult->GetHeight(),
-						(LPARAM)image);
-					//pic->drawBitmap( dc, image );
+								(LPARAM)image);
 				}
 				else
 				{
@@ -144,10 +143,4 @@ class ImageEventHandler : public Pylon::CImageEventHandler
 		}
 	private:
 		HWND* parent;
-};
-
-void onImageGrabbedProcedure(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& grabResult, HWND* parent);
-
-
-	
-	
+};	

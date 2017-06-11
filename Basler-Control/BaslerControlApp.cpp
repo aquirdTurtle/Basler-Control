@@ -39,7 +39,7 @@ CBaslerControlApp::CBaslerControlApp()
 
 // The one and only CBaslerControlApp object. The entire program runs from the construction of this object.
 CBaslerControlApp theApp;
-
+long num;
 
 // this initialization function is called after the constructor.
 BOOL CBaslerControlApp::InitInstance()

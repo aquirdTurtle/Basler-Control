@@ -11,6 +11,7 @@
 #include "resource.h"		// main symbols
 
 extern UINT ACE_PIC_READY;
+extern long num;
 
 // CBaslerControlApp:
 // See Basler-Control.cpp for the implementation of this class

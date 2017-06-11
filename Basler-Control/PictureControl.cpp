@@ -5,6 +5,12 @@
 #include "constants.h"
 #include <cmath>
 
+
+PictureControl::PictureControl()
+{
+	active = true;
+}
+
 bool PictureControl::isActive()
 {
 	return active;
@@ -185,30 +191,38 @@ void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, in
 
 void PictureControl::setValue()
 {
-	valueDisp.SetWindowTextA(cstr(mostRecentImage[mouseCoordinates.x * grid[0].size() + mouseCoordinates.y]));
+	int loc = mouseCoordinates.x * grid[0].size() + mouseCoordinates.y;
+	if (loc > mostRecentImage.size())
+	{
+		return;
+	}
+	//errBox(str(mouseCoordinates.x * grid[0].size() + mouseCoordinates.y));	
+	valueDisp.SetWindowTextA(cstr(mostRecentImage[loc]));
 }
 
-void PictureControl::handleMouse( CPoint point )
+
+void PictureControl::handleMouse(CPoint point)
 {
 	int rowCount = 0;
 	int colCount = 0;
-	for (auto row : grid)
+	for (auto col : grid)
 	{
-		for (auto box : row)
+		for (auto box : col)
 		{
 			if (point.x < box.right && point.x > box.left && point.y > box.top && point.y < box.bottom)
 			{
-				coordinatesDisp.SetWindowTextA( (str( rowCount ) + ", " + str( colCount ) ).c_str());
+				rowCount = grid.front().size() - rowCount - 1;
+				coordinatesDisp.SetWindowTextA((str(rowCount) + ", " + str(colCount)).c_str());
 				mouseCoordinates = { rowCount, colCount };
 				if (mostRecentImage.size() != 0 && grid.size() != 0)
 				{
 					setValue();
 				}
 			}
-			colCount += 1;
+			rowCount += 1;
 		}
-		rowCount += 1;
-		colCount = 0;
+		colCount += 1;
+		rowCount = 0;
 	}
 }
 
@@ -225,29 +239,29 @@ void PictureControl::updateGridSpecs(imageDimensions newParameters)
 		{
 			// for all 4 pictures...
 			grid[widthInc][heightInc].left = (int)(currentBackgroundArea.left
-				+ (double)widthInc * (currentBackgroundArea.right - currentBackgroundArea.left) / (double)grid.size() + 2);
+												   + (double)widthInc * (currentBackgroundArea.right - currentBackgroundArea.left) / (double)grid.size() + 2);
 			grid[widthInc][heightInc].right = (int)(currentBackgroundArea.left
-				+ (double)(widthInc + 1) * (currentBackgroundArea.right - currentBackgroundArea.left) / (double)grid.size() + 2);
+													+ (double)(widthInc + 1) * (currentBackgroundArea.right - currentBackgroundArea.left) / (double)grid.size() + 2);
 			grid[widthInc][heightInc].top = (int)(currentBackgroundArea.top
-				+ (double)(heightInc)* (currentBackgroundArea.bottom - currentBackgroundArea.top) / (double)grid[widthInc].size());
+												  + (double)(heightInc)* (currentBackgroundArea.bottom - currentBackgroundArea.top) / (double)grid[widthInc].size());
 			grid[widthInc][heightInc].bottom = (int)(currentBackgroundArea.top
-				+ (double)(heightInc + 1)* (currentBackgroundArea.bottom - currentBackgroundArea.top) / (double)grid[widthInc].size());
+													 + (double)(heightInc + 1)* (currentBackgroundArea.bottom - currentBackgroundArea.top) / (double)grid[widthInc].size());
 		}
 	}
 }
 
 
-void PictureControl::setActive( bool activeState )
+void PictureControl::setActive(bool activeState)
 {
 	active = activeState;
 }
 
-void PictureControl::redrawImage( CWnd* parent )
+void PictureControl::redrawImage(CWnd* parent)
 {
-	drawBackground(parent);
+	//drawBackground(parent);
 	if (active && mostRecentImage.size() != 0)
 	{
-		drawBitmap( parent->GetDC(), mostRecentImage );
+		drawBitmap(parent->GetDC(), mostRecentImage);
 	}
 }
 
@@ -256,8 +270,8 @@ void PictureControl::drawBitmap(CDC* deviceContext, std::vector<long> picData)
 {
 	mostRecentImage = picData;
 	float yscale;
-	unsigned int minColor = minSliderPosition / 4.0;
-	unsigned int maxColor = maxSliderPosition / 4.0;
+	unsigned int minColor = minSliderPosition;
+	unsigned int maxColor = maxSliderPosition;
 	long modrange = maxColor - minColor;
 	double dTemp = 1;
 	int pixelsAreaWidth;
@@ -269,16 +283,20 @@ void PictureControl::drawBitmap(CDC* deviceContext, std::vector<long> picData)
 	WORD argbq[PICTURE_PALETTE_SIZE];
 	BYTE *DataArray;
 	// Rotated
-	SelectPalette( deviceContext->GetSafeHdc(), (HPALETTE)imagePalette, true );
-	RealizePalette( deviceContext->GetSafeHdc() );
+	SelectPalette(deviceContext->GetSafeHdc(), (HPALETTE)imagePalette, true);
+	RealizePalette(deviceContext->GetSafeHdc());
 
 	pixelsAreaWidth = currentBackgroundArea.right - currentBackgroundArea.left + 1;
 	pixelsAreaHeight = currentBackgroundArea.bottom - currentBackgroundArea.top + 1;
-	
+
 	dataWidth = grid.size();
 	// assumes non-zero size...
 	dataHeight = grid[0].size();
-
+	int totalGridSize = dataWidth * dataHeight;
+	if (picData.size() != totalGridSize)
+	{
+		thrower("ERROR: picture data didn't match grid size!");
+	}
 	// imageBoxWidth must be a multiple of 4, otherwise StretchDIBits has problems apparently T.T
 	if (pixelsAreaWidth % 4)
 	{
@@ -354,7 +372,6 @@ void PictureControl::drawBitmap(CDC* deviceContext, std::vector<long> picData)
 	{
 		case 0:
 		{
-			
 			//pixelsAreaHeight -= 1;
 			pbmi->bmiHeader.biWidth = dataWidth;
 			pbmi->bmiHeader.biSizeImage = 1;// pbmi->bmiHeader.biWidth * pbmi->bmiHeader.biHeight;// * sizeof( BYTE );
