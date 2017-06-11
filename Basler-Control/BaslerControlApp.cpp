@@ -9,7 +9,7 @@
 
 #include "stdafx.h"
 #include "BaslerControlApp.h"
-#include "BaslerControlWindow.h"
+#include "BaslerWindow.h"
 
 // something windows programs often do for debugging purposes.
 #ifdef _DEBUG
@@ -40,6 +40,7 @@ CBaslerControlApp::CBaslerControlApp()
 // The one and only CBaslerControlApp object. The entire program runs from the construction of this object.
 CBaslerControlApp theApp;
 long num;
+
 
 // this initialization function is called after the constructor.
 BOOL CBaslerControlApp::InitInstance()
@@ -75,7 +76,7 @@ BOOL CBaslerControlApp::InitInstance()
 	SetRegistryKey(_T("Mark Brown's control code"));
 
 	// create the main window object.
-	BaslerControlWindow dlg;
+	BaslerWindow dlg;
 	// the app class gets a reference.
 	m_pMainWnd = &dlg;
 

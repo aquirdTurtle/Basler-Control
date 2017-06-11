@@ -27,9 +27,6 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BaslerControlWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BaslerControlApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,15 +60,15 @@
     <ClInclude Include="commonTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BaslerWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BaslerControlApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BaslerControlWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PictureControl.cpp">
@@ -93,6 +90,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PictureSaver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaslerWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,14 +3,15 @@
 #include "PictureControl.h"
 #include <algorithm>
 #include <functional>
-#include "BaslerControlWindow.h"
+//#include "BaslerWindow.h"
 #include "BaslerControlApp.h"
 #include "stdint.h"
 #include "constants.h"
 
 
 // important constructor;
-// Create an instant camera object with the camera device found first.
+// Create an instant camera object with the camera device found first. At this point this class is really only meant to work with a single
+// camera of one type at a time. Not sure what would happen if you had multiple cameras set up at once.
 BaslerCameras::BaslerCameras(HWND* parent)
 {
 	Pylon::PylonInitialize();
@@ -81,7 +82,7 @@ void BaslerCameras::setDefaultParameters()
 // general function you should use for setting camera settings based on the input.
 void BaslerCameras::setParameters( baslerSettings settings )
 {
-	// Set the AOI:
+	/// Set the AOI:
 
 	/* 
 		there is never a problem making things smaller. the danger is over-reaching the maximum whose bounds change dynamically.
@@ -110,9 +111,14 @@ void BaslerCameras::setParameters( baslerSettings settings )
 	camera->setOffsetY(settings.dimensions.topBorder);
 	camera->setHeight(settings.dimensions.vertRawPixelNumber);
 	camera->setVertBin(settings.dimensions.vertPixelsPerBin);
+	
+	/// set other parameters
 	#ifdef USB_CAMERA
-	camera->setPixelFormat( cameraParams::PixelFormat_Mono10 );
+		camera->setPixelFormat( cameraParams::PixelFormat_Mono10 );
+	#elif defined FIREWIRE_CAMERA
+		camera->setPixelFormat( cameraParams::PixelFormat_Mono16 );
 	#endif
+	
 	camera->setGainMode("Off");
 	camera->setGain( camera->getMinGain() );
 	//amera->AcquisitionFrameRateEnable.SetValue(true);

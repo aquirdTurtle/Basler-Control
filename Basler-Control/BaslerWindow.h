@@ -12,11 +12,11 @@
 #include "commonTypes.h"
 
 
-class BaslerControlWindow : public CDialogEx
+class BaslerWindow : public CDialogEx
 {
 	public:
 		
-		BaslerControlWindow(CWnd* pParent = NULL);	
+		BaslerWindow(CWnd* pParent = NULL);	
 		virtual BOOL OnInitDialog();
 		void OnPaint();
 		HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
@@ -28,7 +28,7 @@ class BaslerControlWindow : public CDialogEx
 		void passExposureMode();
 		void passCameraMode();
 		afx_msg LRESULT handleNewPics( WPARAM wParam, LPARAM lParam );
-		void handlePictureRangeEditChange( UINT id );
+		void pictureRangeEditChange( UINT id );
 		void OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scrollbar );
 		void handleSoftwareTrigger();
 		void OnMouseMove(UINT flags, CPoint point);

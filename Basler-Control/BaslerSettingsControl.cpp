@@ -1,13 +1,10 @@
 #include "stdafx.h"
-
 #include "BaslerSettingsControl.h"
 #include "constants.h"
 
+
 void BaslerSettingsControl::rearrange(int width, int height, fontMap fonts)
 {
-	// arm
-	armCameraButton.rearrange("", "", width, height, fonts);
-	disarmCameraButton.rearrange("", "", width, height, fonts);
 	// exposure
 	exposureText.rearrange("", "", width, height, fonts);
 	exposureModeCombo.rearrange("", "", width, height, fonts);
@@ -50,25 +47,6 @@ void BaslerSettingsControl::rearrange(int width, int height, fontMap fonts)
 void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight )
 {
 	int width = 300;
-	// arm
-	armCameraButton.sPos = { pos.x, pos.y, pos.x + 150, pos.y + 25 };
-	armCameraButton.ID = id++;
-	if (armCameraButton.ID != IDC_ARM_BASLER_BUTTON)
-	{
-		throw;
-	}
-	armCameraButton.Create( "Arm Camera", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, armCameraButton.sPos, parent, armCameraButton.ID );
-	armCameraButton.fontType = Normal;
-
-	disarmCameraButton.sPos = { pos.x + 150, pos.y, pos.x + 300, pos.y += 25 };
-	disarmCameraButton.ID = id++;
-	if (disarmCameraButton.ID != IDC_DISARM_BASLER_BUTTON)
-	{
-		throw;
-	}
-	disarmCameraButton.Create( "Disarm Camera", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, disarmCameraButton.sPos, parent, 
-							   disarmCameraButton.ID );
-	disarmCameraButton.fontType = Normal;
 
 	repText.sPos = { pos.x, pos.y, pos.x + 200, pos.y + 25 };
 	repText.ID = id++;
@@ -231,7 +209,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 
 	gainText.sPos = { pos.x, pos.y, pos.x + 150, pos.y + 25 };
 	gainText.ID = id++;
-	gainText.Create( "Raw Gain: ", WS_CHILD | WS_VISIBLE, gainText.sPos, parent, gainText.ID );
+	gainText.Create( "Raw Gain (260-?): ", WS_CHILD | WS_VISIBLE, gainText.sPos, parent, gainText.ID );
 
 	gainEdit.sPos = { pos.x + 150, pos.y, pos.x + 300, pos.y += 25 };
 	gainEdit.ID = id++;

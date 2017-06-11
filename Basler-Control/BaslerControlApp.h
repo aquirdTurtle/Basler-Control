@@ -10,24 +10,17 @@
 
 #include "resource.h"		// main symbols
 
+// some hap-hazardly placed globals.
 extern UINT ACE_PIC_READY;
 extern long num;
 
-// CBaslerControlApp:
-// See Basler-Control.cpp for the implementation of this class
-//
-
 class CBaslerControlApp : public CWinApp
 {
-public:
-	CBaslerControlApp();
-
-// Overrides
-public:
-	virtual BOOL InitInstance();
-
-// Implementation
-
+	public:
+		CBaslerControlApp();
+		// Overrides
+		virtual BOOL InitInstance();
+	// 
 	DECLARE_MESSAGE_MAP()
 };
 

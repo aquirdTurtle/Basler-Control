@@ -4,30 +4,36 @@
 
 #include "stdafx.h"
 #include "BaslerControlApp.h"
-#include "BaslerControlWindow.h"
+#include "BaslerWindow.h"
 #include "afxdialogex.h"
 #include "constants.h"
 
+
 // the message map. Allows me to handle various events in the system using functions I write myself.
-BEGIN_MESSAGE_MAP( BaslerControlWindow, CDialogEx )
+BEGIN_MESSAGE_MAP( BaslerWindow, CDialogEx )
 	ON_WM_CTLCOLOR()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
 	ON_WM_VSCROLL()
-	ON_COMMAND( IDC_ARM_BASLER_BUTTON, BaslerControlWindow::handleArmPress )
-	ON_COMMAND( IDC_DISARM_BASLER_BUTTON, BaslerControlWindow::handleDisarmPress )
-	ON_COMMAND( ID_SOFTWARE_TRIGGER, BaslerControlWindow::handleSoftwareTrigger )
-	ON_REGISTERED_MESSAGE( ACE_PIC_READY, &BaslerControlWindow::handleNewPics )
-	ON_CBN_SELENDOK( IDC_EXPOSURE_MODE_COMBO, BaslerControlWindow::passExposureMode )
-	ON_CBN_SELENDOK(IDC_CAMERA_MODE_COMBO, BaslerControlWindow::passCameraMode)
-	ON_CONTROL_RANGE( EN_CHANGE, IDC_BASLER_MIN_SLIDER_MIN_EDIT, IDC_BASLER_MIN_SLIDER_MIN_EDIT, &BaslerControlWindow::handlePictureRangeEditChange )
-	ON_CONTROL_RANGE( EN_CHANGE, IDC_BASLER_MIN_SLIDER_MAX_EDIT, IDC_BASLER_MIN_SLIDER_MAX_EDIT, &BaslerControlWindow::handlePictureRangeEditChange )
 	ON_WM_MOUSEMOVE()
+
+	ON_COMMAND( ID_SOFTWARE_TRIGGER, BaslerWindow::handleSoftwareTrigger )
+	ON_COMMAND( ID_FILE_ARMCAMERA, BaslerWindow::handleArmPress)
+	ON_COMMAND( ID_FILE_DISARMCAMERA, BaslerWindow::handleDisarmPress)
+
+	ON_CONTROL_RANGE(EN_CHANGE, IDC_MIN_SLIDER_EDIT, IDC_MIN_SLIDER_EDIT, &BaslerWindow::pictureRangeEditChange)
+	ON_CONTROL_RANGE(EN_CHANGE, IDC_MAX_SLIDER_EDIT, IDC_MAX_SLIDER_EDIT, &BaslerWindow::pictureRangeEditChange)
+
+	ON_REGISTERED_MESSAGE( ACE_PIC_READY, &BaslerWindow::handleNewPics )
+	
+	ON_CBN_SELENDOK( IDC_EXPOSURE_MODE_COMBO, BaslerWindow::passExposureMode )
+	ON_CBN_SELENDOK(IDC_CAMERA_MODE_COMBO, BaslerWindow::passCameraMode)
 END_MESSAGE_MAP()
 
+
 // this is suppose see where the mouse is at a given time so that if it is hovering over a pixel I can display the pixel count.
-void BaslerControlWindow::OnMouseMove( UINT flags, CPoint point )
+void BaslerWindow::OnMouseMove( UINT flags, CPoint point )
 {
 	try
 	{
@@ -40,7 +46,7 @@ void BaslerControlWindow::OnMouseMove( UINT flags, CPoint point )
 }
 
 
-void BaslerControlWindow::handleSoftwareTrigger()
+void BaslerWindow::handleSoftwareTrigger()
 {
 	try
 	{
@@ -53,7 +59,7 @@ void BaslerControlWindow::handleSoftwareTrigger()
 }
 
 
-void BaslerControlWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scrollbar )
+void BaslerWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scrollbar )
 {
 	if (nSBCode == SB_THUMBPOSITION || nSBCode == SB_THUMBTRACK)
 	{
@@ -71,7 +77,7 @@ void BaslerControlWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scroll
 }
 
 
-void BaslerControlWindow::handlePictureRangeEditChange( UINT id )
+void BaslerWindow::pictureRangeEditChange( UINT id )
 {
 	try
 	{
@@ -84,7 +90,7 @@ void BaslerControlWindow::handlePictureRangeEditChange( UINT id )
 }
 
 
-void BaslerControlWindow::handleDisarmPress()
+void BaslerWindow::handleDisarmPress()
 {
 	try
 	{
@@ -98,7 +104,7 @@ void BaslerControlWindow::handleDisarmPress()
 }
 
 
-LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
+LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 {
 	std::vector<long>* image = (std::vector<long>*) lParam;
  	long size = long( wParam );
@@ -141,7 +147,7 @@ LRESULT BaslerControlWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 	return 0;
 }
 
-void BaslerControlWindow::passCameraMode()
+void BaslerWindow::passCameraMode()
 {
 	try
 	{
@@ -154,7 +160,7 @@ void BaslerControlWindow::passCameraMode()
 }
 
 
-void BaslerControlWindow::passExposureMode()
+void BaslerWindow::passExposureMode()
 {
 	try
 	{
@@ -167,7 +173,7 @@ void BaslerControlWindow::passExposureMode()
 }
 
 
-void BaslerControlWindow::handleArmPress()
+void BaslerWindow::handleArmPress()
 {
 	try
 	{
@@ -189,7 +195,7 @@ void BaslerControlWindow::handleArmPress()
 }
 
 
-void BaslerControlWindow::OnSize( UINT nType, int cx, int cy )
+void BaslerWindow::OnSize( UINT nType, int cx, int cy )
 {
 	//CDialog::OnSize( nType, cx, cy );
 	picture.rearrange("", "", cx, cy, mainFonts);
@@ -199,7 +205,7 @@ void BaslerControlWindow::OnSize( UINT nType, int cx, int cy )
 }
 
 
-HBRUSH BaslerControlWindow::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+HBRUSH BaslerWindow::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	switch (nCtlColor)
 	{
@@ -223,12 +229,12 @@ HBRUSH BaslerControlWindow::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		}
 		default:
 		{
-			return *mainBrushes["Dark Indigo"];
+			return *mainBrushes[mainColor];
 		}
 	}
 }
 
-BaslerControlWindow::BaslerControlWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx( IDD_BASLERCONTROL_DIALOG, pParent )
+BaslerWindow::BaslerWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx( IDD_BASLERCONTROL_DIALOG, pParent )
 {
 	m_hIcon = AfxGetApp()->LoadIcon( IDR_MAINFRAME );
 
@@ -257,6 +263,7 @@ BaslerControlWindow::BaslerControlWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx(
 	mainRGBs["Dark Blue"] = RGB(0, 0, 75);
 	mainRGBs["Indigo"] = RGB(75, 0, 130);
 	mainRGBs["Dark Indigo"] = RGB(18, 0, 32);
+	mainRGBs["Dark Orange"] = RGB(31, 17, 0);
 	// there are less brushes because these are only used for backgrounds.
 	mainBrushes["Dark Red"] = new CBrush;
 	mainBrushes["Dark Red"]->CreateSolidBrush(mainRGBs["Dark Red"]);
@@ -282,10 +289,10 @@ BaslerControlWindow::BaslerControlWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx(
 	mainBrushes["Dark Blue"]->CreateSolidBrush(mainRGBs["Dark Blue"]);
 	mainBrushes["Dark Green"] = new CBrush;
 	mainBrushes["Dark Green"]->CreateSolidBrush(mainRGBs["Dark Green"]);
-
-	(mainBrushes["Indigo"] = new CBrush)->CreateSolidBrush(mainRGBs["Indigo"]);
+	// these are equivalent to the two-lines per used above.
+	(mainBrushes["Indigo"]		= new CBrush)->CreateSolidBrush(mainRGBs["Indigo"]);
 	(mainBrushes["Dark Indigo"] = new CBrush)->CreateSolidBrush(mainRGBs["Dark Indigo"]);
-	
+	(mainBrushes["Dark Orange"] = new CBrush)->CreateSolidBrush(mainRGBs["Dark Orange"]);
 	/// the following is all equivalent to:
 	// mainFonts["Font name"] = new CFont;
 	// mainFonts["Font name"].CreateFontA(...);
@@ -351,12 +358,13 @@ BaslerControlWindow::BaslerControlWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx(
 					  CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("Arial"));
 }
 
-void BaslerControlWindow::DoDataExchange( CDataExchange* pDX )
+void BaslerWindow::DoDataExchange( CDataExchange* pDX )
 {
 	CDialogEx::DoDataExchange( pDX );
 }
 
-BOOL BaslerControlWindow::OnInitDialog()
+
+BOOL BaslerWindow::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 	// Set the icon for this dialog.  The framework does this automatically
@@ -376,7 +384,7 @@ BOOL BaslerControlWindow::OnInitDialog()
 // If you add a minimize button to your dialog, you will need the code below
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
-void BaslerControlWindow::OnPaint()
+void BaslerWindow::OnPaint()
 {
 	//picture.drawBackground( this );
 	if (IsIconic())
@@ -404,15 +412,22 @@ void BaslerControlWindow::OnPaint()
 
 // The system calls this function to obtain the cursor to display while the user drags
 //  the minimized window.
-HCURSOR BaslerControlWindow::OnQueryDragIcon()
+HCURSOR BaslerWindow::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void BaslerControlWindow::initializeControls()
+
+void BaslerWindow::initializeControls()
 {
 	try
 	{
+		#ifdef FIREWIRE_CAMERA
+			SetWindowText("Firewire Basler Camera Control");
+		#elif defined USB_CAMERA
+			SetWindowText("USB Basler Camera Control");
+		#endif
+
 		CMenu menu;
 		menu.LoadMenu( IDR_MENU1 );
 		SetMenu( &menu );

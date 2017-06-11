@@ -196,7 +196,7 @@
   <ItemGroup>
     <ClInclude Include="BaslerCamera.h" />
     <ClInclude Include="BaslerControlApp.h" />
-    <ClInclude Include="BaslerControlWindow.h" />
+    <ClInclude Include="BaslerWindow.h" />
     <ClInclude Include="BaslerSettingsControl.h" />
     <ClInclude Include="CameraImageDimensions.h" />
     <ClInclude Include="commonTypes.h" />
@@ -213,7 +213,7 @@
   <ItemGroup>
     <ClCompile Include="BaslerCamera.cpp" />
     <ClCompile Include="BaslerControlApp.cpp" />
-    <ClCompile Include="BaslerControlWindow.cpp" />
+    <ClCompile Include="BaslerWindow.cpp" />
     <ClCompile Include="BaslerSettingsControl.cpp" />
     <ClCompile Include="CameraImageDimensions.cpp" />
     <ClCompile Include="miscellaneousCommonFunctions.cpp" />

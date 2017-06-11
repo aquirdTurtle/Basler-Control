@@ -4,17 +4,23 @@
 #include "Control.h"
 #include "commonTypes.h"
 
+
 struct imageDimensions
 {
+	// in raw pixels, not binned pixels. These area meant to refer to the spatial extent of the camera being used.
 	int leftBorder;
 	int rightBorder;
 	int topBorder;
 	int bottomBorder;
-	
+
+	// extent of hardware binning
 	int horPixelsPerBin;
+	// total number of binned pixels
 	int horBinNumber;
+	// total number of pixels (not considering binning), i.e. rightBorder-leftBorder.
 	int horRawPixelNumber;
 
+	// etc
 	int vertPixelsPerBin;
 	int vertBinNumber;
 	int vertRawPixelNumber;
@@ -47,11 +53,9 @@ class BaslerSettingsControl
 		void setSettings( baslerSettings settings);
 		void updateExposure( double exposure );
 		void rearrange(int width, int height, fontMap fonts);
+
 	private:
 		baslerSettings currentSettings;
-		// arm
-		Control<CButton> armCameraButton;
-		Control<CButton> disarmCameraButton;
 		// exposure
 		Control<CStatic> exposureText;
 		Control<CComboBox> exposureModeCombo;

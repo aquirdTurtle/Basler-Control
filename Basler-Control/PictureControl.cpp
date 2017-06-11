@@ -1,15 +1,14 @@
 ﻿#include "stdafx.h"
 #include "PictureControl.h"
-
-//#include "miscellaneousCommonFunctions.h"
 #include "constants.h"
 #include <cmath>
 
-
+// constructor
 PictureControl::PictureControl()
 {
 	active = true;
 }
+
 
 bool PictureControl::isActive()
 {
@@ -92,6 +91,7 @@ void PictureControl::handleEditChange( int id )
 	return;
 }
 
+
 void PictureControl::handleScroll(int id, UINT nPos)
 {
 	if (id == sliderMax.ID)
@@ -107,6 +107,7 @@ void PictureControl::handleScroll(int id, UINT nPos)
 		minSliderPosition = nPos;
 	}
 }
+
 
 void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, int height)
 {
@@ -130,7 +131,7 @@ void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, in
 	// minimum number text
 	editMin.sPos = { loc.x, loc.y + 30, loc.x + 50, loc.y + 60 };
 	editMin.ID = id++;
-	if (editMin.ID != IDC_BASLER_MIN_SLIDER_MIN_EDIT)
+	if (editMin.ID != IDC_MIN_SLIDER_EDIT)
 	{
 		throw;
 	}
@@ -147,10 +148,10 @@ void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, in
 	labelMax.ID = id++;
 	labelMax.Create("MAX", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMax.sPos, parent, labelMax.ID);
 	labelMax.fontType = Normal;
-	// maximum number text
+	// maximum number edit
 	editMax.sPos = { loc.x + 50, loc.y + 30, loc.x + 100, loc.y + 60 };
 	editMax.ID = id++;
-	if (editMax.ID != IDC_BASLER_MIN_SLIDER_MAX_EDIT)
+	if (editMax.ID != IDC_MAX_SLIDER_EDIT)
 	{
 		throw;
 	}
@@ -503,7 +504,7 @@ void PictureControl::drawCircle(CWnd* parent, std::pair<int, int> selectedLocati
 }
 
 
-void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, int width, int height, std::unordered_map<std::string, CFont*> fonts)
+void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, int width, int height, fontMap fonts)
 {
 	editMax.rearrange(cameraMode, triggerMode, width, height, fonts);
 	editMin.rearrange(cameraMode, triggerMode, width, height, fonts);
@@ -534,11 +535,6 @@ void PictureControl::createPalettes( CDC* dc )
 	GetSystemPaletteEntries( *dc, 0, PICTURE_PALETTE_SIZE, Palette.aEntries );
 	// this is the parula colormap from matlab. It looks nice :D
 	std::vector<std::vector<double>> viridis;
-	//viridis.resize( PICTURE_PALETTE_SIZE );
-	//for (auto& elem : viridis)
-	//{
-	//	elem.resize( 3 );
-	//}
 	if (PICTURE_PALETTE_SIZE == 256)
 	{
 		viridis = 
@@ -827,8 +823,9 @@ void PictureControl::createPalettes( CDC* dc )
 		blueToRed[paletteInc][0] = (paletteInc / PICTURE_PALETTE_SIZE) * (paletteInc / PICTURE_PALETTE_SIZE);
 		blueToRed[paletteInc][1] = 0;
 		blueToRed[paletteInc][2] = ((7 * paletteInc + PICTURE_PALETTE_SIZE) / (8 * PICTURE_PALETTE_SIZE)) 
-			* ((PICTURE_PALETTE_SIZE - paletteInc) / PICTURE_PALETTE_SIZE);
+									* ((PICTURE_PALETTE_SIZE - paletteInc) / PICTURE_PALETTE_SIZE);
 	}
+
 	for (int paletteValueInc = 0; paletteValueInc < PICTURE_PALETTE_SIZE; paletteValueInc++)
 	{
 		// scaling it to make it a bit darker near the bottom.

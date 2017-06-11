@@ -15,7 +15,7 @@ class PictureControl
 		void drawGrid(CWnd* parent, CBrush* brush);
 		void drawRectangles(CWnd* parent, CBrush* brush);
 		void drawCircle(CWnd* parent, std::pair<int, int> selectedLocation );
-		void rearrange( std::string cameraMode, std::string triggerMode, int width, int height, std::unordered_map<std::string, CFont*> fonts );
+		void rearrange( std::string cameraMode, std::string triggerMode, int width, int height, fontMap fonts );
 		void handleScroll( int id, UINT nPos );
 		void handleEditChange( int id );
 		void updatePalette( HPALETTE pallete );
@@ -26,6 +26,7 @@ class PictureControl
 		void createPalettes( CDC* dc );
 		void handleMouse( CPoint point );
 		void setValue();
+
 	private:
 		POINT mouseCoordinates;
 		// for replotting.
