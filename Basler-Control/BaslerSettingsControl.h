@@ -42,13 +42,14 @@ struct baslerSettings
 
 class BaslerSettingsControl
 {
+
 	public:
-		void initialize( POINT& pos, int& id, CWnd* parent, int width, int height );
+		void initialize(POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight, POINT cameraDims);
 		void handleGain();
 		void handleExposureMode();
 		void handleCameraMode();
-		baslerSettings loadCurrentSettings();
-		baslerSettings getCurrentSettings();
+		baslerSettings loadCurrentSettings(POINT cameraDims);
+		baslerSettings getCurrentSettings();		
 		// change all the settings.
 		void setSettings( baslerSettings settings);
 		void updateExposure( double exposure );
@@ -63,7 +64,6 @@ class BaslerSettingsControl
 		Control<CButton> setExposure;
 		// trigger
 		Control<CComboBox> triggerCombo;
-
 		// Dimensions & Binning
 		Control<CStatic> leftText;
 		Control<CStatic>  rightText;

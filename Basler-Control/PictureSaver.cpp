@@ -17,13 +17,13 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 	/// note: the rest of the save location is hard-set in the constants file. might want to change this.
 	saveLocationText.ID = id++;
 	saveLocationText.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 25 };
-	saveLocationText.Create( "Save Loc.:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY , 
+	saveLocationText.Create( "Save Date:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY , 
 							 saveLocationText.sPos, parent, saveLocationText.ID );
 
 	saveLocationEdit.ID = id++;
 	saveLocationEdit.sPos = { pos.x + 100, pos.y, pos.x + 300, pos.y += 25 };
 	saveLocationEdit.Create( WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, saveLocationEdit.sPos, parent, saveLocationEdit.ID );
-	saveLocationEdit.SetWindowTextA( "\\17????\\Raw Data\\AceData" );
+	saveLocationEdit.SetWindowTextA( "17????" );
 
 	saveCheckButton.ID = id++;
 	saveCheckButton.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 20 };
@@ -48,7 +48,7 @@ void PictureSaver::append( std::vector<long>* pic, int width )
 	}
 	CString text;
 	saveLocationEdit.GetWindowTextA( text );
-	std::string address = DATA_SAVE_LOCATION + std::string( text );
+	std::string address = DATA_SAVE_LOCATION + std::string( text ) + DATA_SAVE_LOCATION2;
 	if (address == "")
 	{
 		thrower( "ERROR: Please enter an address for saved pictures." );
@@ -96,7 +96,53 @@ void PictureSaver::save( std::vector<long>* pic, int width )
 	}
 	CString text;
 	saveLocationEdit.GetWindowTextA( text );
-	std::string address = std::string( text );
+	// seperate out year month and day.
+	int year = std::stoi(cstring(text.Mid(0, 2))) + 2000;
+	int month = std::stoi(cstring(text.Mid(2, 2)));
+	int day = std::stoi(cstring(text.Mid(4, 2)));
+	// figure out the month
+	std::string monthName;
+	switch (month)
+	{
+		case 1:
+			monthName = "January";
+			break;
+		case 2:
+			monthName = "February";
+			break;
+		case 3:
+			monthName = "March";
+			break;
+		case 4:
+			monthName = "April";
+			break;
+		case 5:
+			monthName = "May";
+			break;
+		case 6:
+			monthName = "June";
+			break;
+		case 7:
+			monthName = "July";
+			break;
+		case 8:
+			monthName = "August";
+			break;
+		case 9:
+			monthName = "September";
+			break;
+		case 10:
+			monthName = "October";
+			break;
+		case 11:
+			monthName = "November";
+			break;
+		case 12:
+			monthName = "December";
+			break;
+	}
+
+	std::string address = DATA_SAVE_LOCATION + str(year) + "\\" + monthName +"\\" + monthName + " " + str(day) + "\\"  + DATA_SAVE_LOCATION2;
 	if (address == "")
 	{
 		thrower( "ERROR: Please enter an address for saved pictures." );

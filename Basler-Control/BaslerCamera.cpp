@@ -54,21 +54,19 @@ std::string BaslerCameras::getCameraInfo()
 baslerSettings BaslerCameras::getDefaultSettings()
 {
 	baslerSettings defaultSettings;
-
-	defaultSettings.dimensions.leftBorder = camera->getMinOffsetX();
-	defaultSettings.dimensions.horBinNumber = camera->getMaxWidth();
-	defaultSettings.dimensions.rightBorder = defaultSettings.dimensions.leftBorder + defaultSettings.dimensions.horBinNumber;
+	POINT dim = getCameraDimensions();
+	defaultSettings.dimensions.leftBorder = 0;
+	defaultSettings.dimensions.horBinNumber = dim.x;
+	defaultSettings.dimensions.rightBorder = dim.x-1;
 	defaultSettings.dimensions.horPixelsPerBin = 1;
-	defaultSettings.dimensions.topBorder = camera->getMinOffsetY();
-	defaultSettings.dimensions.vertBinNumber = camera->getMaxHeight();
-	defaultSettings.dimensions.bottomBorder = camera->getMinOffsetY() + camera->getMaxHeight();
+	defaultSettings.dimensions.topBorder = 0;
+	defaultSettings.dimensions.vertBinNumber = dim.y;
+	defaultSettings.dimensions.bottomBorder = dim.y;
 	defaultSettings.dimensions.vertPixelsPerBin = 1;
-	defaultSettings.exposureMode = "Auto Exposure Continuous";
-	// doesn't matter for continuous.
-	defaultSettings.exposureTime = 0; 
-	defaultSettings.frameRate = 30;
+	defaultSettings.exposureMode = "Auto Exposure Off";
+	defaultSettings.exposureTime = 1000; 
+	defaultSettings.frameRate = 2;
 	defaultSettings.rawGain = camera->getMinGain();
-
 	//defaultSettings.triggerMode = ???
 	return defaultSettings;
 }
@@ -159,7 +157,12 @@ void BaslerCameras::setParameters( baslerSettings settings )
 
 	if (settings.triggerMode == "External Trigger")
 	{
-		camera->setTriggerSource( cameraParams::TriggerSource_Line3 );
+		//cameraParams::TriggerSource_Line1
+		#ifdef FIREWIRE_CAMERA
+			camera->setTriggerSource(cameraParams::TriggerSource_Line1);
+		#elif defined USB_CAMERA
+			camera->setTriggerSource(cameraParams::TriggerSource_Line3);
+		#endif
 		autoTrigger = false;
 	}
 	else if (settings.triggerMode == "Automatic Software Trigger")

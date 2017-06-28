@@ -138,9 +138,9 @@ LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 			}
 		}
 	}
-	catch (Error* err)
+	catch (Error& err)
 	{
-		errBox( err->what() );
+		errBox( err.what() );
 	}
 	// always delete
 	delete image;
@@ -178,7 +178,7 @@ void BaslerWindow::handleArmPress()
 	try
 	{
 		currentRepNumber = 0;
-		baslerSettings tempSettings = settings.loadCurrentSettings();
+		baslerSettings tempSettings = settings.loadCurrentSettings(cameraController->getCameraDimensions());
 		cameraController->setParameters( tempSettings );
 		picture.updateGridSpecs( tempSettings.dimensions );
 		runExposureMode = tempSettings.exposureMode;
@@ -436,7 +436,7 @@ void BaslerWindow::initializeControls()
 		int id = 1000;
 		POINT pos = { 0,0 };
 		POINT cameraDims = cameraController->getCameraDimensions();
-		settings.initialize( pos, id, this, cameraDims.x, cameraDims.y );
+		settings.initialize( pos, id, this, cameraDims.x, cameraDims.y, cameraDims);
 		settings.setSettings( cameraController->getDefaultSettings() );
 		std::unordered_map<std::string, CFont*> fontDummy;
 		std::vector<CToolTipCtrl*> toolTipDummy;

@@ -91,6 +91,7 @@ template <typename IntType> std::vector<IntType> range( IntType stop )
 /// function...
 
 #define cstr(input) str(input).c_str()
+#define cstring(input) std::string(input).c_str()
 
 std::string doubleToString( double number, long precision );
 

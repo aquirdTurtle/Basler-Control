@@ -4,10 +4,10 @@
 #include <pylon/usb/BaslerUsbInstantCamera.h>
 #include <pylon/1394/Basler1394InstantCamera.h>
 
-#define BASLER_SAFEMODE true
+#define BASLER_SAFEMODE false
 // which type of camera
 #define FIREWIRE_CAMERA 
-//#define USB_CAMERA 
+//#define USB_CAMERA
 
 // The code compiles fairly differently for Firewire (1384) cameras vs. USB cameras.
 #ifdef FIREWIRE_CAMERA 
@@ -19,10 +19,16 @@
 	typedef Pylon::CBaslerUsbInstantCamera cameraType;
 	typedef Pylon::CBaslerUsbGrabResultPtr grabPtr;
 	namespace cameraParams = Basler_UsbCameraParams;
-	const std::string mainColor = "Dark Violet";
+	const std::string mainColor = "Dark Indigo";
 #endif
 
-const std::string DATA_SAVE_LOCATION = "C:\\Users\\Mark\\Documents\\Basler-Control\\Data\\";
+const std::string DATA_SAVE_LOCATION = "J:\\Data Repository\\New Data Repository\\";
+
+#ifdef FIREWIRE_CAMERA
+	const std::string DATA_SAVE_LOCATION2 = "\\Raw Data\\ScoutData";
+#elif defined USB_CAMERA
+	const std::string DATA_SAVE_LOCATION2 = "\\Raw Data\\AceData";
+#endif
 
 // constants for various controls that I need to reference in the basler window message map.
 #define IDC_MIN_SLIDER_EDIT 1046
