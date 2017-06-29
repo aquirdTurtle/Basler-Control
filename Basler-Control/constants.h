@@ -6,8 +6,8 @@
 
 #define BASLER_SAFEMODE false
 // which type of camera
-#define FIREWIRE_CAMERA 
-//#define USB_CAMERA
+// #define FIREWIRE_CAMERA
+#define USB_CAMERA
 
 // The code compiles fairly differently for Firewire (1384) cameras vs. USB cameras.
 #ifdef FIREWIRE_CAMERA 
@@ -31,12 +31,12 @@ const std::string DATA_SAVE_LOCATION = "J:\\Data Repository\\New Data Repository
 #endif
 
 // constants for various controls that I need to reference in the basler window message map.
-#define IDC_MIN_SLIDER_EDIT 1046
-#define IDC_MAX_SLIDER_EDIT 1049
-#define IDC_CAMERA_MODE_COMBO 1002
-#define IDC_EXPOSURE_MODE_COMBO 1005
-#define IDC_REPETITIONS_EDIT 1001
-#define IDC_TRIGGER_MODE_COMBO 1018
+#define IDC_MIN_SLIDER_EDIT 1047
+#define IDC_MAX_SLIDER_EDIT 1050
+#define IDC_CAMERA_MODE_COMBO 1003
+#define IDC_EXPOSURE_MODE_COMBO 1006
+#define IDC_REPETITIONS_EDIT 1002
+#define IDC_TRIGGER_MODE_COMBO 1019
 // the basler has a 10 bit dac, but the data is compressed to 256 for visualization (visualization only!)
 #define PICTURE_PALETTE_SIZE 256
 

@@ -212,6 +212,8 @@ POINT BaslerCameras::getCameraDimensions()
 	bins.x = camera->BinningHorizontal.GetValue();
 	bins.y = camera->BinningVertical.GetValue();
 	
+	// TODO:
+	// change to my apif
 	camera->BinningHorizontal.SetValue( camera->BinningHorizontal.GetMin() );
 	camera->BinningVertical.SetValue( camera->BinningVertical.GetMin() );
 	camera->OffsetX.SetValue( camera->OffsetX.GetMin() );

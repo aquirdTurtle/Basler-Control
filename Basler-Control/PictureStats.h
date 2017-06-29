@@ -45,9 +45,11 @@ class PictureStats
 	private:
 		std::string displayDataType;
 		conversions convs;
+		
 		Control<CStatic> pictureStatsHeader;
 		Control<CStatic> repetitionIndicator;
 		Control<CButton> updateButton;
+
 		std::array<Control<CStatic>, 5> collumnHeaders;
 		std::array<Control<CStatic>, 1> picNumberIndicators;
 		std::array<Control<CStatic>, 1> maxCounts;

@@ -28,6 +28,7 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 	saveCheckButton.ID = id++;
 	saveCheckButton.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 20 };
 	saveCheckButton.Create( "Save?", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, saveCheckButton.sPos, parent, saveCheckButton.ID );
+	saveCheckButton.EnableWindow(0);
 
 	fileNumberText.ID = id++;
 	fileNumberText.sPos = { pos.x + 100, pos.y, pos.x + 200, pos.y + 20 };
@@ -232,6 +233,21 @@ void PictureSaver::save( std::vector<std::vector<long>> pics, int width )
 	fileNumberEdit.SetWindowTextA( std::to_string( fileNumber ).c_str() );
 
 }
+
+
+void PictureSaver::handleModeChange(std::string cameraMode)
+{
+	if (cameraMode == "Finite Acquisition")
+	{
+		saveCheckButton.EnableWindow(1);
+	}
+	else
+	{
+		saveCheckButton.EnableWindow(0);
+	}
+
+}
+
 
 void PictureSaver::close()
 {

@@ -25,7 +25,7 @@ bool PictureStats::initialize( POINT& pos, CWnd* parent, int& id, std::unordered
 
 	updateButton.sPos = { pos.x, pos.y, pos.x + width, pos.y += 25 };
 	updateButton.ID = id++;
-	updateButton.Create( "Update?", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | WS_BORDER, updateButton.sPos, parent, updateButton.ID );
+	updateButton.Create( "Update Statistics?", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | WS_BORDER, updateButton.sPos, parent, updateButton.ID );
 	updateButton.fontType = Normal;
 	/// Picture labels ///
 
@@ -185,13 +185,13 @@ bool PictureStats::updateType(std::string typeText)
 void PictureStats::update( std::vector<long>* image, unsigned int imageNumber, std::pair<int, int> selectedPixel, int pictureWidth, 
 						   int currentRepetitionNumber, int totalRepetitionCount)
 {
+	// always update the picture number, it's very low cost compared to the other stuff.
+	repetitionIndicator.SetWindowTextA(("Repetition " + str(currentRepetitionNumber) + "/"
+									   + str(totalRepetitionCount)).c_str());
 	if (!updateButton.GetCheck())
 	{
 		return;
 	}
-
-	repetitionIndicator.SetWindowTextA( ("Repetition " + str( currentRepetitionNumber ) + "/" 
-									   + str( totalRepetitionCount )).c_str() );
 	
 	long selCounts = (*image)[selectedPixel.first + selectedPixel.second * pictureWidth];
 	long maxCounts = 1;

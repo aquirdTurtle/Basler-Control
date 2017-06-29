@@ -5,6 +5,7 @@
 
 void BaslerSettingsControl::rearrange(int width, int height, fontMap fonts)
 {
+	statusText.rearrange("", "", width, height, fonts);
 	// exposure
 	exposureText.rearrange("", "", width, height, fonts);
 	exposureModeCombo.rearrange("", "", width, height, fonts);
@@ -44,14 +45,25 @@ void BaslerSettingsControl::rearrange(int width, int height, fontMap fonts)
 }
 
 
+void BaslerSettingsControl::setStatus(std::string status)
+{
+	statusText.SetWindowTextA(status.c_str());
+}
+
 void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight, POINT cameraDims )
 {
 	int width = 300;
 
+	statusText.sPos = { pos.x, pos.y, pos.x + width, pos.y += 50 };
+	statusText.ID = id++;
+	statusText.Create("Camera Status: IDLE", WS_CHILD | WS_VISIBLE | WS_BORDER, statusText.sPos, parent, statusText.ID);
+	statusText.fontType = Normal;
+	////
 	repText.sPos = { pos.x, pos.y, pos.x + 200, pos.y + 25 };
 	repText.ID = id++;
 	repText.Create( "Total Picture Number:", WS_CHILD | WS_VISIBLE, repText.sPos, parent, repText.ID );
 	repText.fontType = Normal;
+	//
 	repEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
 	repEdit.ID = id++;
 	if (repEdit.ID != IDC_REPETITIONS_EDIT)
@@ -59,7 +71,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 		throw;
 	}
 	repEdit.Create( WS_CHILD | WS_VISIBLE, repEdit.sPos, parent, repEdit.ID );
-	repEdit.SetWindowTextA( "---" );
+	repEdit.SetWindowTextA( "100" );
 
 	cameraMode.sPos = { pos.x, pos.y, pos.x + 300, pos.y + 100 };
 	cameraMode.ID = id++;
@@ -200,7 +212,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	frameRateEdit.sPos = { pos.x + 150, pos.y, pos.x + 225, pos.y + 25 };
 	frameRateEdit.ID = id++;
 	frameRateEdit.Create( WS_CHILD | WS_VISIBLE, frameRateEdit.sPos, parent, frameRateEdit.ID );
-	frameRateEdit.SetWindowTextA( "2" );
+	frameRateEdit.SetWindowTextA( "30" );
 
 
 	realFrameRate.sPos = { pos.x + 225, pos.y, pos.x + 300, pos.y += 25 };

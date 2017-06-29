@@ -1,0 +1,16 @@
+
+Planning:
+Features:
+- saver can figure out lowest number for picture.
+Bugs:
+- handle throw when camera not connected. tell user before quitting.
+- Disarming camera doesn't work in safemode (ironically)
+- handle continuous mode saving: no saving
+
+COMPLETED:
+Feautres:
+- Indicator that shows that camera is armed.
+- Always displays picture #
+Bugs:
+- changed frame rate to 30/s by default
+- closes correctly when only one pic.

@@ -96,10 +96,12 @@ void BaslerWindow::handleDisarmPress()
 	{
 		cameraController->disarm();
 		isRunning = false;
+		settings.setStatus("Camera Status: Idle");
 	}
 	catch (Error& err)
 	{
 		errBox( "Error! " + err.whatStr() );
+		settings.setStatus("Camera Status: ERROR?!?!");
 	}
 }
 
@@ -122,25 +124,26 @@ LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		
 		stats.update( image, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, currentRepNumber, 
 						cameraController->getRepCounts() );
-
-		if (currentRepNumber == 1 || cameraController->isContinuous())
+		settings.setStatus("Camera Status: Acquiring Pictures.");
+		if (currentRepNumber == 1 && !cameraController->isContinuous())
 		{
 			saver.save( image, imageWidth );
 		}
-		else
+		else if (!cameraController->isContinuous())
 		{
 			saver.append( image, imageWidth );
-			if (currentRepNumber == cameraController->getRepCounts())
-			{
-				cameraController->disarm();
-				saver.close();
-				isRunning = false;
-			}
+		}
+		if (currentRepNumber == cameraController->getRepCounts())
+		{
+			cameraController->disarm();
+			saver.close();
+			isRunning = false;
 		}
 	}
 	catch (Error& err)
 	{
 		errBox( err.what() );
+		settings.setStatus("Camera Status: ERROR?!?!?");
 	}
 	// always delete
 	delete image;
@@ -152,6 +155,7 @@ void BaslerWindow::passCameraMode()
 	try
 	{
 		settings.handleCameraMode();
+		saver.handleModeChange(settings.loadCurrentSettings(cameraController->getCameraDimensions()).cameraMode);
 	}
 	catch (Error& err)
 	{
@@ -186,6 +190,7 @@ void BaslerWindow::handleArmPress()
 		HWND* win = new HWND;
 		win = &m_hWnd;
 		cameraController->armCamera( tempSettings.frameRate, win );
+		settings.setStatus("Camera Status: Armed...");
 		isRunning = true;
 	}
 	catch (Error& err)

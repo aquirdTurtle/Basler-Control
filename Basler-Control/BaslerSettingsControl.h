@@ -46,6 +46,7 @@ class BaslerSettingsControl
 	public:
 		void initialize(POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight, POINT cameraDims);
 		void handleGain();
+		void setStatus(std::string status);
 		void handleExposureMode();
 		void handleCameraMode();
 		baslerSettings loadCurrentSettings(POINT cameraDims);
@@ -57,6 +58,7 @@ class BaslerSettingsControl
 
 	private:
 		baslerSettings currentSettings;
+		Control<CStatic> statusText;
 		// exposure
 		Control<CStatic> exposureText;
 		Control<CComboBox> exposureModeCombo;

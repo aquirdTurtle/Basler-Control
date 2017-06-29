@@ -12,6 +12,7 @@ class PictureSaver
 		void append( std::vector<long>* pic, int width );
 		void close();
 		void rearrange(int width, int height, fontMap fonts);
+		void handleModeChange(std::string cameraMode);
 	private:
 		std::ofstream file;
 		Control<CStatic> saveLocationText;
