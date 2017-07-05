@@ -8,7 +8,6 @@
 #include "stdint.h"
 #include "constants.h"
 
-
 // important constructor;
 // Create an instant camera object with the camera device found first. At this point this class is really only meant to work with a single
 // camera of one type at a time. Not sure what would happen if you had multiple cameras set up at once.
@@ -19,9 +18,16 @@ BaslerCameras::BaslerCameras(HWND* parent)
 	info.SetDeviceClass( cameraType::DeviceClass() );
 	if (!BASLER_SAFEMODE)
 	{
-		cameraType* temp;
-		temp = new BaslerWrapper( Pylon::CTlFactory::GetInstance().CreateFirstDevice( info ) );
-		camera = dynamic_cast<BaslerWrapper*>(temp);
+		try
+		{
+			cameraType* temp;
+			temp = new BaslerWrapper(Pylon::CTlFactory::GetInstance().CreateFirstDevice(info));
+			camera = dynamic_cast<BaslerWrapper*>(temp);
+		}
+		catch (Error& err)
+		{
+			errBox("Basler Camera Failed to initialize! Error Message: " + err.whatStr());
+		}
 	}
 	camera->init(parent);
 }

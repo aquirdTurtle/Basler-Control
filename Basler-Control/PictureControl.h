@@ -14,7 +14,9 @@ class PictureControl
 		void drawBackground(CWnd* parent);
 		void drawGrid(CWnd* parent, CBrush* brush);
 		void drawRectangles(CWnd* parent, CBrush* brush);
-		void drawCircle(CWnd* parent, std::pair<int, int> selectedLocation );
+		void drawPixelCircle(CWnd* parent, std::pair<int, int> selectedLocation );
+		void drawIntegratingCircle(CWnd* parent, std::pair<int, int> selectedLocation, double circleSize);
+		void integrateRegion(std::vector<long> picData, std::pair<int, int> selectedLocation, double circleSize);
 		void rearrange( std::string cameraMode, std::string triggerMode, int width, int height, fontMap fonts );
 		void handleScroll( int id, UINT nPos );
 		void handleEditChange( int id );

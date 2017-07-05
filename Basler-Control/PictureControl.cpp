@@ -463,7 +463,97 @@ void PictureControl::drawRectangles( CWnd* parent, CBrush* brush )
 
 }
 
-void PictureControl::drawCircle(CWnd* parent, std::pair<int, int> selectedLocation)
+
+
+
+/*
+ * integrates a region of the picture that is given as an input. This uses a hard boundary, judging whether a pixel 
+ * is inside a circle or not by whether it's center is inside the circle.
+ *
+ * I want to use a little algorithm to only look at points near the original center so as to not have to scan the entire
+ * picture each time. pseudocode:
+  long runningTotal = 0;
+  std::vector<std::pair<long, long>> activeLocs;
+  activeLocs.push_back(center Location);
+  while (activeLocs.size() != 0)
+  {
+	for (loc in list of active locs)
+	{
+		// get coords
+		if (coords within circle)
+		{
+			add pixel count to running total
+			for (4 pixels surrounding this one)
+			{
+				if (pixel not already looked at)
+				{
+					add pixel to active locations
+				}
+			}
+		}
+		add pixel to list that has been looked at.
+	}
+  }
+ *
+ */
+void PictureControl::integrateRegion(std::vector<long> picData, std::pair<int, int> selectedLocation, double circleSize)
+{
+	if (grid.size() == 0)
+	{
+		return;
+	}
+	else if (grid[0].size() == 0)
+	{
+		return;
+	}
+
+	long count = 0;
+	RECT pixel = grid[selectedLocation.first][selectedLocation.second];
+	POINT center = { (pixel.right + pixel.left) / 2, (pixel.bottom + pixel.top) / 2 };
+	long pixelSize = (pixel.right - pixel.left);
+	long pixWidth = grid.size();
+	long picHeight = grid[0].size();
+	long x, y;
+	for (auto pixelCount : picData)
+	{
+		x = count / 
+
+		// get the coordinates of the current pixel
+		count++;
+	}
+}
+
+/*
+ * draws a (generally) large circle on the picture, used to denote an area of integration.
+ */
+void PictureControl::drawIntegratingCircle(CWnd* parent, std::pair<int, int> centerPixel, double circleRadius)
+{
+	if (grid.size() == 0)
+	{
+		return;
+	}
+	if (mostRecentImage.size() == 0)
+	{
+		drawBackground(parent);
+		// need a brush...
+		//drawGrid(parent);
+	}
+	// get center
+	RECT pixel = grid[centerPixel.first][centerPixel.second];
+	POINT center = {(pixel.right + pixel.left) / 2, (pixel.bottom + pixel.top) / 2 };
+	// get appropriate brush and pen
+	CDC* dc = parent->GetDC();
+	dc->SelectObject(GetStockObject(HOLLOW_BRUSH));
+	dc->SelectObject(GetStockObject(DC_PEN));
+	dc->SetDCPenColor(RGB(255, 255, 0));
+	dc->Ellipse(center.x - circleRadius, center.y - circleRadius, center.x + circleRadius, center.y + circleRadius);
+	parent->ReleaseDC(dc);
+}
+
+/*
+ * Draws a circle within a single pixel
+ */
+void PictureControl::drawPixelCircle(CWnd* parent, std::pair<int, int> selectedLocation)
 {
 	if (grid.size() == 0)
 	{

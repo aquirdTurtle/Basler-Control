@@ -4,7 +4,7 @@
 #include <pylon/usb/BaslerUsbInstantCamera.h>
 #include <pylon/1394/Basler1394InstantCamera.h>
 
-#define BASLER_SAFEMODE false
+#define BASLER_SAFEMODE true
 // which type of camera
 // #define FIREWIRE_CAMERA
 #define USB_CAMERA
