@@ -42,13 +42,13 @@ struct baslerSettings
 
 class BaslerSettingsControl
 {
-
 	public:
 		void initialize(POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight, POINT cameraDims);
 		void handleGain();
 		void setStatus(std::string status);
 		void handleExposureMode();
 		void handleCameraMode();
+		void handleFrameRate();
 		baslerSettings loadCurrentSettings(POINT cameraDims);
 		baslerSettings getCurrentSettings();		
 		// change all the settings.
@@ -57,6 +57,7 @@ class BaslerSettingsControl
 		void rearrange(int width, int height, fontMap fonts);
 
 	private:
+		ULONG lastTime;
 		baslerSettings currentSettings;
 		Control<CStatic> statusText;
 		// exposure

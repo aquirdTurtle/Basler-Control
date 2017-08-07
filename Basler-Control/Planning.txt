@@ -1,9 +1,13 @@
-
 Planning:
 Features:
+- be able to actually control the gain.
 - saver can figure out lowest number for picture.
-- "Finished" Message.
+
 Bugs:
-- handle throw when camera not connected. tell user before quitting.
+- handle throw when camera not connected. Tell user before quitting.
 - Disarming camera doesn't work in safemode (ironically)
-- handle changing options while the system is running
+- handle changing options while the system is running. Grey things.
+- fix hover value
+- enter shouldn't close.
+
+### DONE ###

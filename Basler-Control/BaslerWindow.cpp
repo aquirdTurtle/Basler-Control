@@ -125,6 +125,10 @@ LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		stats.update( image, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, currentRepNumber, 
 						cameraController->getRepCounts() );
 		settings.setStatus("Camera Status: Acquiring Pictures.");
+		if (currentRepNumber % 10 == 0)
+		{
+			settings.handleFrameRate();
+		}
 		if (currentRepNumber == 1 && !cameraController->isContinuous())
 		{
 			saver.save( image, imageWidth );
@@ -138,6 +142,7 @@ LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 			cameraController->disarm();
 			saver.close();
 			isRunning = false;
+			settings.setStatus("Camera Status: Finished finite acquisition.");
 		}
 	}
 	catch (Error& err)

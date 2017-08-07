@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PictureSaver.h"
 #include "constants.h"
+#include <ctime>
 
 void PictureSaver::rearrange(int width, int height, fontMap fonts)
 {
@@ -20,10 +21,23 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 	saveLocationText.Create( "Save Date:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY , 
 							 saveLocationText.sPos, parent, saveLocationText.ID );
 
+	time_t t = time(0);   // get time now
+	struct tm now;
+	localtime_s(&now, &t);
+	std::string dateText;
+	if (now.tm_mon + 1 < 10)
+	{
+		dateText = str(now.tm_year + 1900 - 2000) + "0" + str(now.tm_mon + 1) + str(now.tm_mday);
+	}
+	else
+	{
+		dateText = str(now.tm_year + 1900 - 2000) + str(now.tm_mon + 1) + str(now.tm_mday);
+	}
+
 	saveLocationEdit.ID = id++;
 	saveLocationEdit.sPos = { pos.x + 100, pos.y, pos.x + 300, pos.y += 25 };
 	saveLocationEdit.Create( WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, saveLocationEdit.sPos, parent, saveLocationEdit.ID );
-	saveLocationEdit.SetWindowTextA( "17????" );
+	saveLocationEdit.SetWindowTextA( dateText.c_str() );
 
 	saveCheckButton.ID = id++;
 	saveCheckButton.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 20 };
@@ -148,8 +162,12 @@ void PictureSaver::save( std::vector<long>* pic, int width )
 	{
 		thrower( "ERROR: Please enter an address for saved pictures." );
 	}
+
+	/*
+	
+	*/
+
 	int fileNumber;
-	text;
 	fileNumberEdit.GetWindowTextA( text );
 	try
 	{

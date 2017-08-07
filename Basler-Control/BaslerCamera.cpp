@@ -3,10 +3,10 @@
 #include "PictureControl.h"
 #include <algorithm>
 #include <functional>
-//#include "BaslerWindow.h"
 #include "BaslerControlApp.h"
 #include "stdint.h"
 #include "constants.h"
+
 
 // important constructor;
 // Create an instant camera object with the camera device found first. At this point this class is really only meant to work with a single
@@ -32,6 +32,7 @@ BaslerCameras::BaslerCameras(HWND* parent)
 	camera->init(parent);
 }
 
+
 // send a software trigger to the camera after waiting to make sure it's ready to recieve said trigger.
 void BaslerCameras::softwareTrigger()
 {
@@ -39,12 +40,14 @@ void BaslerCameras::softwareTrigger()
 	camera->executeSoftwareTrigger();
 }
 
+
 // important deconstructor.
 BaslerCameras::~BaslerCameras()
 {
 	Pylon::PylonTerminate();
 	delete camera;
 }
+
 
 // get some information about the camera from the camera itself through pylon.
 std::string BaslerCameras::getCameraInfo()
@@ -312,17 +315,19 @@ void BaslerCameras::triggerThread( void* rawInput )
 				// need some way to communicate the width and height of the pic to this function...
 				std::vector<long>* image;
 				image = new std::vector<long>(672*512);
+				UINT count = 0;
+				UINT rowNum = 0;
+				UINT colNum = 0;
 				for (auto& elem : *image)
 				{
-					// picture comes in as 10-Bit number.
-					elem = rand() % 10;
+					if (colNum == 672)
+					{
+						colNum = 0;
+						rowNum++;
+					}
+					elem = std::stoll("1" + str(rowNum) + "0" + str(colNum));
+					colNum++;
 				}
-				for (auto& elem : *image)
-				{
-					elem *= 256.0 / 1024.0;
-				}
-				(*image)[0] = 1000;
-				(*image)[1] = 500;
 				PostMessage(*input->parent, ACE_PIC_READY, 672 * 512, (LPARAM)(image));
 			}
 		}

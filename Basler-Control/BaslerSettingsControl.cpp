@@ -45,6 +45,21 @@ void BaslerSettingsControl::rearrange(int width, int height, fontMap fonts)
 }
 
 
+// assumes called on every 10 pics.
+void BaslerSettingsControl::handleFrameRate()
+{
+	ULONG currentTime = GetTickCount();
+	ULONG timePerPic = (currentTime - lastTime)/10.0;
+	if (timePerPic == 0)
+	{
+		// avoid dividing by 0.
+		timePerPic++;
+	}
+	realFrameRate.SetWindowTextA(cstr(1000.0 / timePerPic));
+	lastTime = currentTime;
+}
+
+
 void BaslerSettingsControl::setStatus(std::string status)
 {
 	statusText.SetWindowTextA(status.c_str());
@@ -53,7 +68,7 @@ void BaslerSettingsControl::setStatus(std::string status)
 void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight, POINT cameraDims )
 {
 	int width = 300;
-
+	lastTime = 0;
 	statusText.sPos = { pos.x, pos.y, pos.x + width, pos.y += 50 };
 	statusText.ID = id++;
 	statusText.Create("Camera Status: IDLE", WS_CHILD | WS_VISIBLE | WS_BORDER, statusText.sPos, parent, statusText.ID);

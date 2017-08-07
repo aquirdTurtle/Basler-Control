@@ -1,0 +1,16 @@
+
+*.db
+*.opendb
+*.ipch
+*.tlog
+*.obj
+*.pdb
+*.idb
+*.pch
+*.res
+*.log
+*.iobj
+*.ipdb
+*.ilk
+*.exe
+.vs/Basler-Control/v15/.suo
