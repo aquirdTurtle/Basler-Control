@@ -70,32 +70,18 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	int width = 300;
 	lastTime = 0;
 	statusText.sPos = { pos.x, pos.y, pos.x + width, pos.y += 50 };
-	statusText.ID = id++;
-	statusText.Create("Camera Status: IDLE", WS_CHILD | WS_VISIBLE | WS_BORDER, statusText.sPos, parent, statusText.ID);
-	statusText.fontType = Normal;
+	statusText.Create("Camera Status: IDLE", WS_CHILD | WS_VISIBLE | WS_BORDER, statusText.sPos, parent, id++);
 	////
 	repText.sPos = { pos.x, pos.y, pos.x + 200, pos.y + 25 };
-	repText.ID = id++;
-	repText.Create( "Total Picture Number:", WS_CHILD | WS_VISIBLE, repText.sPos, parent, repText.ID );
-	repText.fontType = Normal;
+	repText.Create( "Total Picture Number:", WS_CHILD | WS_VISIBLE, repText.sPos, parent, id++ );
 	//
 	repEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
-	repEdit.ID = id++;
-	if (repEdit.ID != IDC_REPETITIONS_EDIT)
-	{
-		throw;
-	}
-	repEdit.Create( WS_CHILD | WS_VISIBLE, repEdit.sPos, parent, repEdit.ID );
+	repEdit.Create( WS_CHILD | WS_VISIBLE, repEdit.sPos, parent, IDC_REPETITIONS_EDIT );
 	repEdit.SetWindowTextA( "100" );
 
 	cameraMode.sPos = { pos.x, pos.y, pos.x + 300, pos.y + 100 };
-	cameraMode.ID = id++;
-	if (cameraMode.ID != IDC_CAMERA_MODE_COMBO)
-	{
-		throw;
-	}
 	cameraMode.Create( WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_SORT, cameraMode.sPos, parent,
-					   cameraMode.ID );
+					   IDC_CAMERA_MODE_COMBO );
 	pos.y += 25;
 	cameraMode.AddString( "Finite Acquisition" );
 	cameraMode.AddString( "Continuous Acquisition" );
@@ -103,29 +89,21 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	repEdit.EnableWindow( false );
 	
 	exposureText.sPos = { pos.x, pos.y, pos.x + 200, pos.y + 25 };
-	exposureText.ID = id++;
 	std::string exposureTimeText;
 	#ifdef USB_CAMERA
 		exposureTimeText = "Exposure Time (us):";
 	#elif defined FIREWIRE_CAMERA
 		exposureTimeText = "Raw Time (# X 20 = us):";
 	#endif
-	exposureText.Create(exposureTimeText.c_str(), WS_CHILD | WS_VISIBLE, exposureText.sPos, parent, exposureText.ID );
-	exposureText.fontType = Normal;
+	exposureText.Create(exposureTimeText.c_str(), WS_CHILD | WS_VISIBLE, exposureText.sPos, parent, id++ );
 
 	exposureEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
-	exposureEdit.ID = id++;
-	exposureEdit.Create( WS_CHILD | WS_VISIBLE, exposureEdit.sPos, parent, exposureEdit.ID );
+	exposureEdit.Create( WS_CHILD | WS_VISIBLE, exposureEdit.sPos, parent, id++ );
 	exposureEdit.SetWindowTextA( "1000" );
 
 	exposureModeCombo.sPos = { pos.x, pos.y, pos.x + 300, pos.y + 100 };
-	exposureModeCombo.ID = id++;
-	if (exposureModeCombo.ID != IDC_EXPOSURE_MODE_COMBO)
-	{
-		throw;
-	}
 	exposureModeCombo.Create( WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_SORT, exposureModeCombo.sPos, parent, 
-							  exposureModeCombo.ID );
+							  IDC_EXPOSURE_MODE_COMBO );
 
 	pos.y += 25;
 	exposureModeCombo.AddString( "Auto Exposure Continuous" );
@@ -135,85 +113,60 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 
 	/// image dimensions
 	//
-	leftText.ID = id++;
 	leftText.sPos = { pos.x, pos.y, pos.x + width/3, pos.y + 25 };
-	leftText.Create( "Left", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, leftText.sPos, parent, leftText.ID );
+	leftText.Create( "Left", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, leftText.sPos, parent, id++ );
 	
 	//
-	rightText.ID = id++;
 	rightText.sPos = { pos.x + width/3, pos.y, pos.x + 2* width/3, pos.y + 25 };
 	rightText.Create( std::string("Right (/" + str(cameraDims.x-1) + ")").c_str(), WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, rightText.sPos,
-					 parent, rightText.ID );
+					 parent, id++ );
 	
 	//
-	horizontalBinningText.ID = id++;
 	horizontalBinningText.sPos = { pos.x + 2* width/3, pos.y, pos.x + width, pos.y += 25 };
-	horizontalBinningText.Create( "H. Bin", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, horizontalBinningText.sPos, parent,
-								  horizontalBinningText.ID );
+	horizontalBinningText.Create( "H. Bin", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, horizontalBinningText.sPos,
+								  parent, id++ );
 	
 	//
-	leftEdit.ID = id++;
 	leftEdit.sPos = { pos.x, pos.y, pos.x + width/3, pos.y + 25 };
-	leftEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, leftEdit.sPos, parent, leftEdit.ID );
-	leftEdit.fontType = Normal;
+	leftEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, leftEdit.sPos, parent, id++);
 	leftEdit.SetWindowTextA( "0" );
 	//
-	rightEdit.ID = id++;
 	rightEdit.sPos = { pos.x + width/3, pos.y, pos.x + 2* width/3, pos.y + 25 };
-	rightEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, rightEdit.sPos, parent, rightEdit.ID );
-	rightEdit.fontType = Normal;
+	rightEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, rightEdit.sPos, parent, id++ );
 	rightEdit.SetWindowTextA(str(cameraDims.x-1).c_str() );
 	//
-	horizontalBinningEdit.ID = id++;
 	horizontalBinningEdit.sPos = { pos.x + 2* width/3, pos.y, pos.x + width, pos.y += 25 };
 	horizontalBinningEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, horizontalBinningEdit.sPos, parent, 
-								  horizontalBinningEdit.ID );
-	horizontalBinningEdit.fontType = Normal;
+								  id++ );
 	horizontalBinningEdit.SetWindowTextA( "1" );
 	//
-	topText.ID = id++;
 	topText.sPos = { pos.x, pos.y, pos.x + width/3, pos.y + 25 };
-	topText.Create( "Top", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, topText.sPos, parent, topText.ID );
-	topText.fontType = Normal;
+	topText.Create( "Top", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, topText.sPos, parent, id++ );
 
 	//
-	bottomText.ID = id++;
 	bottomText.sPos = { pos.x + width/3, pos.y, pos.x +2* width/3, pos.y + 25 };
 	bottomText.Create( std::string("Bottom (/" + str(cameraDims.y-1) + ")").c_str(), WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, bottomText.sPos, 
-					  parent, bottomText.ID );
-	bottomText.fontType = Normal;
+					  parent, id++ );
 	//
-	verticalBinningText.ID = id++;
 	verticalBinningText.sPos = { pos.x + 2* width/3, pos.y, pos.x + width, pos.y += 25 };
 	verticalBinningText.Create( "V. Bin", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY, verticalBinningText.sPos, parent,
-								verticalBinningText.ID );
-	verticalBinningText.fontType = Normal;
+								id++ );
 	//
-	topEdit.ID = id++;
 	topEdit.sPos = { pos.x, pos.y, pos.x + width/3, pos.y + 25 };
-	topEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, topEdit.sPos, parent, topEdit.ID );
-	topEdit.fontType = Normal;
+	topEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, topEdit.sPos, parent, id++ );
 	topEdit.SetWindowTextA( "0" );
 	//
-	bottomEdit.ID = id++;
 	bottomEdit.sPos = { pos.x + width/3, pos.y, pos.x + 2* width/3, pos.y + 25 };
-	bottomEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, bottomEdit.sPos, parent, bottomEdit.ID );
-	bottomEdit.fontType = Normal;
+	bottomEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, bottomEdit.sPos, parent, id++ );
 	bottomEdit.SetWindowTextA(str(cameraDims.y - 1).c_str() );
 	//
-	verticalBinningEdit.ID = id++;
 	verticalBinningEdit.sPos = { pos.x + 2* width/3, pos.y, pos.x + width, pos.y += 25 };
-	verticalBinningEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, verticalBinningEdit.sPos, parent, verticalBinningEdit.ID );
-	verticalBinningEdit.fontType = Normal;
+	verticalBinningEdit.Create( WS_TABSTOP | WS_CHILD | WS_VISIBLE | ES_CENTER, verticalBinningEdit.sPos, parent, id++ );
 	verticalBinningEdit.SetWindowTextA( "1" );
 
-	triggerCombo.ID = id++;
-	if (triggerCombo.ID != IDC_TRIGGER_MODE_COMBO)
-	{
-		throw;
-	}
 	triggerCombo.sPos = { pos.x, pos.y, pos.x + 300, pos.y + 100 };
-	triggerCombo.Create( WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_SORT, triggerCombo.sPos, parent, triggerCombo.ID );
+	triggerCombo.Create( WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_SORT, triggerCombo.sPos, parent, 
+						 IDC_TRIGGER_MODE_COMBO );
 	triggerCombo.AddString( "External Trigger" );
 	triggerCombo.AddString( "Automatic Software Trigger" );
 	triggerCombo.AddString( "Manual Software Trigger" );
@@ -221,22 +174,18 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	pos.y += 25;
 
 	frameRateText.sPos = { pos.x, pos.y, pos.x + 150, pos.y + 25 };
-	frameRateText.ID = id++;
-	frameRateText.Create( "Frame Rate (pics/s): ", WS_CHILD | WS_VISIBLE, frameRateText.sPos, parent, frameRateText.ID );
+	frameRateText.Create( "Frame Rate (pics/s): ", WS_CHILD | WS_VISIBLE, frameRateText.sPos, parent, id++ );
 
 	frameRateEdit.sPos = { pos.x + 150, pos.y, pos.x + 225, pos.y + 25 };
-	frameRateEdit.ID = id++;
-	frameRateEdit.Create( WS_CHILD | WS_VISIBLE, frameRateEdit.sPos, parent, frameRateEdit.ID );
+	frameRateEdit.Create( WS_CHILD | WS_VISIBLE, frameRateEdit.sPos, parent, id++ );
 	frameRateEdit.SetWindowTextA( "30" );
 
 
 	realFrameRate.sPos = { pos.x + 225, pos.y, pos.x + 300, pos.y += 25 };
-	realFrameRate.ID = id++;
-	realFrameRate.Create( "", WS_CHILD | WS_VISIBLE, realFrameRate.sPos, parent, realFrameRate.ID );
+	realFrameRate.Create( "", WS_CHILD | WS_VISIBLE, realFrameRate.sPos, parent, id++ );
 
 	gainCombo.sPos = { pos.x, pos.y, pos.x + 300, pos.y + 100 };
-	gainCombo.ID = id++;
-	gainCombo.Create( WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_SORT, gainCombo.sPos, parent, gainCombo.ID );
+	gainCombo.Create( WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_SORT, gainCombo.sPos, parent, id++ );
 	gainCombo.AddString( "Auto Gain Continuous" );
 	gainCombo.AddString( "Auto Gain Once" );
 	gainCombo.AddString( "Auto Gain Off" );
@@ -244,29 +193,17 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	pos.y += 25;
 
 	gainText.sPos = { pos.x, pos.y, pos.x + 150, pos.y + 25 };
-	gainText.ID = id++;
-	gainText.Create( "Raw Gain (260-?): ", WS_CHILD | WS_VISIBLE, gainText.sPos, parent, gainText.ID );
+	gainText.Create( "Raw Gain (260-?): ", WS_CHILD | WS_VISIBLE, gainText.sPos, parent, id++ );
 
 	gainEdit.sPos = { pos.x + 150, pos.y, pos.x + 300, pos.y += 25 };
-	gainEdit.ID = id++;
-	gainEdit.Create( WS_CHILD | WS_VISIBLE, gainEdit.sPos, parent, gainEdit.ID );
+	gainEdit.Create( WS_CHILD | WS_VISIBLE, gainEdit.sPos, parent, id++ );
 	gainEdit.SetWindowTextA( "260" );
 
 	realGainText.sPos = { pos.x, pos.y, pos.x + 150, pos.y + 25 };
-	realGainText.ID = id++;
-	realGainText.Create( "Real Gain: ", WS_CHILD | WS_VISIBLE, realGainText.sPos, parent, realGainText.ID );
+	realGainText.Create( "Real Gain: ", WS_CHILD | WS_VISIBLE, realGainText.sPos, parent, id++ );
 
 	realGainStatus.sPos = { pos.x + 150, pos.y, pos.x + 300, pos.y += 25 };
-	realGainStatus.ID = id++;
-	realGainStatus.Create( "", WS_CHILD | WS_VISIBLE, realGainStatus.sPos, parent, realGainStatus.ID );
-
-	/*
-	// gain
-	Control<CStatic> gainText;
-	Control<CSliderCtrl> gainSlider;
-	Control<CEdit> rawGainEdit;
-	Control<CEdit> realGainText;
-	*/
+	realGainStatus.Create( "", WS_CHILD | WS_VISIBLE, realGainStatus.sPos, parent, id++ );
 }
 
 void BaslerSettingsControl::updateExposure( double exposure )

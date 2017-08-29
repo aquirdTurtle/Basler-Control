@@ -26,7 +26,7 @@ void PictureControl::setPictureArea( POINT loc, int width, int height )
 }
 
 
-std::pair<int, int> PictureControl::checkClickLocation( CPoint clickLocation )
+POINT PictureControl::checkClickLocation( CPoint clickLocation )
 {
 	CPoint test;
 	for (int horizontalInc = 0; horizontalInc < grid.size(); horizontalInc++)
@@ -35,8 +35,8 @@ std::pair<int, int> PictureControl::checkClickLocation( CPoint clickLocation )
 		{
 			RECT relevantRect = grid[horizontalInc][verticalInc];
 			// check if inside box
-			if (clickLocation.x < relevantRect.right && clickLocation.x > relevantRect.left
-				 && clickLocation.y < relevantRect.bottom && clickLocation.y > relevantRect.top)
+			if (clickLocation.x <= relevantRect.right && clickLocation.x >= relevantRect.left
+				 && clickLocation.y <= relevantRect.bottom && clickLocation.y >= relevantRect.top)
 			{
 				return { horizontalInc , verticalInc };
 				// then click was inside a box so this should do something.
@@ -54,7 +54,7 @@ void PictureControl::updatePalette( HPALETTE palette )
 
 void PictureControl::handleEditChange( int id )
 {
-	if (id == editMax.ID)
+	if (id == editMax.GetDlgCtrlID())
 	{
 		int max;
 		CString str;
@@ -71,7 +71,7 @@ void PictureControl::handleEditChange( int id )
 		sliderMax.SetPos( max );
 		maxSliderPosition = max;
 	}
-	if (id == this->editMin.ID)
+	if (id == editMin.GetDlgCtrlID())
 	{
 		int min;
 		CString str;
@@ -94,13 +94,13 @@ void PictureControl::handleEditChange( int id )
 
 void PictureControl::handleScroll(int id, UINT nPos)
 {
-	if (id == sliderMax.ID)
+	if (id == sliderMax.GetDlgCtrlID())
 	{
 		sliderMax.SetPos(nPos);
 		editMax.SetWindowTextA(std::to_string(nPos).c_str());
 		maxSliderPosition = nPos;
 	}
-	else if (id == sliderMin.ID)
+	else if (id == sliderMin.GetDlgCtrlID())
 	{
 		sliderMin.SetPos(nPos);
 		editMin.SetWindowTextA(std::to_string(nPos).c_str());
@@ -109,8 +109,11 @@ void PictureControl::handleScroll(int id, UINT nPos)
 }
 
 
-void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, int height)
+void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, int height, CBrush* defaultGridBrush)
 {
+	gridBrush = defaultGridBrush;
+	pictureTextFont.CreateFontA( 34, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+						  CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT( "Arial" ) );
 	if (width < 100)
 	{
 		thrower("Pictures must be greater than 100 in width because this is the size of the max/min controls.");
@@ -125,79 +128,87 @@ void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, in
 	loc.x += originalBackgroundArea.right - originalBackgroundArea.left;
 	// "min" text
 	labelMin.sPos = { loc.x, loc.y, loc.x + 50, loc.y + 30 };
-	labelMin.ID = id++;
-	labelMin.Create("MIN", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMin.sPos, parent, labelMin.ID);
-	labelMin.fontType = Normal;
+	labelMin.Create("MIN", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMin.sPos, parent, id++);
 	// minimum number text
 	editMin.sPos = { loc.x, loc.y + 30, loc.x + 50, loc.y + 60 };
-	editMin.ID = id++;
-	if (editMin.ID != IDC_MIN_SLIDER_EDIT)
-	{
-		throw;
-	}
-	editMin.Create(WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMin.sPos, parent, editMin.ID);
-	editMin.fontType = Normal;
+	editMin.Create(WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMin.sPos, parent, IDC_MIN_SLIDER_EDIT );
+	editMin.SetWindowText( "0" );
 	// minimum slider
 	sliderMin.sPos = { loc.x, loc.y + 60, loc.x + 50, loc.y + originalBackgroundArea.bottom - originalBackgroundArea.top};
-	sliderMin.ID = id++;
-	sliderMin.Create(WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, sliderMin.ID);
+	sliderMin.Create(WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, id++);
 	sliderMin.SetRange(0, 1024);
 	sliderMin.SetPageSize((minSliderPosition - minSliderPosition)/10.0);
+	sliderMin.SetPos( 0 );
 	// "max" text
 	labelMax.sPos = { loc.x + 50, loc.y, loc.x + 100, loc.y + 30 };
-	labelMax.ID = id++;
-	labelMax.Create("MAX", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMax.sPos, parent, labelMax.ID);
-	labelMax.fontType = Normal;
+	labelMax.Create("MAX", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMax.sPos, parent, id++);
 	// maximum number edit
 	editMax.sPos = { loc.x + 50, loc.y + 30, loc.x + 100, loc.y + 60 };
-	editMax.ID = id++;
-	if (editMax.ID != IDC_MAX_SLIDER_EDIT)
-	{
-		throw;
-	}
-	editMax.Create(WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, editMax.ID);
-	editMax.fontType = Normal;
+	editMax.Create(WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, IDC_MAX_SLIDER_EDIT );
+	editMax.SetWindowText( "1024" );
 	// maximum slider
 	sliderMax.sPos = { loc.x + 50, loc.y + 60, loc.x + 100, loc.y + originalBackgroundArea.bottom - originalBackgroundArea.top};
-	sliderMax.ID = id++;
-	sliderMax.Create(WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, sliderMax.ID);
+	sliderMax.Create(WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, id++);
 	sliderMax.SetRange(0, 1024);
 	sliderMax.SetPageSize((minSliderPosition - minSliderPosition) / 10.0);
+	sliderMax.SetPos( 1024 );
 	// reset this.
 	loc.x -= originalBackgroundArea.right - originalBackgroundArea.left;
 	// manually scroll the objects to initial positions.
-	handleScroll( sliderMin.ID, 0);
-	handleScroll( sliderMax.ID, 1024);
+	handleScroll( id++, 0);
+	handleScroll( id++, 1024);
 
 	createPalettes( parent->GetDC() );
 	updatePalette( palettes[0] );
 
 	loc.y += height;
-	coordinatesText.ID = id++;
 	coordinatesText.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
-	coordinatesText.Create( "Coordinates: ", WS_CHILD | WS_VISIBLE, coordinatesText.sPos, parent, coordinatesText.ID );
+	coordinatesText.Create( "Coordinates: ", WS_CHILD | WS_VISIBLE, coordinatesText.sPos, parent, id++ );
 	
-	coordinatesDisp.ID = id++;
 	coordinatesDisp.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
-	coordinatesDisp.Create( "", WS_CHILD | WS_VISIBLE | ES_READONLY, coordinatesDisp.sPos, parent, coordinatesDisp.ID );
+	coordinatesDisp.Create( "", WS_CHILD | WS_VISIBLE | ES_READONLY, coordinatesDisp.sPos, parent, id++ );
 	
-	valueText.ID = id++;
 	valueText.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
-	valueText.Create("Value: ", WS_CHILD | WS_VISIBLE, valueText.sPos, parent, valueText.ID);
+	valueText.Create("Value: ", WS_CHILD | WS_VISIBLE, valueText.sPos, parent, id++);
 
-	valueDisp.ID = id++;
 	valueDisp.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
-	valueDisp.Create("", WS_CHILD | WS_VISIBLE | ES_READONLY, valueDisp.sPos, parent, valueDisp.ID);
+	valueDisp.Create("", WS_CHILD | WS_VISIBLE | ES_READONLY, valueDisp.sPos, parent, id++);
+
+	setLocationsButton.sPos = { loc.x, loc.y, loc.x += 200, loc.y + 20 };
+	setLocationsButton.Create( "Set Analysis Locations", WS_CHILD | WS_VISIBLE | BS_PUSHLIKE | BS_CHECKBOX, valueDisp.sPos,
+							   parent, IDC_SET_ANALYSIS_LOCATIONS );
+	circleSizeText.sPos = { loc.x, loc.y, loc.x += 150, loc.y + 20 };
+	circleSizeText.Create( "Integration Radius:", WS_CHILD | WS_VISIBLE, circleSizeText.sPos, parent, id++ );
+	
+	circleSizeEdit.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
+	circleSizeEdit.Create( WS_CHILD | WS_VISIBLE, circleSizeEdit.sPos, parent, id++ );
+	circleSizeEdit.SetWindowText( "5" );
 }
+
+
+long PictureControl::getIntegrationSize()
+{
+	CString txt;
+	circleSizeEdit.GetWindowText( txt );
+	try
+	{
+		return std::stol( str( txt ) );
+	}
+	catch (std::invalid_argument& err)
+	{
+		// don't throw, user could just be editing the edit while the picture runs.
+		return 0;
+	}
+}
+
 
 void PictureControl::setValue()
 {
-	int loc = mouseCoordinates.x * grid[0].size() + mouseCoordinates.y;
-	if (loc > mostRecentImage.size())
+	int loc = mouseCoordinates.x * grid.size() + mouseCoordinates.y;
+	if (loc >= mostRecentImage.size())
 	{
 		return;
 	}
-	//errBox(str(mouseCoordinates.x * grid[0].size() + mouseCoordinates.y));	
 	valueDisp.SetWindowTextA(cstr(mostRecentImage[loc]));
 }
 
@@ -212,7 +223,6 @@ void PictureControl::handleMouse(CPoint point)
 		{
 			if (point.x < box.right && point.x > box.left && point.y > box.top && point.y < box.bottom)
 			{
-				rowCount = grid.front().size() - rowCount - 1;
 				coordinatesDisp.SetWindowTextA((str(rowCount) + ", " + str(colCount)).c_str());
 				mouseCoordinates = { rowCount, colCount };
 				if (mostRecentImage.size() != 0 && grid.size() != 0)
@@ -227,26 +237,59 @@ void PictureControl::handleMouse(CPoint point)
 	}
 }
 
-void PictureControl::updateGridSpecs(imageDimensions newParameters)
+
+void PictureControl::handleRightClick( CPoint clickLocation, CWnd* parent )
 {
-	// not strictly necessary.
+	if (currentlySettingLocations)
+	{
+		POINT location;
+		location = checkClickLocation( clickLocation );
+		if (location.x != -1)
+		{
+			analysisLocations.push_back( location );
+		}
+		redrawImage(parent);
+	}
+}
+
+
+void PictureControl::handleButtonClick()
+{
+	if (setLocationsButton.GetCheck())
+	{
+		// if pressed currently, then upress it.
+		setLocationsButton.SetCheck( 0 );
+		setLocationsButton.SetWindowTextA( "Set Analysis Points" );
+		currentlySettingLocations = false;
+	}
+	else
+	{
+		// else press it.
+		analysisLocations.clear();
+		setLocationsButton.SetCheck( 1 );
+		setLocationsButton.SetWindowTextA( "Right-Click Relevant Points and Reclick This" );
+		currentlySettingLocations = true;
+	}
+}
+
+
+void PictureControl::recalculateGrid(imageDimensions newParameters)
+{
 	grid.clear();
-	//
 	grid.resize(newParameters.horBinNumber);
 	for (int widthInc = 0; widthInc < grid.size(); widthInc++)
 	{
 		grid[widthInc].resize(newParameters.vertBinNumber);
 		for (int heightInc = 0; heightInc < grid[widthInc].size(); heightInc++)
 		{
-			// for all 4 pictures...
 			grid[widthInc][heightInc].left = (int)(currentBackgroundArea.left
 												   + (double)widthInc * (currentBackgroundArea.right - currentBackgroundArea.left) / (double)grid.size() + 2);
 			grid[widthInc][heightInc].right = (int)(currentBackgroundArea.left
 													+ (double)(widthInc + 1) * (currentBackgroundArea.right - currentBackgroundArea.left) / (double)grid.size() + 2);
 			grid[widthInc][heightInc].top = (int)(currentBackgroundArea.top
-												  + (double)(heightInc)* (currentBackgroundArea.bottom - currentBackgroundArea.top) / (double)grid[widthInc].size());
+												  + (double)(grid[widthInc].size()-heightInc-1)* (currentBackgroundArea.bottom - currentBackgroundArea.top) / (double)grid[widthInc].size());
 			grid[widthInc][heightInc].bottom = (int)(currentBackgroundArea.top
-													 + (double)(heightInc + 1)* (currentBackgroundArea.bottom - currentBackgroundArea.top) / (double)grid[widthInc].size());
+													 + (double)(grid[widthInc].size()-heightInc)* (currentBackgroundArea.bottom - currentBackgroundArea.top) / (double)grid[widthInc].size());
 		}
 	}
 }
@@ -264,10 +307,46 @@ void PictureControl::redrawImage(CWnd* parent)
 	{
 		drawBitmap(parent->GetDC(), mostRecentImage);
 	}
+	drawDongles( parent, mostRecentImage );
+}
+
+
+void PictureControl::drawDongles(CWnd* parent, const std::vector<long>& image)
+{
+	if (false)
+	{
+		drawGrid(parent, gridBrush);
+	}
+	drawIntegratingCircles( parent, getIntegrationSize() );
+	addIntegrationText( image, parent );
+}
+
+
+void PictureControl::addIntegrationText(const std::vector<long>& pic, CWnd* parent)
+{
+	CDC* dc = parent->GetDC();
+	for (auto loc : analysisLocations)
+	{
+		long sum = integrateRegion( pic, loc, getIntegrationSize() );
+		RECT drawLocation;
+		POINT center = { (grid[loc.x][loc.y].right + grid[loc.x][loc.y].left) / 2,
+						(grid[loc.x][loc.y].bottom + grid[loc.x][loc.y].top) / 2 };
+		drawLocation.right = center.x + 75;
+		drawLocation.left = center.x - 75;
+		drawLocation.top = center.y - 15;
+		drawLocation.bottom = center.y + 15;
+		// 150 X 30
+
+		dc->SetBkMode( TRANSPARENT );
+		dc->SelectObject( pictureTextFont );
+		dc->SetTextColor( RGB( 255, 0, 0 ) );
+		dc->DrawText( cstr( sum ), &drawLocation, DT_CENTER | DT_SINGLELINE | DT_VCENTER );
+	}
+	parent->ReleaseDC( dc );
 }
 
 // input is the 2D array which gets mapped to the image.
-void PictureControl::drawBitmap(CDC* deviceContext, std::vector<long> picData)
+void PictureControl::drawBitmap(CDC* deviceContext, const std::vector<long>& picData)
 {
 	mostRecentImage = picData;
 	float yscale;
@@ -373,7 +452,6 @@ void PictureControl::drawBitmap(CDC* deviceContext, std::vector<long> picData)
 	{
 		case 0:
 		{
-			//pixelsAreaHeight -= 1;
 			pbmi->bmiHeader.biWidth = dataWidth;
 			pbmi->bmiHeader.biSizeImage = 1;// pbmi->bmiHeader.biWidth * pbmi->bmiHeader.biHeight;// * sizeof( BYTE );
 			//memset( DataArray, 0, (dataWidth*dataHeight) * sizeof( *DataArray ) );
@@ -455,7 +533,7 @@ void PictureControl::drawGrid(CWnd* parent, CBrush* brush)
 			easel->FrameRect(&grid[widthInc][heightInc], brush);
 		}
 	}
-	return;
+	parent->ReleaseDC(easel);
 }
 
 void PictureControl::drawRectangles( CWnd* parent, CBrush* brush )
@@ -496,74 +574,83 @@ void PictureControl::drawRectangles( CWnd* parent, CBrush* brush )
   }
  *
  */
-void PictureControl::integrateRegion(std::vector<long> picData, std::pair<int, int> selectedLocation, double circleSize)
+
+
+long PictureControl::integrateRegion(const std::vector<long>& picData, POINT selectedLocation, double circleSize)
 {
 	if (grid.size() == 0)
 	{
-		return;
+		return 0;
 	}
 	else if (grid[0].size() == 0)
 	{
-		return;
+		return 0;
 	}
 
 	long count = 0;
-	RECT pixel = grid[selectedLocation.first][selectedLocation.second];
+	RECT pixel = grid[selectedLocation.x][selectedLocation.y];
 	POINT center = { (pixel.right + pixel.left) / 2, (pixel.bottom + pixel.top) / 2 };
 	long pixelSize = (pixel.right - pixel.left);
 	long pixWidth = grid.size();
 	long picHeight = grid[0].size();
+	long sum = 0;
 	long x, y;
 	for (auto pixelCount : picData)
 	{
-		x = count / 
-
-		// get the coordinates of the current pixel
+		x = count % pixWidth;
+		y = count / pixWidth;
+		if (sqrt( pow( x - selectedLocation.x, 2 ) + pow( y - selectedLocation.y, 2 ) ) < circleSize)
+		{
+			sum += picData[count];
+		}
 		count++;
 	}
+	return sum;
 }
+
 
 /*
  * draws a (generally) large circle on the picture, used to denote an area of integration.
  */
-void PictureControl::drawIntegratingCircle(CWnd* parent, std::pair<int, int> centerPixel, double circleRadius)
+void PictureControl::drawIntegratingCircles(CWnd* parent, double circleRadius)
 {
 	if (grid.size() == 0)
 	{
 		return;
 	}
-	if (mostRecentImage.size() == 0)
-	{
-		drawBackground(parent);
-		// need a brush...
-		//drawGrid(parent);
-	}
 	// get center
-	RECT pixel = grid[centerPixel.first][centerPixel.second];
-	POINT center = {(pixel.right + pixel.left) / 2, (pixel.bottom + pixel.top) / 2 };
-	// get appropriate brush and pen
-	CDC* dc = parent->GetDC();
-	dc->SelectObject(GetStockObject(HOLLOW_BRUSH));
-	dc->SelectObject(GetStockObject(DC_PEN));
-	dc->SetDCPenColor(RGB(255, 255, 0));
-	dc->Ellipse(center.x - circleRadius, center.y - circleRadius, center.x + circleRadius, center.y + circleRadius);
-	parent->ReleaseDC(dc);
+	for (auto loc : analysisLocations)
+	{
+		RECT pixel = grid[loc.x][loc.y];
+		UINT width = grid[0][0].right - grid[0][0].left;
+		UINT height = grid[0][0].bottom - grid[0][0].top;
+		POINT center = { (pixel.right + pixel.left) / 2, (pixel.bottom + pixel.top) / 2 };
+		// get appropriate brush and pen
+		CDC* dc = parent->GetDC();
+		dc->SelectObject( GetStockObject( HOLLOW_BRUSH ) );
+		dc->SelectObject( GetStockObject( DC_PEN ) );
+		dc->SetDCPenColor( RGB( 255, 255, 0 ) );
+		dc->Ellipse( center.x - circleRadius * width, center.y - circleRadius * height, center.x + circleRadius * width, 
+					 center.y + circleRadius * height );
+		parent->ReleaseDC( dc );
+	}
 }
 
 /*
  * Draws a circle within a single pixel
  */
-void PictureControl::drawPixelCircle(CWnd* parent, std::pair<int, int> selectedLocation)
+/*
+void PictureControl::drawPixelCircle(CWnd* parent)
 {
 	if (grid.size() == 0)
 	{
 		return;
 	}
-	if (mostRecentImage.size() != 0)
+	for (auto loc : analysisLocations)
 	{
-		//this->drawBackground();
-		//this->drawGrid();
+
 	}
+
 	RECT smallRect;
 	RECT relevantRect = grid[selectedLocation.first][selectedLocation.second];
 	smallRect.left = relevantRect.left + 7.0 * (relevantRect.right - relevantRect.left) / 16.0;
@@ -592,7 +679,7 @@ void PictureControl::drawPixelCircle(CWnd* parent, std::pair<int, int> selectedL
 	dc->Ellipse( smallRect.left, smallRect.top, smallRect.right, smallRect.bottom );
 	parent->ReleaseDC( dc );
 }
-
+*/
 
 void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, int width, int height, fontMap fonts)
 {
@@ -606,6 +693,9 @@ void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, 
 	coordinatesDisp.rearrange(cameraMode, triggerMode, width, height, fonts);
 	valueText.rearrange(cameraMode, triggerMode, width, height, fonts);
 	valueDisp.rearrange(cameraMode, triggerMode, width, height, fonts);
+	setLocationsButton.rearrange( cameraMode, triggerMode, width, height, fonts );
+	circleSizeText.rearrange( cameraMode, triggerMode, width, height, fonts );
+	circleSizeEdit.rearrange( cameraMode, triggerMode, width, height, fonts );
 	currentBackgroundArea.bottom =  originalBackgroundArea.bottom * height / 997.0;
 	currentBackgroundArea.top = originalBackgroundArea.top * height / 997.0;
 	currentBackgroundArea.left = originalBackgroundArea.left * width / 1920.0;

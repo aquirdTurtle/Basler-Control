@@ -64,6 +64,9 @@
     <ClInclude Include="BaslerWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AnalysisControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

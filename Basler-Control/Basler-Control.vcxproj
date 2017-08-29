@@ -195,6 +195,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnalysisControl.h" />
     <ClInclude Include="BaslerCamera.h" />
     <ClInclude Include="BaslerControlApp.h" />
     <ClInclude Include="BaslerWindow.h" />

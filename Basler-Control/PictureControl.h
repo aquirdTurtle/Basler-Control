@@ -7,16 +7,16 @@ class PictureControl
 {
 	public:
 		PictureControl::PictureControl();
-		void initialize(POINT& loc, CWnd* parent, int& id, int width, int height);
-		void updateGridSpecs( imageDimensions newParameters );
+		void initialize(POINT& loc, CWnd* parent, int& id, int width, int height, CBrush* defaultGridBrush);
+		void recalculateGrid( imageDimensions newParameters );
 		void setPictureArea( POINT loc, int width, int height );
-		void drawBitmap( CDC* deviceContext, std::vector<long> picData );
+		void drawBitmap( CDC* deviceContext, const std::vector<long>& picData );
 		void drawBackground(CWnd* parent);
 		void drawGrid(CWnd* parent, CBrush* brush);
 		void drawRectangles(CWnd* parent, CBrush* brush);
-		void drawPixelCircle(CWnd* parent, std::pair<int, int> selectedLocation );
-		void drawIntegratingCircle(CWnd* parent, std::pair<int, int> selectedLocation, double circleSize);
-		void integrateRegion(std::vector<long> picData, std::pair<int, int> selectedLocation, double circleSize);
+		//void drawPixelCircle(CWnd* parent, POINT selectedLocation );
+		void drawIntegratingCircles( CWnd* parent, double circleRadius );
+		long integrateRegion(const std::vector<long>& picData, POINT selectedLocation, double circleSize);
 		void rearrange( std::string cameraMode, std::string triggerMode, int width, int height, fontMap fonts );
 		void handleScroll( int id, UINT nPos );
 		void handleEditChange( int id );
@@ -24,19 +24,27 @@ class PictureControl
 		void redrawImage( CWnd* parent );
 		void setActive( bool activeState );
 		bool isActive();
-		std::pair<int, int> checkClickLocation( CPoint clickLocation );
+		void handleButtonClick();
+		POINT checkClickLocation( CPoint clickLocation );
 		void createPalettes( CDC* dc );
+		void handleRightClick( CPoint clickLocation, CWnd* parent );
 		void handleMouse( CPoint point );
 		void setValue();
-
+		void drawDongles( CWnd* parent, const std::vector<long>& pic );
+		void addIntegrationText( const std::vector<long>& pic, CWnd* parent );
+		long getIntegrationSize();
 	private:
+		CBrush* gridBrush;
+		CFont pictureTextFont;
 		POINT mouseCoordinates;
 		// for replotting.
 		std::vector<long> mostRecentImage;
 		// stores info as to whether the control is currently being used in plotting camera data or was used 
 		// in the most recent run.
 		bool active = true;
-		// Arguably I should make these static controls instead of keeping track explicitly of these things. 
+		bool currentlySettingLocations;
+		std::vector<POINT> analysisLocations;
+		// Arguably I should make these static controls instead of keeping track explicitly of these things.
 		RECT originalBackgroundArea;
 		RECT currentBackgroundArea;
 		// 
@@ -44,6 +52,7 @@ class PictureControl
 		int minSliderPosition;
 		int colorIndicator;
 		HPALETTE imagePalette;
+		std::vector<POINT> locations;
 		// grid data
 		std::vector<std::vector<RECT>> grid;
 		// Picture location data
@@ -60,6 +69,8 @@ class PictureControl
 		Control<CStatic> coordinatesDisp;
 		Control<CStatic> valueText;
 		Control<CStatic> valueDisp;
-
+		Control<CButton> setLocationsButton;
+		Control<CStatic> circleSizeText;
+		Control<CEdit> circleSizeEdit;
 		std::array<HPALETTE, 3> palettes;
 };

@@ -16,10 +16,9 @@ void PictureSaver::rearrange(int width, int height, fontMap fonts)
 void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 {
 	/// note: the rest of the save location is hard-set in the constants file. might want to change this.
-	saveLocationText.ID = id++;
 	saveLocationText.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 25 };
 	saveLocationText.Create( "Save Date:", WS_CHILD | WS_VISIBLE | ES_CENTER | ES_READONLY , 
-							 saveLocationText.sPos, parent, saveLocationText.ID );
+							 saveLocationText.sPos, parent );
 
 	time_t t = time(0);   // get time now
 	struct tm now;
@@ -34,23 +33,19 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 		dateText = str(now.tm_year + 1900 - 2000) + str(now.tm_mon + 1) + str(now.tm_mday);
 	}
 
-	saveLocationEdit.ID = id++;
 	saveLocationEdit.sPos = { pos.x + 100, pos.y, pos.x + 300, pos.y += 25 };
-	saveLocationEdit.Create( WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, saveLocationEdit.sPos, parent, saveLocationEdit.ID );
+	saveLocationEdit.Create( WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, saveLocationEdit.sPos, parent, id++ );
 	saveLocationEdit.SetWindowTextA( dateText.c_str() );
 
-	saveCheckButton.ID = id++;
 	saveCheckButton.sPos = { pos.x, pos.y, pos.x + 100, pos.y + 20 };
-	saveCheckButton.Create( "Save?", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, saveCheckButton.sPos, parent, saveCheckButton.ID );
+	saveCheckButton.Create( "Save?", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, saveCheckButton.sPos, parent, id++ );
 	saveCheckButton.EnableWindow(0);
 
-	fileNumberText.ID = id++;
 	fileNumberText.sPos = { pos.x + 100, pos.y, pos.x + 200, pos.y + 20 };
-	fileNumberText.Create( "File #: ", WS_CHILD | WS_VISIBLE, fileNumberText.sPos, parent, fileNumberText.ID );
+	fileNumberText.Create( "File #: ", WS_CHILD | WS_VISIBLE, fileNumberText.sPos, parent, id++ );
 
-	fileNumberEdit.ID = id++;
 	fileNumberEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y + 20 };
-	fileNumberEdit.Create( WS_CHILD | WS_VISIBLE, fileNumberEdit.sPos, parent, fileNumberEdit.ID );
+	fileNumberEdit.Create( WS_CHILD | WS_VISIBLE, fileNumberEdit.sPos, parent, id++ );
 	fileNumberEdit.SetWindowTextA( "0" );
 }
 
@@ -112,9 +107,9 @@ void PictureSaver::save( std::vector<long>* pic, int width )
 	CString text;
 	saveLocationEdit.GetWindowTextA( text );
 	// seperate out year month and day.
-	int year = std::stoi(cstring(text.Mid(0, 2))) + 2000;
-	int month = std::stoi(cstring(text.Mid(2, 2)));
-	int day = std::stoi(cstring(text.Mid(4, 2)));
+	int year = std::stoi(cstr(text.Mid(0, 2))) + 2000;
+	int month = std::stoi(cstr(text.Mid(2, 2)));
+	int day = std::stoi(cstr(text.Mid(4, 2)));
 	// figure out the month
 	std::string monthName;
 	switch (month)

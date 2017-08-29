@@ -43,30 +43,5 @@
 
 #include <string>
 
-template <typename type> std::string str( type quantity );
-//template <> std::string str( const char* text );
-template <> std::string str( char* text );
-template <> std::string str( std::string text );
-/*
-template <> std::string str( const char* text )
-{
-	return std::string( text );
-}
-*/
-
-template <> std::string str( char* text )
-{
-	return std::string( text );
-}
-
-template <> std::string str( std::string text )
-{
-	return text;
-}
-
-template <typename type> std::string str( type quantity )
-{
-	return std::to_string( quantity );
-}
 
 #include "miscellaneousCommonFunctions.h"

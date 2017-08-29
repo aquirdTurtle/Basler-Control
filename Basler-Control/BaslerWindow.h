@@ -1,8 +1,5 @@
-
-// Basler-ControlDlg.h : header file
-//
-
 #pragma once
+#include <atomic>
 #include "PictureControl.h"
 #include "Control.h"
 #include "BaslerSettingsControl.h"
@@ -17,7 +14,8 @@ class BaslerWindow : public CDialogEx
 	public:
 		
 		BaslerWindow(CWnd* pParent = NULL);	
-		virtual BOOL OnInitDialog();
+		BOOL OnInitDialog();
+		void handleEnter();
 		void OnPaint();
 		HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 		HCURSOR OnQueryDragIcon();
@@ -32,10 +30,8 @@ class BaslerWindow : public CDialogEx
 		void OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scrollbar );
 		void handleSoftwareTrigger();
 		void OnMouseMove(UINT flags, CPoint point);
-	// Dialog Data
-	#ifdef AFX_DESIGN_TIME
-		enum { IDD = IDD_BASLERCONTROL_DIALOG };
-	#endif
+		void OnRButtonUp( UINT stuff, CPoint clickLocation );
+		void passSetLocationsButton();
 
 	private:
 		PictureControl picture;
@@ -51,6 +47,7 @@ class BaslerWindow : public CDialogEx
 		rgbMap mainRGBs;
 		fontMap mainFonts;
 		bool isRunning;
+		std::atomic<bool> triggerThreadFlag;
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 		HICON m_hIcon;

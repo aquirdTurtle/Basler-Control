@@ -32,8 +32,6 @@ template <class ControlType> class Control : public ControlType
 		RECT videoPos;
 		fontTypes fontType;
 		int triggerModeSensitive;
-		//
-		int ID;
 		int colorState = 0;
 		void rearrange(std::string cameraMode, std::string trigMode, int width, int height, 
 			std::unordered_map<std::string, CFont*> fonts);

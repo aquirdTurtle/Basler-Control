@@ -2,12 +2,14 @@ Planning:
 Features:
 - be able to actually control the gain.
 - saver can figure out lowest number for picture.
-
+- Being able to see pixel counts
+- resize picture to keep pixels square (or real dimensions)
 Bugs:
-- handle throw when camera not connected. Tell user before quitting.
-- Disarming camera doesn't work in safemode (ironically)
 - handle changing options while the system is running. Grey things.
 - fix hover value
-- enter shouldn't close.
 
 ### DONE ###
+- Disarming camera doesn't work in safemode (ironically)
+- can change picture size in safemode.
+- enter shouldn't close.
+- now handles throw when camera not connected. Tell user before quitting.

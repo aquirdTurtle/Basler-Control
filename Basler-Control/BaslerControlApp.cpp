@@ -2,10 +2,9 @@
 // Basler-Control.cpp : Defines the class behaviors for the application.
 //
 /// Important Author's note:
-//		Most of the code in this file was created programatically when I started this project.  A lot of it is probably
-//		superfluous, I've created much simpler apps before, but it does no harm. For a lot of the stuff in this file 
-//		however, I don't really know what it does.
-
+//		Most of the code in this file (partyicularly this file) was created programatically when I started this project.  
+//		A lot of it is probably superfluous, I've created much simpler apps before, but it does no harm. For a lot of 
+//		the stuff in this file however, I don't really know what it does.
 
 #include "stdafx.h"
 #include "BaslerControlApp.h"
@@ -73,7 +72,7 @@ BOOL CBaslerControlApp::InitInstance()
 	// Change the registry key under which our settings are stored
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
-	SetRegistryKey(_T("Mark Brown's control code"));
+	SetRegistryKey(_T("Basler Control Code"));
 
 	// create the main window object.
 	BaslerWindow dlg;

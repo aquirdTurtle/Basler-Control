@@ -23,15 +23,25 @@ BaslerCameras::BaslerCameras(HWND* parent)
 			cameraType* temp;
 			temp = new BaslerWrapper(Pylon::CTlFactory::GetInstance().CreateFirstDevice(info));
 			camera = dynamic_cast<BaslerWrapper*>(temp);
+			camera->init( parent );
+			cameraInitialized = true;
 		}
-		catch (Error& err)
+		catch (Pylon::GenericException& err)
 		{
-			errBox("Basler Camera Failed to initialize! Error Message: " + err.whatStr());
+			cameraInitialized = false;
 		}
 	}
-	camera->init(parent);
+	else
+	{
+		camera->init( parent );
+		cameraInitialized = true;
+	}
 }
 
+bool BaslerCameras::isInitialized()
+{
+	return cameraInitialized;
+}
 
 // send a software trigger to the camera after waiting to make sure it's ready to recieve said trigger.
 void BaslerCameras::softwareTrigger()
@@ -242,7 +252,7 @@ POINT BaslerCameras::getCameraDimensions()
 
 // get the camera "armed" (ready for aquisition). Actual start of camera taking pictures depends on things like the 
 // trigger mode.
-void BaslerCameras::armCamera( double frameRate, HWND* parent )
+void BaslerCameras::armCamera( triggerThreadInput* input )
 {
 	Pylon::EGrabStrategy grabStrat;
 	if (continuousImaging)
@@ -253,12 +263,9 @@ void BaslerCameras::armCamera( double frameRate, HWND* parent )
 	{
 		grabStrat = Pylon::GrabStrategy_OneByOne;
 	}
+	input->camera = camera;
 	// grab stuff.
 	camera->startGrabbing( repCounts, grabStrat );
-	triggerThreadInput* input = new triggerThreadInput;
-	input->camera = camera;
-	input->frameRate = frameRate;
-	input->parent = parent;
 	if (autoTrigger)
 	{
 		_beginthread( triggerThread, NULL, input );
@@ -286,10 +293,10 @@ bool BaslerCameras::isContinuous()
 
 
 // this is the thread that programatically software-triggers the camera when triggering internally.
-void BaslerCameras::triggerThread( void* rawInput )
+void BaslerCameras::triggerThread( void* voidInput )
 {
 	int count = 0;
-	triggerThreadInput* input = (triggerThreadInput*)rawInput;
+	triggerThreadInput* input = (triggerThreadInput*)voidInput;
 	try
 	{
 		while (input->camera->isGrabbing())
@@ -310,23 +317,33 @@ void BaslerCameras::triggerThread( void* rawInput )
 			}
 
 			if (BASLER_SAFEMODE)
-			{
-				// simulate successful grab
+ 			{ 
+				if (!*input->runningFlag)
+				{
+					// aborting.
+					return;
+				}
+ 				// simulate successful grab
 				// need some way to communicate the width and height of the pic to this function...
 				std::vector<long>* image;
-				image = new std::vector<long>(672*512);
+				image = new std::vector<long>(input->width * input->height);
 				UINT count = 0;
 				UINT rowNum = 0;
 				UINT colNum = 0;
 				for (auto& elem : *image)
 				{
-					if (colNum == 672)
+					//elem = count++;
+					elem = 500 + rand() % 100;
+					if (false)
 					{
-						colNum = 0;
-						rowNum++;
+						if (colNum == 672)
+						{
+							colNum = 0;
+							rowNum++;
+						}
+						elem = std::stoll( "1" + str( rowNum ) + "0" + str( colNum ) );
+						colNum++;
 					}
-					elem = std::stoll("1" + str(rowNum) + "0" + str(colNum));
-					colNum++;
 				}
 				PostMessage(*input->parent, ACE_PIC_READY, 672 * 512, (LPARAM)(image));
 			}
@@ -338,7 +355,7 @@ void BaslerCameras::triggerThread( void* rawInput )
 	}
 	catch (Pylon::RuntimeException& err)
 	{
-		// aborted, that's fine
+		// aborted, that's fine. return.
 	}
 }
 

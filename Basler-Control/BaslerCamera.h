@@ -7,6 +7,7 @@
 #include <pylon/1394/Basler1394InstantCamera.h>
 #include "BaslerControlApp.h"
 #include "constants.h"
+#include <atomic>
 
 class BaslerCameras;
 class BaslerWrapper;
@@ -16,6 +17,11 @@ struct triggerThreadInput
 	double frameRate;
 	BaslerWrapper* camera;
 	HWND* parent;
+	// only actually needed for debug mode.
+	ULONG height;
+	ULONG width;
+	// only used in debug mode.
+	std::atomic<bool>* runningFlag;
 };
 
 // wrapper class for modifying for safemode and to standardize error handling.
@@ -75,7 +81,7 @@ class BaslerCameras
 		~BaslerCameras();
 		void setParameters( baslerSettings settings );
 		void setDefaultParameters();
-		void armCamera( double frameRate, HWND* parent );
+		void armCamera( triggerThreadInput* input);
 		void disarm();
 		static void triggerThread(void* input);
 		void softwareTrigger();
@@ -87,6 +93,7 @@ class BaslerCameras
 		double getCurrentExposure();
 		unsigned int getRepCounts();
 		bool isContinuous();
+		bool isInitialized();
 		// Adjust value so it complies with range and increment passed.
 		//
 		// The parameter's minimum and maximum are always considered as valid values.
@@ -100,6 +107,7 @@ class BaslerCameras
 		bool continuousImaging;
 		bool autoTrigger;
 		unsigned int repCounts;
+		bool cameraInitialized;
 };
 
 
