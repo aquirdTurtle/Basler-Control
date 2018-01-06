@@ -16,7 +16,7 @@ struct triggerThreadInput
 {
 	double frameRate;
 	BaslerWrapper* camera;
-	HWND* parent;
+	CWnd* parent;
 	// only actually needed for debug mode.
 	ULONG height;
 	ULONG width;
@@ -29,7 +29,7 @@ class BaslerWrapper : public cameraType
 {
 	using cameraType::cameraType;
 	public:
-		void init( HWND* parent );
+		void init( CWnd* parent );
 		
 		int getMinOffsetX();
 		int getCurrentOffsetX();
@@ -77,7 +77,7 @@ class BaslerCameras
 {
 	public:
 		// important constructor to initialize camera
-		BaslerCameras( HWND* parent );
+		BaslerCameras( CWnd* parent );
 		~BaslerCameras();
 		void setParameters( baslerSettings settings );
 		void setDefaultParameters();
@@ -85,9 +85,8 @@ class BaslerCameras
 		void disarm();
 		static void triggerThread(void* input);
 		void softwareTrigger();
-		//void armCamera( PictureControl* pic, CDC* dc );
 		POINT getCameraDimensions();
-		void reOpenCamera( HWND* parent );
+		void reOpenCamera( CWnd* parent );
 		std::string getCameraInfo();
 		baslerSettings getDefaultSettings();
 		double getCurrentExposure();
@@ -114,7 +113,7 @@ class BaslerCameras
 class ImageEventHandler : public Pylon::CImageEventHandler
 {
 	public:
-		ImageEventHandler(HWND* parentHandle) : Pylon::CImageEventHandler()
+		ImageEventHandler(CWnd* parentHandle) : Pylon::CImageEventHandler()
 		{
 			parent = parentHandle;
 		}
@@ -135,12 +134,13 @@ class ImageEventHandler : public Pylon::CImageEventHandler
 					{
 						elem *= 256.0 / 1024.0;
 					}
-					PostMessage(*parent, ACE_PIC_READY, grabResult->GetWidth() * grabResult->GetHeight(),
-								(LPARAM)image);
+					parent->PostMessageA( ACE_PIC_READY, grabResult->GetWidth( ) * grabResult->GetHeight( ),
+						(LPARAM)image );
 				}
 				else
 				{
-					thrower("Error: " + str(grabResult->GetErrorCode()) + " " + std::string(grabResult->GetErrorDescription().c_str()));
+					thrower("Error: " + str(grabResult->GetErrorCode()) + " " 
+							 + std::string(grabResult->GetErrorDescription().c_str()));
 				}
 			}
 			catch (Pylon::RuntimeException& err)
@@ -150,5 +150,5 @@ class ImageEventHandler : public Pylon::CImageEventHandler
 
 		}
 	private:
-		HWND* parent;
+		CWnd* parent;
 };	

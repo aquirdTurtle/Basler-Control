@@ -11,7 +11,7 @@
 // important constructor;
 // Create an instant camera object with the camera device found first. At this point this class is really only meant to work with a single
 // camera of one type at a time. Not sure what would happen if you had multiple cameras set up at once.
-BaslerCameras::BaslerCameras(HWND* parent)
+BaslerCameras::BaslerCameras(CWnd* parent)
 {
 	Pylon::PylonInitialize();
 	Pylon::CDeviceInfo info;
@@ -200,7 +200,7 @@ void BaslerCameras::setParameters( baslerSettings settings )
 
 // I can potentially use this to reopen the camera if e.g. the user disconnects. Don't think this is really implemented
 // yet.
-void BaslerCameras::reOpenCamera(HWND* parent)
+void BaslerCameras::reOpenCamera(CWnd* parent)
 {
 	Pylon::CDeviceInfo info;
 	info.SetDeviceClass( cameraType::DeviceClass() );
@@ -301,6 +301,7 @@ void BaslerCameras::triggerThread( void* voidInput )
 	{
 		while (input->camera->isGrabbing())
 		{
+			// adjust for frame rate
 			Sleep(int(1000.0 / input->frameRate));
 			try
 			{
@@ -417,7 +418,7 @@ int64_t BaslerCameras::Adjust( int64_t val, int64_t minimum, int64_t maximum, in
 
 
 // initialize the camera using the fundamental settings I use for all cameras. 
-void BaslerWrapper::init( HWND* parent )
+void BaslerWrapper::init( CWnd* parent )
 {
 	if (!BASLER_SAFEMODE)
 	{
@@ -425,14 +426,14 @@ void BaslerWrapper::init( HWND* parent )
 		{
 			Open();
 			// prepare the image event handler
-			RegisterImageEventHandler( new ImageEventHandler( parent ), Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete );
+			RegisterImageEventHandler( new ImageEventHandler( parent ), Pylon::RegistrationMode_ReplaceAll, 
+									   Pylon::Cleanup_Delete );
 			TriggerMode.SetValue( cameraParams::TriggerMode_On );
 		}
 		catch (Pylon::GenericException& err)
 		{
 			thrower( err.what() );
 		}
-
 	}
 }
 

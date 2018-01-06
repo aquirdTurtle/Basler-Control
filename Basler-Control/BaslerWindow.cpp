@@ -176,7 +176,7 @@ void BaslerWindow::OnRButtonUp( UINT stuff, CPoint clickLocation )
 }
 
 
-void BaslerWindow::handleEnter(){}
+void BaslerWindow::handleEnter( ) { errBox( "hi!" ); }
 
 
 // this is suppose see where the mouse is at a given time so that if it is hovering over a pixel I can display the pixel count.
@@ -342,15 +342,15 @@ void BaslerWindow::handleArmPress()
 		runExposureMode = tempSettings.exposureMode;
 		imageWidth = tempSettings.dimensions.horBinNumber;
 
-		HWND* win = new HWND;
-		win = &m_hWnd;
+		//HWND* win = new HWND;
+		//win = &m_hWnd;
 		triggerThreadFlag = true;
 
 		triggerThreadInput* input = new triggerThreadInput;
 		input->width = tempSettings.dimensions.horBinNumber;
 		input->height = tempSettings.dimensions.vertBinNumber;
 		input->frameRate = tempSettings.frameRate;
-		input->parent = win;
+		input->parent = this;
 		input->runningFlag = &triggerThreadFlag;
 
 		cameraController->armCamera( input);
@@ -366,7 +366,6 @@ void BaslerWindow::handleArmPress()
 
 void BaslerWindow::OnSize( UINT nType, int cx, int cy )
 {
-	//CDialog::OnSize( nType, cx, cy );
 	picture.rearrange("", "", cx, cy, mainFonts);
 	settings.rearrange(cx, cy, mainFonts);
 	stats.rearrange("", "", cx, cy, mainFonts);
@@ -440,7 +439,6 @@ BOOL BaslerWindow::OnInitDialog()
 //  this is automatically done for you by the framework.
 void BaslerWindow::OnPaint()
 {
-	//picture.drawBackground( this );
 	if (IsIconic())
 	{
 		CPaintDC dc(this); // device context for painting
@@ -483,8 +481,8 @@ void BaslerWindow::initializeControls()
 	CMenu menu;
 	menu.LoadMenu( IDR_MENU1 );
 	SetMenu( &menu );
-	HWND* temp = new HWND( GetSafeHwnd() );
-	cameraController = new BaslerCameras( temp );
+	//HWND* temp = new HWND( GetSafeHwnd() );
+	cameraController = new BaslerCameras( this );
 	if (!cameraController->isInitialized())
 	{
 		thrower("ERROR: Camera not connected! Exiting program..." );

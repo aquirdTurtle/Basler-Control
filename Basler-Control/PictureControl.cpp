@@ -54,6 +54,10 @@ void PictureControl::updatePalette( HPALETTE palette )
 
 void PictureControl::handleEditChange( int id )
 {
+	if ( !editMax  || !sliderMax )
+	{
+		return;
+	}
 	if (id == editMax.GetDlgCtrlID())
 	{
 		int max;
@@ -302,7 +306,6 @@ void PictureControl::setActive(bool activeState)
 
 void PictureControl::redrawImage(CWnd* parent)
 {
-	//drawBackground(parent);
 	if (active && mostRecentImage.size() != 0)
 	{
 		drawBitmap(parent->GetDC(), mostRecentImage);
@@ -345,33 +348,20 @@ void PictureControl::addIntegrationText(const std::vector<long>& pic, CWnd* pare
 	parent->ReleaseDC( dc );
 }
 
+
 // input is the 2D array which gets mapped to the image.
-void PictureControl::drawBitmap(CDC* deviceContext, const std::vector<long>& picData)
+void PictureControl::drawBitmap(CDC* dc, const std::vector<long>& picData)
 {
 	mostRecentImage = picData;
-	float yscale;
 	unsigned int minColor = minSliderPosition;
 	unsigned int maxColor = maxSliderPosition;
-	long modrange = maxColor - minColor;
-	double dTemp = 1;
-	int pixelsAreaWidth;
-	int pixelsAreaHeight;
-	int dataWidth, dataHeight;
-	int iTemp;
-	HANDLE hloc;
-	PBITMAPINFO pbmi;
-	WORD argbq[PICTURE_PALETTE_SIZE];
-	BYTE *DataArray;
-	// Rotated
-	SelectPalette(deviceContext->GetSafeHdc(), (HPALETTE)imagePalette, true);
-	RealizePalette(deviceContext->GetSafeHdc());
-
-	pixelsAreaWidth = currentBackgroundArea.right - currentBackgroundArea.left + 1;
-	pixelsAreaHeight = currentBackgroundArea.bottom - currentBackgroundArea.top + 1;
-
-	dataWidth = grid.size();
+	dc->SelectPalette( CPalette::FromHandle(imagePalette), true );
+	dc->RealizePalette();
+	int pixelsAreaWidth = currentBackgroundArea.right - currentBackgroundArea.left + 1;
+	int pixelsAreaHeight = currentBackgroundArea.bottom - currentBackgroundArea.top + 1;
+	int dataWidth = grid.size();
 	// assumes non-zero size...
-	dataHeight = grid[0].size();
+	int dataHeight = grid[0].size();
 	int totalGridSize = dataWidth * dataHeight;
 	if (picData.size() != totalGridSize)
 	{
@@ -382,37 +372,25 @@ void PictureControl::drawBitmap(CDC* deviceContext, const std::vector<long>& pic
 	{
 		pixelsAreaWidth += (4 - pixelsAreaWidth % 4);
 	}
-
-	yscale = (256.0f) / (float)modrange;
-
+	long modrange = maxColor - minColor;
+	float yscale = (256.0f) / (float)modrange;
+	WORD argbq[PICTURE_PALETTE_SIZE];
 	for (int paletteIndex = 0; paletteIndex < PICTURE_PALETTE_SIZE; paletteIndex++)
 	{
 		argbq[paletteIndex] = (WORD)paletteIndex;
 	}
-
-	//hloc = LocalAlloc(LMEM_ZEROINIT | LMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + (sizeof(WORD)*PICTURE_PALETTE_SIZE));
-	//hloc = LocalAlloc( LMEM_ZEROINIT | LMEM_MOVEABLE, sizeof( pbmi ) );
-	//hloc = LocalAlloc( LMEM_ZEROINIT | LMEM_MOVEABLE, sizeof( BITMAPINFOHEADER ));
-	//pbmi = (PBITMAPINFO)LocalLock(hloc);
-	pbmi = (PBITMAPINFO)LocalAlloc( LPTR,
-									sizeof( BITMAPINFOHEADER ) +
-									sizeof( RGBQUAD ) * (1 << 8) );
+	PBITMAPINFO pbmi = (PBITMAPINFO)LocalAlloc( LPTR, sizeof( BITMAPINFOHEADER ) + sizeof( RGBQUAD ) * (1 << 8) );
 	pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	pbmi->bmiHeader.biPlanes = 1;
 	pbmi->bmiHeader.biBitCount = 8;
 	pbmi->bmiHeader.biCompression = BI_RGB;
 	pbmi->bmiHeader.biClrUsed = PICTURE_PALETTE_SIZE;
 	pbmi->bmiHeader.biSizeImage = 0;// ((pbmi->bmiHeader.biWidth * 8 + 31) & ~31) / 8 * pbmi->bmiHeader.biHeight;
-
 	pbmi->bmiHeader.biHeight = dataHeight;
 	memcpy(pbmi->bmiColors, argbq, sizeof(WORD) * PICTURE_PALETTE_SIZE);
-
-	// errBox( std::to_string( sizeof( DataArray ) / sizeof( DataArray[0] ) ) );
-	// DataArray = (BYTE*)malloc(dataWidth * dataHeight * sizeof(BYTE));
-	// memset(DataArray, 0, dataWidth * dataHeight);
-
-	DataArray = (BYTE*)malloc( (dataWidth * dataHeight) * sizeof( BYTE ) );
-	memset( DataArray, 255, (dataWidth * dataHeight) * sizeof( BYTE ) );
+	std::vector<BYTE> dataArray( dataWidth * dataHeight, 255);
+	int iTemp;
+	double dTemp = 1;
 	for (int heightInc = 0; heightInc < dataHeight; heightInc++)
 	{
 		for (int widthInc = 0; widthInc < dataWidth; widthInc++)
@@ -441,63 +419,60 @@ void PictureControl::drawBitmap(CDC* deviceContext, const std::vector<long>& pic
 				iTemp = (int)dTemp;
 			}
 			// store the value.
-			DataArray[widthInc + heightInc * dataWidth] = (BYTE)iTemp;
+			dataArray[widthInc + heightInc * dataWidth] = (BYTE)iTemp;
 		}
 	}
-	SetStretchBltMode( deviceContext->GetSafeHdc(), COLORONCOLOR );
+	SetStretchBltMode( dc->GetSafeHdc(), COLORONCOLOR );
 	//deviceContext->SetStretchBltMode( COLORONCOLOR );
 	// eCurrentAccumulationNumber starts at 1.
-	BYTE *finalDataArray = NULL;
+	
+	//BYTE *finalDataArray = NULL;
 	switch (dataWidth)
 	{
 		case 0:
 		{
 			pbmi->bmiHeader.biWidth = dataWidth;
-			pbmi->bmiHeader.biSizeImage = 1;// pbmi->bmiHeader.biWidth * pbmi->bmiHeader.biHeight;// * sizeof( BYTE );
-			//memset( DataArray, 0, (dataWidth*dataHeight) * sizeof( *DataArray ) );
-			StretchDIBits( deviceContext->GetSafeHdc(), currentBackgroundArea.left, currentBackgroundArea.top,
+			pbmi->bmiHeader.biSizeImage = 1;
+			StretchDIBits( dc->GetSafeHdc(), currentBackgroundArea.left, currentBackgroundArea.top,
 						   pixelsAreaWidth, pixelsAreaHeight, 0, 0, dataWidth,
-						   dataHeight, DataArray, (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
+						   dataHeight, dataArray.data(), (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
 			break;
 		}
 		case 2:
 		{
 			// make array that is twice as long.
-			finalDataArray = (BYTE*)malloc(dataWidth * dataHeight * 2);
-			memset(finalDataArray, 255, dataWidth * dataHeight * 2);
-
+			std::vector<BYTE> finalDataArray(dataWidth * dataHeight * 2, 255 );
 			for (int dataInc = 0; dataInc < dataWidth * dataHeight; dataInc++)
 			{
-				finalDataArray[2 * dataInc] = DataArray[dataInc];
-				finalDataArray[2 * dataInc + 1] = DataArray[dataInc];
+				finalDataArray[2 * dataInc] = dataArray[dataInc];
+				finalDataArray[2 * dataInc + 1] = dataArray[dataInc];
 			}
 			pbmi->bmiHeader.biWidth = dataWidth * 2;
-			StretchDIBits( *deviceContext, currentBackgroundArea.left, currentBackgroundArea.top, pixelsAreaWidth, pixelsAreaHeight, 0, 0, dataWidth * 2, dataHeight,
-						   finalDataArray, (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
-			free(finalDataArray);
+			StretchDIBits( *dc, currentBackgroundArea.left, currentBackgroundArea.top, pixelsAreaWidth,
+						   pixelsAreaHeight, 0, 0, dataWidth * 2, dataHeight, finalDataArray.data(), 
+						   (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
 			break;
 		}
 		default:
 		{
 			// make array that is 4X as long.
-			finalDataArray = (BYTE*)malloc(dataWidth * dataHeight * 4);
-			memset(finalDataArray, 255, dataWidth * dataHeight * 4);
+			std::vector<BYTE> finalDataArray (dataWidth * dataHeight * 4, 255 );
 			for (int dataInc = 0; dataInc < dataWidth * dataHeight; dataInc++)
 			{
-				int data = DataArray[dataInc];
+				int data = dataArray[dataInc];
 				finalDataArray[4 * dataInc] = data;
 				finalDataArray[4 * dataInc + 1] = data;
 				finalDataArray[4 * dataInc + 2] = data;
 				finalDataArray[4 * dataInc + 3] = data;
 			}
 			pbmi->bmiHeader.biWidth = dataWidth * 4;
-			StretchDIBits( *deviceContext, currentBackgroundArea.left, currentBackgroundArea.top, pixelsAreaWidth, pixelsAreaHeight, 0, 0, dataWidth * 4, dataHeight,
-						   finalDataArray, (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
-			free(finalDataArray);
+			StretchDIBits( *dc, currentBackgroundArea.left, currentBackgroundArea.top, pixelsAreaWidth,
+						   pixelsAreaHeight, 0, 0, dataWidth * 4, dataHeight, finalDataArray.data(), 
+						   (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
 			break;
 		}
 	}
-	delete[] DataArray;
+	LocalFree( pbmi );
 }
 
 /*

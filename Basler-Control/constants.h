@@ -6,8 +6,8 @@
 
 #define BASLER_SAFEMODE true
 // which type of camera
-// #define FIREWIRE_CAMERA
-#define USB_CAMERA
+#define FIREWIRE_CAMERA
+//#define USB_CAMERA
 
 // The code compiles fairly differently for Firewire (1384) cameras vs. USB cameras.
 #ifdef FIREWIRE_CAMERA 
