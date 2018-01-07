@@ -134,8 +134,6 @@ BaslerWindow::BaslerWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx( IDD_BASLERCON
 					   CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT( "Arial" ) );
 }
 
-
-
 // the message map. Allows me to handle various events in the system using functions I write myself.
 BEGIN_MESSAGE_MAP( BaslerWindow, CDialogEx )
 	ON_WM_CTLCOLOR()
