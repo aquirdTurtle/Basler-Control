@@ -237,7 +237,10 @@
     <None Include="res\BaslerControl.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\Camera-Firewire-Icon.ico" />
+    <Image Include="..\Camera-USB-Icon.ico" />
     <Image Include="res\Basler-Control.ico" />
+    <Image Include="res\icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

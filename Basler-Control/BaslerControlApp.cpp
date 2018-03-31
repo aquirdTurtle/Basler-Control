@@ -9,7 +9,7 @@
 #include "stdafx.h"
 #include "BaslerControlApp.h"
 #include "BaslerWindow.h"
-
+#include "Resource.h"
 // something windows programs often do for debugging purposes.
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -78,7 +78,6 @@ BOOL CBaslerControlApp::InitInstance()
 	BaslerWindow dlg;
 	// the app class gets a reference.
 	m_pMainWnd = &dlg;
-
 	// create the main dialog. Most of the code sits inside this function, including the main gui looping.
 	INT_PTR nResponse = dlg.DoModal();
 	
@@ -89,6 +88,7 @@ BOOL CBaslerControlApp::InitInstance()
 	{
 		delete pShellManager;
 	}
+
 
 	#if !defined(_AFXDLL) && !defined(_AFX_NO_MFC_CONTROLS_IN_DIALOGS)
 		ControlBarCleanUp();

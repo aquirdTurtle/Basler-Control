@@ -4,7 +4,8 @@ Features:
 - plot line from plot or integrated rows / columns
 - Being able to see pixel counts
 - resize picture to keep pixels square (or real dimensions)
- 
+- make camera-type-sensitive taskbar icon
+
 Bugs:
 - handle changing options while the system is running. Grey things.
 - fix hover value

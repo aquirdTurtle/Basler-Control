@@ -117,5 +117,14 @@
     <Image Include="res\Basler-Control.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\icon1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Camera-Firewire-Icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Camera-USB-Icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
