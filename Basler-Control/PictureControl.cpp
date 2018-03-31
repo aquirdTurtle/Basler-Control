@@ -56,8 +56,8 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 	// reset this.
 	loc.x -= originalBackgroundArea.right - originalBackgroundArea.left;
 	// manually scroll the objects to initial positions.
-	handleScroll( id++, 0 );
-	handleScroll( id++, 1024 );
+	handleScroll( sliderMin.GetDlgCtrlID( ), 0 );
+	handleScroll( sliderMax.GetDlgCtrlID( ), 1024 );
 
 	createPalettes( parent->GetDC( ) );
 	updatePalette( palettes[0] );

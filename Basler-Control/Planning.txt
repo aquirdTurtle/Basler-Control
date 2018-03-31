@@ -8,12 +8,4 @@ Features:
 Bugs:
 - handle changing options while the system is running. Grey things.
 - fix hover value
-- contrast range is initializing to zero
 - usb dynamic range seems wrong
-
-
-### DONE ###
-- Disarming camera doesn't work in safemode (ironically)
-- can change picture size in safemode.
-- enter shouldn't close.
-- now handles throw when camera not connected. Tell user before quitting.
