@@ -14,3 +14,4 @@
 *.ilk
 *.exe
 .vs/Basler-Control/v15/.suo
+Basler-Control/Packages/*

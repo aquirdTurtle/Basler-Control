@@ -49,7 +49,7 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 	fileNumberEdit.SetWindowTextA( "0" );
 }
 
-void PictureSaver::append( std::vector<long>* pic, int width )
+void PictureSaver::append( const Matrix<long>& pic, int width )
 {
 	// check if it's actually supposed to save.
 	if (!saveCheckButton.GetCheck())
@@ -81,7 +81,7 @@ void PictureSaver::append( std::vector<long>* pic, int width )
 	}
 	file << ";\n";
 	int count = 0;
-	for (auto elem : (*pic))
+	for (auto elem : pic)
 	{
 		file << elem;
 		count++;
@@ -97,7 +97,7 @@ void PictureSaver::append( std::vector<long>* pic, int width )
 }
 
 // save a picture with width width.
-void PictureSaver::save( std::vector<long>* pic, int width )
+void PictureSaver::save( const Matrix<long>& pic, int width )
 {
 	// check if it's actually supposed to save.
 	if (!saveCheckButton.GetCheck())
@@ -158,10 +158,6 @@ void PictureSaver::save( std::vector<long>* pic, int width )
 		thrower( "ERROR: Please enter an address for saved pictures." );
 	}
 
-	/*
-	
-	*/
-
 	int fileNumber;
 	fileNumberEdit.GetWindowTextA( text );
 	try
@@ -172,20 +168,17 @@ void PictureSaver::save( std::vector<long>* pic, int width )
 	{
 		thrower( "ERROR: Please enter a valid number in the file number edit box!" );
 	}
-
-
 	if (file.is_open())
 	{
 		file.close();
-	}
-	
+	}	
 	file.open( address + "_" + str(fileNumber) + ".txt");
 	if (!file.is_open())
 	{
 		thrower( "ERROR! Save file failed to open! Full address was: " + address + "_" + str( fileNumber ) + ".txt" );
 	}
 	int count = 0;
-	for (auto elem : (*pic))
+	for (auto elem : pic)
 	{
 		file << elem << " ";
 		count++;
@@ -200,7 +193,7 @@ void PictureSaver::save( std::vector<long>* pic, int width )
 
 
 // save an array of pictures. Each picture has width of width.
-void PictureSaver::save( std::vector<std::vector<long>> pics, int width )
+void PictureSaver::save( const std::vector<Matrix<long>>& pics, int width )
 {
 	// check if it's actually supposed to save.
 	if (!saveCheckButton.GetCheck())

@@ -48,11 +48,10 @@ class Error : public std::runtime_error
 // the following gives any throw call file and line information.
 #define thrower(arg) throw Error(arg, __FILE__, __LINE__)
 // shows error message if it exists. Could be function but for consistency with other ERR_X Macros...
-#define ERR_POP(string) {if (string != ""){errBox(string);}}
+//#define ERR_POP(string) {if (string != ""){errBox(string);}}
 // shows error message and exits given function with error.
-#define ERR_POP_RETURN(string) {if (string != ""){errBox(string); return;}}
+//#define ERR_POP_RETURN(string) {if (string != ""){errBox(string); return;}}
 
-void errBox( std::string msg );
 /*
 * This functions appends the text "newText" to the edit control corresponding to textIDC.
 */
@@ -120,3 +119,20 @@ template <typename T> std::string str( T input, const int precision = 6, bool ea
 // the function with __VA_ARGS__ which was the original "..." arguments.
 #define cstr(...) GET_MACRO(__VA_ARGS__, cstr2, cstr1)(__VA_ARGS__)
 
+
+// this function takes any argument, converts it to a string, and displays it on the screen. It can be useful for debuging.
+template <typename T> void errBox( T msg )
+{
+	MessageBox( NULL, cstr( msg ), "ERROR!", MB_ICONERROR | MB_SYSTEMMODAL );
+}
+
+// this function takes any argument, converts it to a string, and displays it on the screen. It can be useful for debuging.
+template <typename T> void infoBox( T msg )
+{
+	MessageBox( NULL, cstr( msg ), "Info", MB_ICONWARNING );
+}
+
+template <typename T> int promptBox( T msg, UINT promptStyle )
+{
+	return MessageBox( NULL, cstr( msg ), "Prompt", promptStyle | MB_SYSTEMMODAL );
+}

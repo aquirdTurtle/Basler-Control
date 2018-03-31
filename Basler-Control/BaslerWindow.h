@@ -12,7 +12,6 @@
 class BaslerWindow : public CDialogEx
 {
 	public:
-		
 		BaslerWindow(CWnd* pParent = NULL);	
 		BOOL OnInitDialog();
 		void handleEnter();
@@ -21,6 +20,7 @@ class BaslerWindow : public CDialogEx
 		HCURSOR OnQueryDragIcon();
 		void OnSize( UINT nType, int cx, int cy );
 		void handleArmPress();
+		void handleClose();
 		void handleDisarmPress();
 		void initializeControls();
 		void passExposureMode();

@@ -81,7 +81,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Basler\pylon 5\Development\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\Basler\pylon 5\Development\include;$(IncludePath);C:\Users\Mark-Brown\Basler-Control\Basler-Control\Packages\boost_1_64_0</IncludePath>
     <LibraryPath>C:\Program Files\Basler\pylon 5\Development\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -91,7 +91,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\Basler\pylon 5\Development\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>C:\Program Files\Basler\pylon 5\Development\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);;C:\Users\Mark-Brown\Basler-Control\Basler-Control\Packages\boost_1_64_0</IncludePath>
     <LibraryPath>C:\Program Files\Basler\pylon 5\Development\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -204,6 +204,7 @@
     <ClInclude Include="commonTypes.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="Control.h" />
+    <ClInclude Include="Matrix.h" />
     <ClInclude Include="miscellaneousCommonFunctions.h" />
     <ClInclude Include="PictureControl.h" />
     <ClInclude Include="PictureSaver.h" />

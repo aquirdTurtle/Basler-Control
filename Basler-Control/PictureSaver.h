@@ -1,15 +1,17 @@
 #pragma once
 #include "stdafx.h"
-#include <fstream>
+#include "Matrix.h"
 #include "commonTypes.h"
+#include <fstream>
+
 
 class PictureSaver
 {
 	public:
 		void initialize( POINT& pos, int& id, CWnd* parent );
-		void save(std::vector<long>* pic, int width);
-		void save( std::vector<std::vector<long>> pics, int width );
-		void append( std::vector<long>* pic, int width );
+		void save(const Matrix<long>& pic, int width);
+		void save( const std::vector<Matrix<long>>& pics, int width );
+		void append( const Matrix<long>& pic, int width );
 		void close();
 		void rearrange(int width, int height, fontMap fonts);
 		void handleModeChange(std::string cameraMode);

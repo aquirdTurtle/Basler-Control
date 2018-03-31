@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include "Control.h"
+#include "Matrix.h"
 
 // contains experimentally calibrated conversion factors. See the onenote section on the camera
 // for more conversion factors and notes on the calibration.
@@ -37,8 +38,8 @@ class PictureStats
 						 std::vector<CToolTipCtrl*>& tooltips );
 		bool rearrange( std::string cameraMode, std::string trigMode, int width, int height,
 						std::unordered_map<std::string, CFont*> fonts );
-		void update( std::vector<long>* image, unsigned int imageNumber, std::pair<int, int> selectedPixel,
-					 int pictureWidth, int currentRepetitionNumbar, int totalRepetitionCount );
+		void update( Matrix<long> image, unsigned int imageNumber, POINT selectedPixel, int pictureWidth, 
+					 int currentRepetitionNumbar, int totalRepetitionCount );
 		bool reset();
 		bool updateType( std::string typeText );
 

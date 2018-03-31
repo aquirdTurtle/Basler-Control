@@ -1,12 +1,16 @@
-Planning:
 Features:
 - be able to actually control the gain.
 - saver can figure out lowest number for picture.
+- plot line from plot or integrated rows / columns
 - Being able to see pixel counts
 - resize picture to keep pixels square (or real dimensions)
+ 
 Bugs:
 - handle changing options while the system is running. Grey things.
 - fix hover value
+- contrast range is initializing to zero
+- usb dynamic range seems wrong
+
 
 ### DONE ###
 - Disarming camera doesn't work in safemode (ironically)

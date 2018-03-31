@@ -2,6 +2,7 @@
 #include "Control.h"
 #include "BaslerSettingsControl.h"
 #include <array>
+#include "Matrix.h"
 
 class PictureControl
 {
@@ -10,35 +11,34 @@ class PictureControl
 		void initialize(POINT& loc, CWnd* parent, int& id, int width, int height, CBrush* defaultGridBrush);
 		void recalculateGrid( imageDimensions newParameters );
 		void setPictureArea( POINT loc, int width, int height );
-		void drawBitmap( CDC* deviceContext, const std::vector<long>& picData );
-		void drawBackground(CWnd* parent);
-		void drawGrid(CWnd* parent, CBrush* brush);
-		void drawRectangles(CWnd* parent, CBrush* brush);
-		//void drawPixelCircle(CWnd* parent, POINT selectedLocation );
-		void drawIntegratingCircles( CWnd* parent, double circleRadius );
-		long integrateRegion(const std::vector<long>& picData, POINT selectedLocation, double circleSize);
+		void drawBitmap( CDC* deviceContext, const Matrix<long>& picData );
+		void drawBackground( CDC* parentCdc );
+		void drawGrid(CDC* parentCdc, CBrush* brush);
+		void drawIntegratingCircles( CDC* parentCdc, double circleRadius );
+		long integrateRegion(const Matrix<long>& picData, POINT selectedLocation, double circleSize);
 		void rearrange( std::string cameraMode, std::string triggerMode, int width, int height, fontMap fonts );
 		void handleScroll( int id, UINT nPos );
 		void handleEditChange( int id );
 		void updatePalette( HPALETTE pallete );
-		void redrawImage( CWnd* parent );
+		void redrawImage( CDC* parentCdc );
 		void setActive( bool activeState );
 		bool isActive();
 		void handleButtonClick();
 		POINT checkClickLocation( CPoint clickLocation );
 		void createPalettes( CDC* dc );
-		void handleRightClick( CPoint clickLocation, CWnd* parent );
+		void handleRightClick( CPoint clickLocation, CDC* parentCdc );
 		void handleMouse( CPoint point );
-		void setValue();
-		void drawDongles( CWnd* parent, const std::vector<long>& pic );
-		void addIntegrationText( const std::vector<long>& pic, CWnd* parent );
+		void setHoverValue();
+		void drawDongles( CDC* parentCdc, const Matrix<long>& pic );
+		void addIntegrationText( const Matrix<long>& pic, CDC* parentCdc );
 		long getIntegrationSize();
 	private:
 		CBrush* gridBrush;
 		CFont pictureTextFont;
 		POINT mouseCoordinates;
 		// for replotting.
-		std::vector<long> mostRecentImage;
+		Matrix<long> mostRecentImage;
+		//std::vector<long> mostRecentImage;
 		// stores info as to whether the control is currently being used in plotting camera data or was used 
 		// in the most recent run.
 		bool active = true;

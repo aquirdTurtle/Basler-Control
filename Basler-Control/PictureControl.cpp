@@ -10,6 +10,101 @@ PictureControl::PictureControl()
 }
 
 
+void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, int height, CBrush* defaultGridBrush )
+{
+	gridBrush = defaultGridBrush;
+	pictureTextFont.CreateFontA( 34, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+								 CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT( "Arial" ) );
+	if ( width < 100 )
+	{
+		thrower( "Pictures must be greater than 100 in width because this is the size of the max/min controls." );
+	}
+	if ( height < 100 )
+	{
+		thrower( "Pictures must be greater than 100 in height because this is the minimum height of the max/min controls." );
+	}
+
+	setPictureArea( loc, width, height );
+
+	loc.x += originalBackgroundArea.right - originalBackgroundArea.left;
+	// "min" text
+	labelMin.sPos = { loc.x, loc.y, loc.x + 50, loc.y + 30 };
+	labelMin.Create( "MIN", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMin.sPos, parent, id++ );
+	// minimum number text
+	editMin.sPos = { loc.x, loc.y + 30, loc.x + 50, loc.y + 60 };
+	editMin.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMin.sPos, parent, IDC_MIN_SLIDER_EDIT );
+	editMin.SetWindowText( "0" );
+	// minimum slider
+	sliderMin.sPos = { loc.x, loc.y + 60, loc.x + 50, loc.y + originalBackgroundArea.bottom - originalBackgroundArea.top };
+	sliderMin.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, id++ );
+	sliderMin.SetRange( 0, 1024 );
+	sliderMin.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
+	sliderMin.SetPos( 0 );
+	// "max" text
+	labelMax.sPos = { loc.x + 50, loc.y, loc.x + 100, loc.y + 30 };
+	labelMax.Create( "MAX", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMax.sPos, parent, id++ );
+	// maximum number edit
+	editMax.sPos = { loc.x + 50, loc.y + 30, loc.x + 100, loc.y + 60 };
+	editMax.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, IDC_MAX_SLIDER_EDIT );
+	editMax.SetWindowText( "1024" );
+	// maximum slider
+	sliderMax.sPos = { loc.x + 50, loc.y + 60, loc.x + 100, loc.y + originalBackgroundArea.bottom - originalBackgroundArea.top };
+	sliderMax.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, id++ );
+	sliderMax.SetRange( 0, 1024 );
+	sliderMax.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
+	sliderMax.SetPos( 1024 );
+	// reset this.
+	loc.x -= originalBackgroundArea.right - originalBackgroundArea.left;
+	// manually scroll the objects to initial positions.
+	handleScroll( id++, 0 );
+	handleScroll( id++, 1024 );
+
+	createPalettes( parent->GetDC( ) );
+	updatePalette( palettes[0] );
+
+	loc.y += height;
+	coordinatesText.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
+	coordinatesText.Create( "Coordinates: ", WS_CHILD | WS_VISIBLE, coordinatesText.sPos, parent, id++ );
+
+	coordinatesDisp.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
+	coordinatesDisp.Create( "", WS_CHILD | WS_VISIBLE | ES_READONLY, coordinatesDisp.sPos, parent, id++ );
+
+	valueText.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
+	valueText.Create( "Value: ", WS_CHILD | WS_VISIBLE, valueText.sPos, parent, id++ );
+
+	valueDisp.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
+	valueDisp.Create( "", WS_CHILD | WS_VISIBLE | ES_READONLY, valueDisp.sPos, parent, id++ );
+
+	setLocationsButton.sPos = { loc.x, loc.y, loc.x += 200, loc.y + 20 };
+	setLocationsButton.Create( "Set Analysis Locations", WS_CHILD | WS_VISIBLE | BS_PUSHLIKE | BS_CHECKBOX, valueDisp.sPos,
+							   parent, IDC_SET_ANALYSIS_LOCATIONS );
+	circleSizeText.sPos = { loc.x, loc.y, loc.x += 150, loc.y + 20 };
+	circleSizeText.Create( "Integration Radius:", WS_CHILD | WS_VISIBLE, circleSizeText.sPos, parent, id++ );
+
+	circleSizeEdit.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
+	circleSizeEdit.Create( WS_CHILD | WS_VISIBLE, circleSizeEdit.sPos, parent, id++ );
+	circleSizeEdit.SetWindowText( "5" );
+}
+
+
+long PictureControl::getIntegrationSize( )
+{
+	CString txt;
+	circleSizeEdit.GetWindowText( txt );
+	try
+	{
+		return std::stol( str( txt ) );
+	}
+	catch ( std::invalid_argument& err )
+	{
+		// don't throw, user could just be editing the edit while the picture runs.
+		return 0;
+	}
+}
+
+
+
+
 bool PictureControl::isActive()
 {
 	return active;
@@ -92,7 +187,6 @@ void PictureControl::handleEditChange( int id )
 		sliderMin.SetPos( min );
 		minSliderPosition = min;
 	}
-	return;
 }
 
 
@@ -113,107 +207,16 @@ void PictureControl::handleScroll(int id, UINT nPos)
 }
 
 
-void PictureControl::initialize(POINT& loc, CWnd* parent, int& id, int width, int height, CBrush* defaultGridBrush)
+void PictureControl::setHoverValue()
 {
-	gridBrush = defaultGridBrush;
-	pictureTextFont.CreateFontA( 34, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
-						  CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT( "Arial" ) );
-	if (width < 100)
-	{
-		thrower("Pictures must be greater than 100 in width because this is the size of the max/min controls.");
-	}
-	if (height < 100)
-	{
-		thrower("Pictures must be greater than 100 in height because this is the minimum height of the max/min controls.");
-	}
-
-	setPictureArea( loc, width, height );
-
-	loc.x += originalBackgroundArea.right - originalBackgroundArea.left;
-	// "min" text
-	labelMin.sPos = { loc.x, loc.y, loc.x + 50, loc.y + 30 };
-	labelMin.Create("MIN", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMin.sPos, parent, id++);
-	// minimum number text
-	editMin.sPos = { loc.x, loc.y + 30, loc.x + 50, loc.y + 60 };
-	editMin.Create(WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMin.sPos, parent, IDC_MIN_SLIDER_EDIT );
-	editMin.SetWindowText( "0" );
-	// minimum slider
-	sliderMin.sPos = { loc.x, loc.y + 60, loc.x + 50, loc.y + originalBackgroundArea.bottom - originalBackgroundArea.top};
-	sliderMin.Create(WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, id++);
-	sliderMin.SetRange(0, 1024);
-	sliderMin.SetPageSize((minSliderPosition - minSliderPosition)/10.0);
-	sliderMin.SetPos( 0 );
-	// "max" text
-	labelMax.sPos = { loc.x + 50, loc.y, loc.x + 100, loc.y + 30 };
-	labelMax.Create("MAX", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMax.sPos, parent, id++);
-	// maximum number edit
-	editMax.sPos = { loc.x + 50, loc.y + 30, loc.x + 100, loc.y + 60 };
-	editMax.Create(WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, IDC_MAX_SLIDER_EDIT );
-	editMax.SetWindowText( "1024" );
-	// maximum slider
-	sliderMax.sPos = { loc.x + 50, loc.y + 60, loc.x + 100, loc.y + originalBackgroundArea.bottom - originalBackgroundArea.top};
-	sliderMax.Create(WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, id++);
-	sliderMax.SetRange(0, 1024);
-	sliderMax.SetPageSize((minSliderPosition - minSliderPosition) / 10.0);
-	sliderMax.SetPos( 1024 );
-	// reset this.
-	loc.x -= originalBackgroundArea.right - originalBackgroundArea.left;
-	// manually scroll the objects to initial positions.
-	handleScroll( id++, 0);
-	handleScroll( id++, 1024);
-
-	createPalettes( parent->GetDC() );
-	updatePalette( palettes[0] );
-
-	loc.y += height;
-	coordinatesText.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
-	coordinatesText.Create( "Coordinates: ", WS_CHILD | WS_VISIBLE, coordinatesText.sPos, parent, id++ );
-	
-	coordinatesDisp.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
-	coordinatesDisp.Create( "", WS_CHILD | WS_VISIBLE | ES_READONLY, coordinatesDisp.sPos, parent, id++ );
-	
-	valueText.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
-	valueText.Create("Value: ", WS_CHILD | WS_VISIBLE, valueText.sPos, parent, id++);
-
-	valueDisp.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
-	valueDisp.Create("", WS_CHILD | WS_VISIBLE | ES_READONLY, valueDisp.sPos, parent, id++);
-
-	setLocationsButton.sPos = { loc.x, loc.y, loc.x += 200, loc.y + 20 };
-	setLocationsButton.Create( "Set Analysis Locations", WS_CHILD | WS_VISIBLE | BS_PUSHLIKE | BS_CHECKBOX, valueDisp.sPos,
-							   parent, IDC_SET_ANALYSIS_LOCATIONS );
-	circleSizeText.sPos = { loc.x, loc.y, loc.x += 150, loc.y + 20 };
-	circleSizeText.Create( "Integration Radius:", WS_CHILD | WS_VISIBLE, circleSizeText.sPos, parent, id++ );
-	
-	circleSizeEdit.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
-	circleSizeEdit.Create( WS_CHILD | WS_VISIBLE, circleSizeEdit.sPos, parent, id++ );
-	circleSizeEdit.SetWindowText( "5" );
-}
-
-
-long PictureControl::getIntegrationSize()
-{
-	CString txt;
-	circleSizeEdit.GetWindowText( txt );
-	try
-	{
-		return std::stol( str( txt ) );
-	}
-	catch (std::invalid_argument& err)
-	{
-		// don't throw, user could just be editing the edit while the picture runs.
-		return 0;
-	}
-}
-
-
-void PictureControl::setValue()
-{
-	int loc = mouseCoordinates.x * grid.size() + mouseCoordinates.y;
+	//int loc = mouseCoordinates.x * grid.size() + grid.front().size( ) - mouseCoordinates.y;
+	int loc = mouseCoordinates.x * grid.size( ) + mouseCoordinates.y;
 	if (loc >= mostRecentImage.size())
 	{
 		return;
 	}
-	valueDisp.SetWindowTextA(cstr(mostRecentImage[loc]));
+	//valueDisp.SetWindowTextA(cstr(mostRecentImage[loc]));
+	valueDisp.SetWindowTextA( cstr( mostRecentImage(mouseCoordinates) ) );
 }
 
 
@@ -231,7 +234,7 @@ void PictureControl::handleMouse(CPoint point)
 				mouseCoordinates = { rowCount, colCount };
 				if (mostRecentImage.size() != 0 && grid.size() != 0)
 				{
-					setValue();
+					setHoverValue();
 				}
 			}
 			rowCount += 1;
@@ -242,7 +245,7 @@ void PictureControl::handleMouse(CPoint point)
 }
 
 
-void PictureControl::handleRightClick( CPoint clickLocation, CWnd* parent )
+void PictureControl::handleRightClick( CPoint clickLocation, CDC* parentCdc )
 {
 	if (currentlySettingLocations)
 	{
@@ -252,7 +255,7 @@ void PictureControl::handleRightClick( CPoint clickLocation, CWnd* parent )
 		{
 			analysisLocations.push_back( location );
 		}
-		redrawImage(parent);
+		redrawImage( parentCdc );
 	}
 }
 
@@ -304,53 +307,50 @@ void PictureControl::setActive(bool activeState)
 	active = activeState;
 }
 
-void PictureControl::redrawImage(CWnd* parent)
+void PictureControl::redrawImage(CDC* parentCdc )
 {
 	if (active && mostRecentImage.size() != 0)
 	{
-		drawBitmap(parent->GetDC(), mostRecentImage);
+		drawBitmap( parentCdc, mostRecentImage);
 	}
-	drawDongles( parent, mostRecentImage );
+	drawDongles( parentCdc, mostRecentImage );
 }
 
 
-void PictureControl::drawDongles(CWnd* parent, const std::vector<long>& image)
+void PictureControl::drawDongles( CDC* parentCdc, const Matrix<long>& image)
 {
 	if (false)
 	{
-		drawGrid(parent, gridBrush);
+		drawGrid(parentCdc, gridBrush);
 	}
-	drawIntegratingCircles( parent, getIntegrationSize() );
-	addIntegrationText( image, parent );
+	drawIntegratingCircles( parentCdc, getIntegrationSize() );
+	addIntegrationText( image, parentCdc );
 }
 
 
-void PictureControl::addIntegrationText(const std::vector<long>& pic, CWnd* parent)
+void PictureControl::addIntegrationText(const Matrix<long>& pic, CDC* parentCdc)
 {
-	CDC* dc = parent->GetDC();
 	for (auto loc : analysisLocations)
 	{
 		long sum = integrateRegion( pic, loc, getIntegrationSize() );
 		RECT drawLocation;
 		POINT center = { (grid[loc.x][loc.y].right + grid[loc.x][loc.y].left) / 2,
-						(grid[loc.x][loc.y].bottom + grid[loc.x][loc.y].top) / 2 };
+						 (grid[loc.x][loc.y].bottom + grid[loc.x][loc.y].top) / 2 };
 		drawLocation.right = center.x + 75;
 		drawLocation.left = center.x - 75;
 		drawLocation.top = center.y - 15;
 		drawLocation.bottom = center.y + 15;
 		// 150 X 30
-
-		dc->SetBkMode( TRANSPARENT );
-		dc->SelectObject( pictureTextFont );
-		dc->SetTextColor( RGB( 255, 0, 0 ) );
-		dc->DrawText( cstr( sum ), &drawLocation, DT_CENTER | DT_SINGLELINE | DT_VCENTER );
+		parentCdc->SetBkMode( TRANSPARENT );
+		parentCdc->SelectObject( pictureTextFont );
+		parentCdc->SetTextColor( RGB( 255, 0, 0 ) );
+		parentCdc->DrawText( cstr( sum ), &drawLocation, DT_CENTER | DT_SINGLELINE | DT_VCENTER );
 	}
-	parent->ReleaseDC( dc );
 }
 
 
 // input is the 2D array which gets mapped to the image.
-void PictureControl::drawBitmap(CDC* dc, const std::vector<long>& picData)
+void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 {
 	mostRecentImage = picData;
 	unsigned int minColor = minSliderPosition;
@@ -401,7 +401,8 @@ void PictureControl::drawBitmap(CDC* dc, const std::vector<long>& picData)
 			}
 			else
 			{
-				dTemp = ceil( yscale * (picData[widthInc + heightInc * dataWidth] - minColor) );
+				//dTemp = ceil( yscale * (picData[widthInc + heightInc * dataWidth] - minColor) );
+				dTemp = ceil( yscale * (picData( widthInc, heightInc ) - minColor) );
 			}
 			if (dTemp < 0)
 			{
@@ -473,49 +474,41 @@ void PictureControl::drawBitmap(CDC* dc, const std::vector<long>& picData)
 		}
 	}
 	LocalFree( pbmi );
+	// update this with the new picture.
+	setHoverValue( );
 }
 
 /*
  * recolor the box, clearing last run
  */
-void PictureControl::drawBackground(CWnd* parent)
+void PictureControl::drawBackground( CDC* parentCdc )
 {
-	CDC* colorObj = parent->GetDC();
-	colorObj->SelectObject(GetStockObject(DC_BRUSH));
-	colorObj->SelectObject(GetStockObject(DC_PEN));
+	parentCdc->SelectObject(GetStockObject(DC_BRUSH));
+	parentCdc->SelectObject(GetStockObject(DC_PEN));
 	// dark green brush
-	colorObj->SetDCBrushColor(RGB(0, 10, 0));
+	parentCdc->SetDCBrushColor(RGB(0, 10, 0));
 	// Set the Pen to White
-	colorObj->SetDCPenColor(RGB(255, 255, 255));
-	// Drawing a rectangle with the current Device Context
-	// (slightly larger than the image zone).
-	RECT rectArea = { currentBackgroundArea.left, currentBackgroundArea.top, currentBackgroundArea.right, currentBackgroundArea.bottom};
-	//RECT rectArea = { 0, 100, 105, 105 };
-	int result = colorObj->Rectangle(&rectArea);
-	parent->ReleaseDC(colorObj);
+	parentCdc->SetDCPenColor(RGB(255, 255, 255));
+	// Drawing a rectangle with the current Device Context (slightly larger than the image zone).
+	RECT rectArea = { currentBackgroundArea.left, currentBackgroundArea.top, currentBackgroundArea.right, 
+		currentBackgroundArea.bottom};
+	parentCdc->Rectangle(&rectArea);
 }
 
-void PictureControl::drawGrid(CWnd* parent, CBrush* brush)
+
+void PictureControl::drawGrid( CDC* parentCdc, CBrush* brush)
 {
-	CDC* easel = parent->GetDC();
-	easel->SelectObject(GetStockObject(DC_BRUSH));
-	easel->SetDCBrushColor(RGB(255, 255, 255));
+	parentCdc->SelectObject(GetStockObject(DC_BRUSH));
+	parentCdc->SetDCBrushColor(RGB(255, 255, 255));
 	// draw rectangles indicating where the pixels are.
 	for (int widthInc = 0; widthInc < grid.size(); widthInc++)
 	{
 		for (int heightInc = 0; heightInc < grid[widthInc].size(); heightInc++)
 		{
-			easel->FrameRect(&grid[widthInc][heightInc], brush);
+			parentCdc->FrameRect(&grid[widthInc][heightInc], brush);
 		}
 	}
-	parent->ReleaseDC(easel);
 }
-
-void PictureControl::drawRectangles( CWnd* parent, CBrush* brush )
-{
-
-}
-
 
 
 
@@ -551,7 +544,7 @@ void PictureControl::drawRectangles( CWnd* parent, CBrush* brush )
  */
 
 
-long PictureControl::integrateRegion(const std::vector<long>& picData, POINT selectedLocation, double circleSize)
+long PictureControl::integrateRegion(const Matrix<long>& picData, POINT selectedLocation, double circleSize)
 {
 	if (grid.size() == 0)
 	{
@@ -570,13 +563,13 @@ long PictureControl::integrateRegion(const std::vector<long>& picData, POINT sel
 	long picHeight = grid[0].size();
 	long sum = 0;
 	long x, y;
-	for (auto pixelCount : picData)
+	for (auto pixelCount : range(picData.size()))
 	{
 		x = count % pixWidth;
 		y = count / pixWidth;
 		if (sqrt( pow( x - selectedLocation.x, 2 ) + pow( y - selectedLocation.y, 2 ) ) < circleSize)
 		{
-			sum += picData[count];
+			sum += picData(x,y);
 		}
 		count++;
 	}
@@ -587,7 +580,7 @@ long PictureControl::integrateRegion(const std::vector<long>& picData, POINT sel
 /*
  * draws a (generally) large circle on the picture, used to denote an area of integration.
  */
-void PictureControl::drawIntegratingCircles(CWnd* parent, double circleRadius)
+void PictureControl::drawIntegratingCircles(CDC* parentCdc, double circleRadius)
 {
 	if (grid.size() == 0)
 	{
@@ -601,13 +594,11 @@ void PictureControl::drawIntegratingCircles(CWnd* parent, double circleRadius)
 		UINT height = grid[0][0].bottom - grid[0][0].top;
 		POINT center = { (pixel.right + pixel.left) / 2, (pixel.bottom + pixel.top) / 2 };
 		// get appropriate brush and pen
-		CDC* dc = parent->GetDC();
-		dc->SelectObject( GetStockObject( HOLLOW_BRUSH ) );
-		dc->SelectObject( GetStockObject( DC_PEN ) );
-		dc->SetDCPenColor( RGB( 255, 255, 0 ) );
-		dc->Ellipse( center.x - circleRadius * width, center.y - circleRadius * height, center.x + circleRadius * width, 
-					 center.y + circleRadius * height );
-		parent->ReleaseDC( dc );
+		parentCdc->SelectObject( GetStockObject( HOLLOW_BRUSH ) );
+		parentCdc->SelectObject( GetStockObject( DC_PEN ) );
+		parentCdc->SetDCPenColor( RGB( 255, 255, 0 ) );
+		parentCdc->Ellipse( center.x - circleRadius * width, center.y - circleRadius * height, 
+							center.x + circleRadius * width, center.y + circleRadius * height );
 	}
 }
 

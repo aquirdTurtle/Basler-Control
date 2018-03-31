@@ -326,12 +326,13 @@ void BaslerCameras::triggerThread( void* voidInput )
 				}
  				// simulate successful grab
 				// need some way to communicate the width and height of the pic to this function...
-				std::vector<long>* image;
-				image = new std::vector<long>(input->width * input->height);
+				Matrix<long>* imageMatrix = new Matrix<long>(input->width, input->height);
+				// std::vector<long>* image;
+				// image = new std::vector<long>(input->width * input->height);
 				UINT count = 0;
 				UINT rowNum = 0;
 				UINT colNum = 0;
-				for (auto& elem : *image)
+				for (auto& elem : *imageMatrix)
 				{
 					//elem = count++;
 					elem = 500 + rand() % 100;
@@ -346,7 +347,7 @@ void BaslerCameras::triggerThread( void* voidInput )
 						colNum++;
 					}
 				}
-				PostMessage(*input->parent, ACE_PIC_READY, 672 * 512, (LPARAM)(image));
+				PostMessage(*input->parent, ACE_PIC_READY, 672 * 512, (LPARAM)imageMatrix);
 			}
 		}
 	}

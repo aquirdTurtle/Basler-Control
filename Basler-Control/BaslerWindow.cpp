@@ -157,9 +157,20 @@ BEGIN_MESSAGE_MAP( BaslerWindow, CDialogEx )
 	ON_CBN_SELENDOK( IDC_EXPOSURE_MODE_COMBO, BaslerWindow::passExposureMode )
 	ON_CBN_SELENDOK( IDC_CAMERA_MODE_COMBO, BaslerWindow::passCameraMode)
 
-	ON_WM_RBUTTONUP()
-	
+	ON_COMMAND( IDCANCEL, &BaslerWindow::handleClose )
+
+	ON_WM_RBUTTONUP()	
 END_MESSAGE_MAP()
+
+
+void BaslerWindow::handleClose( )
+{
+	auto res = promptBox("Close the Camera Application?", MB_OKCANCEL );
+	if ( res == IDOK )
+	{
+		CDialog::OnCancel( );
+	}
+}
 
 
 void BaslerWindow::passSetLocationsButton()
@@ -170,7 +181,9 @@ void BaslerWindow::passSetLocationsButton()
 
 void BaslerWindow::OnRButtonUp( UINT stuff, CPoint clickLocation )
 {
-	picture.handleRightClick(clickLocation, this);
+	CDC* cdc = GetDC( );
+	picture.handleRightClick(clickLocation, cdc);
+	ReleaseDC( cdc );
 }
 
 
@@ -212,7 +225,9 @@ void BaslerWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scrollbar )
 		try
 		{
 			picture.handleScroll( id, nPos );
-			picture.redrawImage(this);
+			CDC* cdc = GetDC( );
+			picture.redrawImage(cdc);
+			ReleaseDC( cdc );
 		}
 		catch (Error& err)
 		{
@@ -254,23 +269,24 @@ void BaslerWindow::handleDisarmPress()
 
 LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 {
-	std::vector<long>* image = (std::vector<long>*) lParam;
+	Matrix<long>* imageMatrix = (Matrix<long>*)lParam;
+	//std::vector<long>* image = (std::vector<long>*) lParam;
  	long size = long( wParam );
  	try
 	{
 		currentRepNumber++;
-		CDC* tempDc = GetDC();
-		picture.drawBitmap( tempDc, *image );
-		ReleaseDC( tempDc );
-		picture.drawDongles( this, *image );
-		picture.setValue();
+		CDC* cdc = GetDC();
+		picture.drawBitmap( cdc, *imageMatrix );
+		picture.drawDongles( cdc, *imageMatrix );
+		ReleaseDC( cdc );
+		picture.setHoverValue();
 		if (runExposureMode == "Auto Exposure Continuous")
 		{
 			settings.updateExposure( cameraController->getCurrentExposure() );
 		}
 		
-		stats.update( image, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, currentRepNumber, 
-						cameraController->getRepCounts() );
+		stats.update( *imageMatrix, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, currentRepNumber,
+					  cameraController->getRepCounts() );
 		settings.setStatus("Camera Status: Acquiring Pictures.");
 		if (currentRepNumber % 10 == 0)
 		{
@@ -278,11 +294,11 @@ LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		}
 		if (currentRepNumber == 1 && !cameraController->isContinuous())
 		{
-			saver.save( image, imageWidth );
+			saver.save( *imageMatrix, imageWidth );
 		}
 		else if (!cameraController->isContinuous())
 		{
-			saver.append( image, imageWidth );
+			saver.append( *imageMatrix, imageWidth );
 		}
 		if (currentRepNumber == cameraController->getRepCounts())
 		{
@@ -298,7 +314,7 @@ LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		settings.setStatus("Camera Status: ERROR?!?!?");
 	}
 	// always delete
-	delete image;
+	delete imageMatrix;
 	return 0;
 }
 
@@ -503,6 +519,8 @@ void BaslerWindow::initializeControls()
 	dims.y *= 1.7;
 	picture.initialize( picPos, this, id, dims.x + picPos.x + 100, dims.y + picPos.y, mainBrushes["Red"] );
 	picture.recalculateGrid( cameraController->getDefaultSettings().dimensions );
-	picture.drawBackground( this );
+	CDC* cdc = GetDC( );
+	picture.drawBackground( cdc );
+	ReleaseDC( cdc );
 }
 

@@ -128,14 +128,18 @@ class ImageEventHandler : public Pylon::CImageEventHandler
 					const uint16_t *pImageBuffer = (uint16_t *)grabResult->GetBuffer();
 					int width = grabResult->GetWidth();
 					int vertBinNumber = grabResult->GetHeight();
-					std::vector<long>* image;
-					image = new std::vector<long>(pImageBuffer, pImageBuffer + width * vertBinNumber);
-					for (auto& elem : *image)
+					Matrix<long>* imageMatrix; 
+					imageMatrix = new Matrix<long>( vertBinNumber, width, 
+													std::vector<long>( pImageBuffer, 
+																	   pImageBuffer + width * vertBinNumber ) );
+					//std::vector<long>* image;
+					//image = new std::vector<long>(pImageBuffer, pImageBuffer + width * vertBinNumber);
+					for (auto& elem : *imageMatrix)
 					{
 						elem *= 256.0 / 1024.0;
 					}
 					parent->PostMessageA( ACE_PIC_READY, grabResult->GetWidth( ) * grabResult->GetHeight( ),
-						(LPARAM)image );
+						(LPARAM)imageMatrix );
 				}
 				else
 				{

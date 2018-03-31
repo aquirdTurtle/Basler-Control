@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PictureStats.h"
-//#include "reorganizeControl.h"
+#include "Matrix.h"
 #include <algorithm>
 #include <numeric>
 
@@ -164,13 +164,15 @@ bool PictureStats::reset()
 	return true;
 }
 
+
 bool PictureStats::updateType(std::string typeText)
 {
 	pictureStatsHeader.SetWindowText(typeText.c_str());
 	return true;
 }
 
-void PictureStats::update( std::vector<long>* image, unsigned int imageNumber, std::pair<int, int> selectedPixel, int pictureWidth, 
+ 
+void PictureStats::update( Matrix<long> image, unsigned int imageNumber, POINT selectedPixel, int pictureWidth, 
 						   int currentRepetitionNumber, int totalRepetitionCount)
 {
 	// always update the picture number, it's very low cost compared to the other stuff.
@@ -180,33 +182,24 @@ void PictureStats::update( std::vector<long>* image, unsigned int imageNumber, s
 	{
 		return;
 	}
-	
-	long selCounts = (*image)[selectedPixel.first + selectedPixel.second * pictureWidth];
+	long selCounts = image(selectedPixel);
+	//long selCounts = image[selectedPixel.first + selectedPixel.second * pictureWidth];
 	long maxCounts = 1;
 	long minCounts = 65536;
 	double avgCounts;
 	// for all pixels... find the max and min of the picture.
-	for (int pixelInc = 0; pixelInc < (*image).size(); pixelInc++)
+	for ( const auto& pixel : image )
 	{
-		try
+		if ( pixel > maxCounts )
 		{
-			if ((*image)[pixelInc] > maxCounts)
-			{
-				maxCounts = (*image)[pixelInc];
-			}
-			if ((*image)[pixelInc] < minCounts)
-			{
-				minCounts = (*image)[pixelInc];
-			}
+			maxCounts = pixel;
 		}
-		catch (std::out_of_range&)
+		if ( pixel < minCounts )
 		{
-			errBox( "ERROR: caught std::out_of_range in this->drawDataWindow! experimentImagesInc = " + str( imageNumber )
-					+ ", pixelInc = " + str( pixelInc ) + ", image.size() = " + str( image->size() ) + ". Attempting to continue..." );
-			return;
+			minCounts = pixel;
 		}
 	}
-	avgCounts = std::accumulate( image->begin(), image->end(), 0.0 ) / image->size();
+	avgCounts = std::accumulate( image.begin(), image.end(), 0.0 ) / image.size();
 
 	this->maxCounts[imageNumber].SetWindowTextA( cstr( maxCounts ) );
 	this->minCounts[imageNumber].SetWindowTextA( cstr( minCounts ) );

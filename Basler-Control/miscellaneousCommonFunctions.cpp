@@ -3,11 +3,6 @@
 #include <Windows.h>
 #include <string>
 
-void errBox( std::string msg )
-{
-	MessageBox( 0, msg.c_str(), "ERROR!", MB_ICONERROR );
-}
-
 // for mfc edits
 void appendText(std::string newText, CEdit& edit)
 {
