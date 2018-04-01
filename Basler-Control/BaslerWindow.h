@@ -7,7 +7,7 @@
 #include "PictureStats.h"
 #include "PictureSaver.h"
 #include "commonTypes.h"
-
+#include "PlotCtrl.h"
 
 class BaslerWindow : public CDialogEx
 {
@@ -32,6 +32,7 @@ class BaslerWindow : public CDialogEx
 		void OnMouseMove(UINT flags, CPoint point);
 		void OnRButtonUp( UINT stuff, CPoint clickLocation );
 		void passSetLocationsButton();
+		void DoDataExchange( CDataExchange* pDX );
 
 	private:
 		PictureControl picture;
@@ -48,8 +49,12 @@ class BaslerWindow : public CDialogEx
 		fontMap mainFonts;
 		bool isRunning;
 		std::atomic<bool> triggerThreadFlag;
+		PlotCtrl *horGraph, *vertGraph;
+		std::vector<Gdiplus::Pen*> plotPens, brightPlotPens;
+		std::vector<Gdiplus::SolidBrush*> plotBrushes, brightPlotBrushes;
+		CFont* plotfont;
 	protected:
-		virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
+		//virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 		HICON m_hIcon;
 
 	DECLARE_MESSAGE_MAP()

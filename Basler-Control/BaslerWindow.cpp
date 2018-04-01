@@ -9,9 +9,24 @@
 #include "constants.h"
 
 
-
 BaslerWindow::BaslerWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx( IDD_BASLERCONTROL_DIALOG, pParent )
 {
+	for ( auto elem : GIST_RAINBOW_RGB )
+	{
+		Gdiplus::Color c( 50, BYTE( elem[0] ), BYTE( elem[1] ), BYTE( elem[2] ) );
+		Gdiplus::SolidBrush* b = new Gdiplus::SolidBrush( c );
+		Gdiplus::Pen* p = new Gdiplus::Pen( b );
+		Gdiplus::Color c_bright( 255, BYTE( elem[0] ), BYTE( elem[1] ), BYTE( elem[2] ) );
+		Gdiplus::SolidBrush* b_bright = new Gdiplus::SolidBrush( c_bright );
+		Gdiplus::Pen* p_bright = new Gdiplus::Pen( b_bright );
+		plotBrushes.push_back( b );
+		plotPens.push_back( p );
+		brightPlotBrushes.push_back( b_bright );
+		brightPlotPens.push_back( p_bright );
+	}
+	(plotfont = new CFont)->CreateFontA( 12/*20*/, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+										 CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT( "Arial" ) );
+
 	m_hIcon = AfxGetApp()->LoadIcon( IDR_MAINFRAME );
 
 	mainRGBs["Dark Grey"] = RGB( 15, 15, 15 );
@@ -41,6 +56,7 @@ BaslerWindow::BaslerWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx( IDD_BASLERCON
 	mainRGBs["Dark Indigo"] = RGB( 18, 0, 32 );
 	mainRGBs["Dark Orange"] = RGB( 31, 17, 0 );
 	// there are less brushes because these are only used for backgrounds.
+	(mainBrushes["Black"] = new CBrush)->CreateSolidBrush( mainRGBs["Black"] );
 	mainBrushes["Dark Red"] = new CBrush;
 	mainBrushes["Dark Red"]->CreateSolidBrush( mainRGBs["Dark Red"] );
 	mainBrushes["Gold"] = new CBrush;
@@ -163,6 +179,12 @@ BEGIN_MESSAGE_MAP( BaslerWindow, CDialogEx )
 END_MESSAGE_MAP()
 
 
+void BaslerWindow::DoDataExchange( CDataExchange* pDX )
+{
+	CDialog::DoDataExchange( pDX );
+}
+
+
 void BaslerWindow::handleClose( )
 {
 	auto res = promptBox("Close the Camera Application?", MB_OKCANCEL );
@@ -277,6 +299,7 @@ LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		currentRepNumber++;
 		CDC* cdc = GetDC();
 		picture.drawBitmap( cdc, *imageMatrix );
+		picture.updatePlotData( );
 		picture.drawDongles( cdc, *imageMatrix );
 		ReleaseDC( cdc );
 		picture.setHoverValue();
@@ -313,6 +336,7 @@ LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		errBox( err.what() );
 		settings.setStatus("Camera Status: ERROR?!?!?");
 	}
+	OnPaint( );
 	// always delete
 	delete imageMatrix;
 	return 0;
@@ -384,6 +408,14 @@ void BaslerWindow::OnSize( UINT nType, int cx, int cy )
 	settings.rearrange(cx, cy, mainFonts);
 	stats.rearrange("", "", cx, cy, mainFonts);
 	saver.rearrange(cx, cy, mainFonts);
+	if ( horGraph )
+	{
+		horGraph->rearrange( cx, cy, mainFonts );
+	}
+	if ( vertGraph )
+	{
+		vertGraph->rearrange( cx, cy, mainFonts );
+	}
 }
 
 
@@ -414,11 +446,6 @@ HBRUSH BaslerWindow::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 			return *mainBrushes[mainColor];
 		}
 	}
-}
-
-void BaslerWindow::DoDataExchange( CDataExchange* pDX )
-{
-	CDialogEx::DoDataExchange( pDX );
 }
 
 
@@ -473,6 +500,11 @@ void BaslerWindow::OnPaint()
 	else
 	{
 		CDialogEx::OnPaint();
+		auto* dc = GetDC( );
+		CRect size;
+		GetClientRect( &size );
+		picture.paint( dc, size, mainBrushes["Black"] );
+		ReleaseDC( dc );
 	}
 }
 
@@ -495,7 +527,6 @@ void BaslerWindow::initializeControls()
 	CMenu menu;
 	menu.LoadMenu( IDR_MENU1 );
 	SetMenu( &menu );
-	//HWND* temp = new HWND( GetSafeHwnd() );
 	cameraController = new BaslerCameras( this );
 	if (!cameraController->isInitialized())
 	{
@@ -517,7 +548,9 @@ void BaslerWindow::initializeControls()
 	// scale to fill the window (approximately).
 	dims.x *= 1.7;
 	dims.y *= 1.7;
-	picture.initialize( picPos, this, id, dims.x + picPos.x + 100, dims.y + picPos.y, mainBrushes["Red"] );
+
+	picture.initialize( picPos, this, id, dims.x + picPos.x + 115, dims.y + picPos.y, mainBrushes["Red"], 
+						brightPlotPens, plotfont, brightPlotBrushes );
 	picture.recalculateGrid( cameraController->getDefaultSettings().dimensions );
 	CDC* cdc = GetDC( );
 	picture.drawBackground( cdc );

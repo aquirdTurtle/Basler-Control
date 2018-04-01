@@ -4,13 +4,17 @@
 #include <array>
 #include "Matrix.h"
 #include "CameraImageDimensions.h"
-
+#include "PlotCtrl.h"
 
 class PictureControl
 {
 	public:
+		void updatePlotData( );
 		PictureControl();
-		void initialize(POINT& loc, CWnd* parent, int& id, int width, int height, CBrush* defaultGridBrush);
+		void initialize( POINT& loc, CWnd* parent, int& id, int width, int height, CBrush* defaultGridBrush,
+						 std::vector<Gdiplus::Pen*> graphPens, CFont* font, 
+						 std::vector<Gdiplus::SolidBrush*> graphBrushes );
+		void paint( CDC* cdc, CRect size, CBrush* bgdBrush );
 		void recalculateGrid( imageDimensions newParameters );
 		void setPictureArea( POINT loc, int width, int height );
 		void drawBitmap( CDC* deviceContext, const Matrix<long>& picData );
@@ -33,15 +37,18 @@ class PictureControl
 		void setHoverValue();
 		void drawDongles( CDC* parentCdc, const Matrix<long>& pic );
 		void addIntegrationText( const Matrix<long>& pic, CDC* parentCdc );
-		long getIntegrationSize();
+		long getIntegrationSize(); 
 	private:
+		std::vector<pPlotDataVec> horData, vertData;
 		CBrush* gridBrush;
+		PlotCtrl* horGraph;
+		PlotCtrl* vertGraph;
+
 		CFont pictureTextFont;
 		POINT mouseCoordinates;
 		UINT maxWidth, maxHeight;
 		// for replotting.
 		Matrix<long> mostRecentImage;
-		//std::vector<long> mostRecentImage;
 		// stores info as to whether the control is currently being used in plotting camera data or was used 
 		// in the most recent run.
 		bool active = true;
@@ -63,6 +70,7 @@ class PictureControl
 		// grid data
 		std::vector<std::vector<RECT>> grid;
 		// Picture location data
+		
 		Control<CSliderCtrl> sliderMax;
 		Control<CSliderCtrl> sliderMin;
 		//

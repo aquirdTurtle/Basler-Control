@@ -6,7 +6,7 @@
 #include "BaslerControlApp.h"
 #include "stdint.h"
 #include "constants.h"
-
+#include <cmath>
 
 // important constructor;
 // Create an instant camera object with the camera device found first. At this point this class is really only meant to work with a single
@@ -325,25 +325,17 @@ void BaslerCameras::triggerThread( void* voidInput )
 				}
  				// simulate successful grab
 				// need some way to communicate the width and height of the pic to this function...
-				Matrix<long>* imageMatrix = new Matrix<long>(input->width, input->height);
-				// std::vector<long>* image;
-				// image = new std::vector<long>(input->width * input->height);
+				Matrix<long>* imageMatrix = new Matrix<long>(input->height, input->width );
 				UINT count = 0;
 				UINT rowNum = 0;
 				UINT colNum = 0;
-				for (auto& elem : *imageMatrix)
+				for ( auto row : range( imageMatrix->getRows( ) ) )
 				{
-					//elem = count++;
-					elem = 500 + rand() % 100;
-					if (false)
+					for ( auto col : range( imageMatrix->getCols( ) ) )
 					{
-						if (colNum == 672)
-						{
-							colNum = 0;
-							rowNum++;
-						}
-						elem = std::stoll( "1" + str( rowNum ) + "0" + str( colNum ) );
-						colNum++;
+						(*imageMatrix)(row, col) = 300 + rand( ) % 10
+							+ 300 * exp( -std::pow( (double( row ) - 100) / 10.0, 2 ) - std::pow( (double( col ) - 100) / 10.0, 2 ) )
+							+ 300 * exp( -std::pow( (double( row ) - 200) / 10.0, 2 ) - std::pow( (double( col ) - 100) / 10.0, 2 ) );
 					}
 				}
 				PostMessage(*input->parent, ACE_PIC_READY, 672 * 512, (LPARAM)imageMatrix);

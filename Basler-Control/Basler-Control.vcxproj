@@ -205,10 +205,12 @@
     <ClInclude Include="constants.h" />
     <ClInclude Include="Control.h" />
     <ClInclude Include="Matrix.h" />
+    <ClInclude Include="memdc.h" />
     <ClInclude Include="miscellaneousCommonFunctions.h" />
     <ClInclude Include="PictureControl.h" />
     <ClInclude Include="PictureSaver.h" />
     <ClInclude Include="PictureStats.h" />
+    <ClInclude Include="PlotCtrl.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -223,6 +225,7 @@
     <ClCompile Include="PictureControl.cpp" />
     <ClCompile Include="PictureSaver.cpp" />
     <ClCompile Include="PictureStats.cpp" />
+    <ClCompile Include="PlotCtrl.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

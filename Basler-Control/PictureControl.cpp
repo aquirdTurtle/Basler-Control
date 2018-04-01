@@ -2,54 +2,97 @@
 #include "PictureControl.h"
 #include "constants.h"
 #include <cmath>
+#include <numeric>
 
 // constructor
 PictureControl::PictureControl()
 {
 	active = true;
+	horData.resize( 1 );
+	horData[0] = pPlotDataVec( new plotDataVec( 100, { 0, -1, 0 } ) );
+	vertData.resize( 1 );
+	vertData[0] = pPlotDataVec( new plotDataVec( 100, { 0, -1, 0 } ) );
+	updatePlotData( );
 }
 
+void PictureControl::paint( CDC* cdc, CRect size, CBrush* bgdBrush )
+{
+	// for some reason I suddenly started needing to do this. I know that memDC redraws the background, but it used to 
+	// work without this and I don't know what changed. I used to do:
+	cdc->SetBkColor( RGB(0,0,0) );
+	long width = size.right - size.left, height = size.bottom - size.top;
+	// each dc gets initialized with the rect for the corresponding plot. That way, each dc only overwrites the area 
+	// for a single plot.
+	horGraph->setCurrentDims( width, height );
+	{
+		memDC ttlDC( cdc, &horGraph->GetPlotRect( ) );
+		horGraph->drawBackground( ttlDC, bgdBrush, bgdBrush );
+		horGraph->drawTitle( ttlDC );
+		horGraph->drawBorder( ttlDC );
+		horGraph->plotPoints( &ttlDC );
+	}
+	vertGraph->setCurrentDims( width, height );
+	{
+		memDC ttlDC( cdc, &vertGraph->GetPlotRect( ) );
+		vertGraph->drawBackground( ttlDC, bgdBrush, bgdBrush );
+		vertGraph->drawTitle( ttlDC );
+		vertGraph->drawBorder( ttlDC );
+		vertGraph->plotPoints( &ttlDC );
+	}
+}
 
-void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, int height, CBrush* defaultGridBrush )
+void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, int height, CBrush* defaultGridBrush,
+								 std::vector<Gdiplus::Pen*> graphPens, CFont* font, 
+								 std::vector<Gdiplus::SolidBrush*> graphBrushes )
 {
 	gridBrush = defaultGridBrush;
 	pictureTextFont.CreateFontA( 34, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
 								 CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT( "Arial" ) );
-	if ( width < 100 )
+	if ( width < 50 )
 	{
-		thrower( "Pictures must be greater than 100 in width because this is the size of the max/min controls." );
+		thrower( "Pictures must be greater than 50 in width because this is the size of the max/min controls." );
 	}
-	if ( height < 100 )
+	if ( height < 50 )
 	{
-		thrower( "Pictures must be greater than 100 in height because this is the minimum height of the max/min controls." );
+		thrower( "Pictures must be greater than 50 in height because this is the minimum height of the max/min controls." );
 	}
 	maxWidth = width;
 	maxHeight = height;
+	vertGraph = new PlotCtrl( vertData, plotStyle::VertHist, graphPens, font, graphBrushes, "", true );
+	vertGraph->init( { loc.x, loc.y}, 65, height, parent );
+	loc.x += 65;
 	setPictureArea( loc, maxWidth, maxHeight );
+	horGraph = new PlotCtrl( horData, plotStyle::HistPlot, graphPens, font, graphBrushes, "", true );
+	horGraph->init( { loc.x, loc.y + height }, width - 50, 60, parent );
+
 
 	loc.x += unscaledBackgroundArea.right - unscaledBackgroundArea.left;
-	// "min" text
-	labelMin.sPos = { loc.x, loc.y, loc.x + 50, loc.y + 30 };
+	
+	labelMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + 20 };
 	labelMin.Create( "MIN", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMin.sPos, parent, id++ );
-	// minimum number text
-	editMin.sPos = { loc.x, loc.y + 30, loc.x + 50, loc.y + 60 };
+	labelMin.fontType = fontTypes::Small;
+
+	labelMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y += 20 };
+	labelMax.Create( "MAX", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMax.sPos, parent, id++ );
+	labelMax.fontType = fontTypes::Small;
+
+	editMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + 20 };
 	editMin.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMin.sPos, parent, IDC_MIN_SLIDER_EDIT );
 	editMin.SetWindowText( "0" );
+	editMin.fontType = fontTypes::Small;
+
+	editMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y += 20 };
+	editMax.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, IDC_MAX_SLIDER_EDIT );
+	editMax.SetWindowText( "1024" );	
+	editMax.fontType = fontTypes::Small;
 	// minimum slider
-	sliderMin.sPos = { loc.x, loc.y + 60, loc.x + 50, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
+	sliderMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMin.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, id++ );
 	sliderMin.SetRange( 0, 1024 );
 	sliderMin.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
 	sliderMin.SetPos( 0 );
-	// "max" text
-	labelMax.sPos = { loc.x + 50, loc.y, loc.x + 100, loc.y + 30 };
-	labelMax.Create( "MAX", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMax.sPos, parent, id++ );
-	// maximum number edit
-	editMax.sPos = { loc.x + 50, loc.y + 30, loc.x + 100, loc.y + 60 };
-	editMax.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, IDC_MAX_SLIDER_EDIT );
-	editMax.SetWindowText( "1024" );
 	// maximum slider
-	sliderMax.sPos = { loc.x + 50, loc.y + 60, loc.x + 100, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
+	sliderMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMax.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, id++ );
 	sliderMax.SetRange( 0, 1024 );
 	sliderMax.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
@@ -59,11 +102,9 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 	// manually scroll the objects to initial positions.
 	handleScroll( sliderMin.GetDlgCtrlID( ), 0 );
 	handleScroll( sliderMax.GetDlgCtrlID( ), 1024 );
-
 	createPalettes( parent->GetDC( ) );
 	updatePalette( palettes[0] );
-
-	loc.y += height;
+	loc.y += height+60;
 	coordinatesText.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
 	coordinatesText.Create( "Coordinates: ", WS_CHILD | WS_VISIBLE, coordinatesText.sPos, parent, id++ );
 
@@ -85,6 +126,7 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 	circleSizeEdit.sPos = { loc.x, loc.y, loc.x += 100, loc.y + 20 };
 	circleSizeEdit.Create( WS_CHILD | WS_VISIBLE, circleSizeEdit.sPos, parent, id++ );
 	circleSizeEdit.SetWindowText( "5" );
+
 }
 
 
@@ -117,7 +159,7 @@ void PictureControl::setPictureArea( POINT loc, int width, int height )
 	// this is important for the control to know where it should draw controls.
 	unscaledBackgroundArea = { loc.x, loc.y, loc.x + width, loc.y + height };
 	// reserve some area for the texts.
-	unscaledBackgroundArea.right -= 100;
+	unscaledBackgroundArea.right -= 50;
 	scaledBackgroundArea = unscaledBackgroundArea;
 	scaledBackgroundArea.left *= width;
 	scaledBackgroundArea.right *= width;
@@ -240,13 +282,11 @@ void PictureControl::handleScroll(int id, UINT nPos)
 
 void PictureControl::setHoverValue()
 {
-	//int loc = mouseCoordinates.x * grid.size() + grid.front().size( ) - mouseCoordinates.y;
 	int loc = mouseCoordinates.x * grid.size( ) + mouseCoordinates.y;
 	if (loc >= mostRecentImage.size())
 	{
 		return;
 	}
-	//valueDisp.SetWindowTextA(cstr(mostRecentImage[loc]));
 	valueDisp.SetWindowTextA( cstr( mostRecentImage(mouseCoordinates) ) );
 }
 
@@ -261,12 +301,14 @@ void PictureControl::handleMouse(CPoint point)
 		{
 			if (point.x < box.right && point.x > box.left && point.y > box.top && point.y < box.bottom)
 			{
+				rowCount = mostRecentImage.getRows( ) - rowCount;
 				coordinatesDisp.SetWindowTextA((str(rowCount) + ", " + str(colCount)).c_str());
-				mouseCoordinates = { rowCount, colCount };
+				mouseCoordinates = { colCount, rowCount };
 				if (mostRecentImage.size() != 0 && grid.size() != 0)
 				{
 					setHoverValue();
 				}
+				break;
 			}
 			rowCount += 1;
 		}
@@ -377,8 +419,56 @@ void PictureControl::redrawImage(CDC* parentCdc )
 		drawBitmap( parentCdc, mostRecentImage);
 	}
 	drawDongles( parentCdc, mostRecentImage );
+	updatePlotData( );
 }
 
+void PictureControl::updatePlotData( )
+{
+	horData[0]->resize( mostRecentImage.getCols( ) );
+	vertData[0]->resize( mostRecentImage.getRows( ) );
+	UINT count = 0;
+
+	std::vector<long> dataRow;
+	for ( auto& data : *horData[0] )
+	{
+		data.x = count;
+		// integrate the column
+		double p = 0.0;
+		for ( auto row : range(mostRecentImage.getRows( )) )
+		{
+			p += mostRecentImage( row, count );
+		}
+		count++;
+		dataRow.push_back( p );
+	}
+	count = 0;
+	auto avg = std::accumulate( dataRow.begin( ), dataRow.end( ), 0.0 ) / dataRow.size( );
+	for ( auto& data : *horData[0] )
+	{
+		data.y = dataRow[count++] - avg;
+	}
+	count = 0;
+	std::vector<long> dataCol;
+	for ( auto& data : *vertData[0] )
+	{
+		data.x = count;
+		// integrate the row
+		double p = 0.0;
+		for ( auto col : range( mostRecentImage.getCols( ) ) )
+		{
+			p += mostRecentImage( count, col);
+		}
+		count++;
+		dataCol.push_back( p );
+	}
+	count = 0;
+	auto avgCol = std::accumulate( dataCol.begin( ), dataCol.end( ), 0.0 ) / dataCol.size( );
+	for ( auto& data : *vertData[0] )
+	{
+		data.y = dataCol[count++] - avgCol;
+	}
+
+}
 
 void PictureControl::drawDongles( CDC* parentCdc, const Matrix<long>& image)
 {
@@ -458,7 +548,7 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 	{
 		for (int widthInc = 0; widthInc < dataWidth; widthInc++)
 		{
-			dTemp = ceil( yscale * (picData( widthInc, heightInc ) - minColor) );
+			dTemp = ceil( yscale * (picData( heightInc, widthInc ) - minColor) );
 			if (dTemp < 0)
 			{
 				// raise value to zero which is the floor of values this parameter can take.
@@ -698,7 +788,6 @@ void PictureControl::drawPixelCircle(CWnd* parent)
 */
 
 
-
 void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, int width, int height, fontMap fonts)
 {
 	editMax.rearrange(cameraMode, triggerMode, width, height, fonts);
@@ -714,6 +803,14 @@ void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, 
 	setLocationsButton.rearrange( cameraMode, triggerMode, width, height, fonts );
 	circleSizeText.rearrange( cameraMode, triggerMode, width, height, fonts );
 	circleSizeEdit.rearrange( cameraMode, triggerMode, width, height, fonts );
+	if ( vertGraph )
+	{
+		vertGraph->rearrange( width, height, fonts );
+	}
+	if ( horGraph )
+	{
+		horGraph->rearrange( width, height, fonts );
+	}
 
 	double widthPicScale;
 	double heightPicScale;

@@ -1,9 +1,9 @@
 Features:
 - be able to actually control the gain.
-- plot line from plot or integrated rows / columns
 - Being able to see pixel counts
 
 Bugs:
 - handle changing options while the system is running. Grey things.
 - fix hover value
 - usb dynamic range seems wrong
+

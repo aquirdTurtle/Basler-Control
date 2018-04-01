@@ -132,8 +132,6 @@ class ImageEventHandler : public Pylon::CImageEventHandler
 					imageMatrix = new Matrix<long>( vertBinNumber, width, 
 													std::vector<long>( pImageBuffer, 
 																	   pImageBuffer + width * vertBinNumber ) );
-					//std::vector<long>* image;
-					//image = new std::vector<long>(pImageBuffer, pImageBuffer + width * vertBinNumber);
 					for (auto& elem : *imageMatrix)
 					{
 						elem *= 256.0 / 1024.0;

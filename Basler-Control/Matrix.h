@@ -137,14 +137,15 @@ std::string Matrix<type>::print( )
 template<class type>
 type Matrix<type>::operator()( POINT p ) const
 {
-	if ( p.y > rows )
+	if ( p.y >= rows )
 	{
-		thrower( "ERROR: row index out of range during Matrix access!" );
+		thrower( "ERROR: row index out of range during Matrix access! row was " + str( p.y ) );
 	}
-	if ( p.x > cols )
+	if ( p.x >= cols )
 	{
-		thrower( "ERROR: col index out of range during Matrix access!" );
+		thrower( "ERROR: col index out of range during Matrix access! col was " + str( p.x ) );
 	}
+
 	UINT rowOffset( p.y * cols );
 	UINT index = rowOffset + p.x;
 	return data[index];
@@ -153,13 +154,13 @@ type Matrix<type>::operator()( POINT p ) const
 template<class type>
 type & Matrix<type>::operator()( POINT p )
 {
-	if ( p.y > rows )
+	if ( p.y >= rows )
 	{
-		thrower( "ERROR: row index out of range during Matrix access!" );
+		thrower( "ERROR: row index out of range during Matrix access! row was " + str( p.y ) );
 	}
-	if ( p.x > cols )
+	if ( p.x >= cols )
 	{
-		thrower( "ERROR: col index out of range during Matrix access!" );
+		thrower( "ERROR: col index out of range during Matrix access! col was " + str( p.x ) );
 	}
 	UINT rowOffset( p.y * cols );
 	UINT index = rowOffset + p.x;
@@ -170,13 +171,13 @@ type & Matrix<type>::operator()( POINT p )
 template<class type>
 type Matrix<type>::operator()( UINT row, UINT col ) const
 {
-	if ( row > rows )
+	if ( row >= rows )
 	{
-		thrower( "ERROR: row index out of range during Matrix access!" );
+		thrower( "ERROR: row index out of range during Matrix access! row was " + str( row ) );
 	}
-	if ( col > cols )
+	if ( col >= cols )
 	{
-		thrower( "ERROR: col index out of range during Matrix access!" );
+		thrower( "ERROR: col index out of range during Matrix access! col was " + str( col ) );
 	}
 	UINT rowOffset( row * cols );
 	UINT index = rowOffset + col;
@@ -188,11 +189,11 @@ type & Matrix<type>::operator()( UINT row, UINT col )
 {
 	if ( row >= rows )
 	{
-		thrower( "ERROR: row index out of range during Matrix access!" );
+		thrower( "ERROR: row index out of range during Matrix access! row was " + str( row) );
 	}
 	if ( col >= cols )
 	{
-		thrower( "ERROR: col index out of range during Matrix access!" );
+		thrower( "ERROR: col index out of range during Matrix access! col was " + str(col) );
 	}
 	UINT rowOffset( row * cols );
 	UINT index = rowOffset + col;

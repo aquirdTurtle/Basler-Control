@@ -18,6 +18,8 @@ class CBaslerControlApp : public CWinApp
 {
 	public:
 		CBaslerControlApp();
+		BOOL ExitInstance( );
+		ULONG_PTR gdip_token;
 		// Overrides
 		virtual BOOL InitInstance();
 	// 

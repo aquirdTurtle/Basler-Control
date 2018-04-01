@@ -43,6 +43,21 @@ template <class ControlType> class Control : public ControlType
 		bool toolTipIsSet;
 };
 
+/*
+Some standard IDs for controls. Can be combined with other options for specific controls. Use of these shortens and
+standardizes control initializations.
+*/
+const DWORD NORM_CWND_OPTIONS = WS_VISIBLE | WS_CHILD;
+const DWORD NORM_PUSH_OPTIONS = NORM_CWND_OPTIONS | BS_DEFPUSHBUTTON | WS_TABSTOP;
+const DWORD NORM_STATIC_OPTIONS = NORM_CWND_OPTIONS | ES_READONLY | ES_CENTER | SS_ENDELLIPSIS;
+const DWORD NORM_HEADER_OPTIONS = NORM_STATIC_OPTIONS | WS_BORDER | ES_SUNKEN;
+const DWORD NORM_EDIT_OPTIONS = NORM_CWND_OPTIONS | WS_TABSTOP | ES_MULTILINE | ES_WANTRETURN;
+const DWORD NORM_COMBO_OPTIONS = NORM_CWND_OPTIONS | CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_OVERLAPPED | WS_TABSTOP;
+const DWORD NORM_RADIO_OPTIONS = NORM_CWND_OPTIONS | BS_AUTORADIOBUTTON | WS_TABSTOP;
+const DWORD NORM_CHECK_OPTIONS = NORM_CWND_OPTIONS | BS_AUTOCHECKBOX | WS_TABSTOP | BS_RIGHT;
+const DWORD NORM_LISTVIEW_OPTIONS = NORM_CWND_OPTIONS | WS_BORDER | LVS_REPORT | LVS_EDITLABELS;
+
+
 template<class ControlType> Control<ControlType>::Control()
 {
 	// assert that the template class is derived from CWnd. This doesn't actually do anything in run-time. It's also

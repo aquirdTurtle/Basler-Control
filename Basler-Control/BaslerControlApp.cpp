@@ -44,6 +44,8 @@ long num;
 // this initialization function is called after the constructor.
 BOOL CBaslerControlApp::InitInstance()
 {
+	Gdiplus::GdiplusStartupInput input;
+	Gdiplus::GdiplusStartup( &gdip_token, &input, NULL );
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
@@ -80,9 +82,7 @@ BOOL CBaslerControlApp::InitInstance()
 	m_pMainWnd = &dlg;
 	// create the main dialog. Most of the code sits inside this function, including the main gui looping.
 	INT_PTR nResponse = dlg.DoModal();
-	
 	// at the point the program is ending.
-
 	// Delete the shell manager created above.
 	if (pShellManager != NULL)
 	{
@@ -97,4 +97,11 @@ BOOL CBaslerControlApp::InitInstance()
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than armCamera the application's message pump.
 	return FALSE;
+}
+
+
+BOOL CBaslerControlApp::ExitInstance( )
+{
+	Gdiplus::GdiplusShutdown( gdip_token );
+	return CWinApp::ExitInstance( );
 }
