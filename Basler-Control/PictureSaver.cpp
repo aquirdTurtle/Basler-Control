@@ -3,13 +3,29 @@
 #include "constants.h"
 #include <ctime>
 
+
+ULONG PictureSaver::getNextFileIndex( std::string fileBase, std::string ext )
+{
+	// find the first data file that hasn't been already written, starting with fileBase1.h5
+	ULONG fileNum = 1;
+	// The while condition here check if file exists. No idea how this actually works.
+	struct stat statBuffer;
+	// figure out the next file number
+	while ( (stat( cstr( fileBase + str( fileNum ) + ext ),
+				   &statBuffer ) == 0) )
+	{
+		fileNum++;
+	}
+	return fileNum;
+}
+
 void PictureSaver::rearrange(int width, int height, fontMap fonts)
 {
 	saveLocationText.rearrange("", "", width, height, fonts);
 	saveLocationEdit.rearrange("", "", width, height, fonts);
 	saveCheckButton.rearrange("", "", width, height, fonts);
 	fileNumberText.rearrange("", "", width, height, fonts);
-	fileNumberEdit.rearrange("", "", width, height, fonts);
+	fileNumberDisp.rearrange("", "", width, height, fonts);
 }
 		
 
@@ -42,11 +58,10 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 	saveCheckButton.EnableWindow(0);
 
 	fileNumberText.sPos = { pos.x + 100, pos.y, pos.x + 200, pos.y + 20 };
-	fileNumberText.Create( "File #: ", WS_CHILD | WS_VISIBLE, fileNumberText.sPos, parent, id++ );
+	fileNumberText.Create( "Current File #: ", WS_CHILD | WS_VISIBLE, fileNumberText.sPos, parent, id++ );
 
-	fileNumberEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y + 20 };
-	fileNumberEdit.Create( WS_CHILD | WS_VISIBLE, fileNumberEdit.sPos, parent, id++ );
-	fileNumberEdit.SetWindowTextA( "0" );
+	fileNumberDisp.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y + 20 };
+	fileNumberDisp.Create( "?", WS_CHILD | WS_VISIBLE, fileNumberDisp.sPos, parent, id++ );
 }
 
 void PictureSaver::append( const Matrix<long>& pic, int width )
@@ -56,28 +71,10 @@ void PictureSaver::append( const Matrix<long>& pic, int width )
 	{
 		return;
 	}
-	CString text;
-	saveLocationEdit.GetWindowTextA( text );
-	std::string address = DATA_SAVE_LOCATION + std::string( text ) + DATA_SAVE_LOCATION2;
-	if (address == "")
-	{
-		thrower( "ERROR: Please enter an address for saved pictures." );
-	}
-	int fileNumber;
-	fileNumberEdit.GetWindowTextA( text );
-	try
-	{
-		fileNumber = std::stoi( std::string( text ) );
-	}
-	catch (std::invalid_argument& err)
-	{
-		thrower( "ERROR: Please enter a valid number in the file number edit box!" );
-	}
-
 	// file should already be open.
 	if (!file.is_open())
 	{
-		thrower( "ERROR! Save file failed to open! Full address was: " + address + "_" + str( fileNumber ) + ".txt" );
+		thrower( "ERROR! Save file failed to open for append?!?!?!" );
 	}
 	file << ";\n";
 	int count = 0;
@@ -152,30 +149,24 @@ void PictureSaver::save( const Matrix<long>& pic, int width )
 			break;
 	}
 
-	std::string address = DATA_SAVE_LOCATION + str(year) + "\\" + monthName +"\\" + monthName + " " + str(day) + "\\"  + DATA_SAVE_LOCATION2;
+	std::string address = DATA_SAVE_LOCATION + str(year) + "\\" + monthName +"\\" + monthName + " " + str(day) 
+		+ "\\"  + DATA_SAVE_LOCATION2;
 	if (address == "")
 	{
 		thrower( "ERROR: Please enter an address for saved pictures." );
 	}
 
-	int fileNumber;
-	fileNumberEdit.GetWindowTextA( text );
-	try
-	{
-		fileNumber = std::stoi( std::string( text ) );
-	}
-	catch (std::invalid_argument& err)
-	{
-		thrower( "ERROR: Please enter a valid number in the file number edit box!" );
-	}
+	int fileNumber = getNextFileIndex(address, ".txt");
+	auto tempstr = str( fileNumber );
+	fileNumberDisp.SetWindowTextA( tempstr.c_str() );
 	if (file.is_open())
 	{
 		file.close();
-	}	
-	file.open( address + "_" + str(fileNumber) + ".txt");
+	}
+	file.open( address + str(fileNumber) + ".txt");
 	if (!file.is_open())
 	{
-		thrower( "ERROR! Save file failed to open! Full address was: " + address + "_" + str( fileNumber ) + ".txt" );
+		thrower( "ERROR! Save file failed to open! Full address was: " + address + str( fileNumber ) + ".txt" );
 	}
 	int count = 0;
 	for (auto elem : pic)
@@ -187,11 +178,9 @@ void PictureSaver::save( const Matrix<long>& pic, int width )
 			file << "\n";
 		}
 	}
-	fileNumber++;
-	fileNumberEdit.SetWindowTextA( std::to_string( fileNumber ).c_str() );
 }
 
-
+/*
 // save an array of pictures. Each picture has width of width.
 void PictureSaver::save( const std::vector<Matrix<long>>& pics, int width )
 {
@@ -207,7 +196,7 @@ void PictureSaver::save( const std::vector<Matrix<long>>& pics, int width )
 
 	int fileNumber;
 	text;
-	fileNumberEdit.GetWindowTextA( text );
+	fileNumberDisp.GetWindowTextA( text );
 	try
 	{
 		fileNumber = std::stoi( std::string( text ) );
@@ -236,10 +225,10 @@ void PictureSaver::save( const std::vector<Matrix<long>>& pics, int width )
 		saveFile << "\n,\n";
 	}
 	fileNumber++;
-	fileNumberEdit.SetWindowTextA( std::to_string( fileNumber ).c_str() );
+	fileNumberDisp.SetWindowTextA( std::to_string( fileNumber ).c_str() );
 
 }
-
+*/
 
 void PictureSaver::handleModeChange(std::string cameraMode)
 {

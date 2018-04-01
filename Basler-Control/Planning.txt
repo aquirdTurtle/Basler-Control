@@ -1,6 +1,5 @@
 Features:
 - be able to actually control the gain.
-- saver can figure out lowest number for picture.
 - plot line from plot or integrated rows / columns
 - Being able to see pixel counts
 

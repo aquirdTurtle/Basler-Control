@@ -24,7 +24,7 @@ const std::string DATA_SAVE_LOCATION = "J:\\Data Repository\\New Data Repository
 #ifdef FIREWIRE_CAMERA
 	const std::string DATA_SAVE_LOCATION2 = "\\Raw Data\\ScoutData";
 #elif defined USB_CAMERA
-	const std::string DATA_SAVE_LOCATION2 = "\\Raw Data\\AceData";
+	const std::string DATA_SAVE_LOCATION2 = "\\Raw Data\\AceData_";
 #endif
 
 // constants for various controls that I need to reference in the basler window message map. Boring controls start at 

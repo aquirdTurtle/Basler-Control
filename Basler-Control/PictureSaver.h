@@ -5,12 +5,14 @@
 #include <fstream>
 
 
+
 class PictureSaver
 {
 	public:
+		ULONG getNextFileIndex( std::string fileBase, std::string ext );
 		void initialize( POINT& pos, int& id, CWnd* parent );
 		void save(const Matrix<long>& pic, int width);
-		void save( const std::vector<Matrix<long>>& pics, int width );
+		//void save( const std::vector<Matrix<long>>& pics, int width );
 		void append( const Matrix<long>& pic, int width );
 		void close();
 		void rearrange(int width, int height, fontMap fonts);
@@ -21,5 +23,5 @@ class PictureSaver
 		Control<CEdit> saveLocationEdit;
 		Control<CButton> saveCheckButton;
 		Control<CStatic> fileNumberText;
-		Control<CEdit> fileNumberEdit;
+		Control<CStatic> fileNumberDisp;
 };
