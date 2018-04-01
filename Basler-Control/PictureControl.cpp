@@ -23,10 +23,11 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 	{
 		thrower( "Pictures must be greater than 100 in height because this is the minimum height of the max/min controls." );
 	}
+	maxWidth = width;
+	maxHeight = height;
+	setPictureArea( loc, maxWidth, maxHeight );
 
-	setPictureArea( loc, width, height );
-
-	loc.x += originalBackgroundArea.right - originalBackgroundArea.left;
+	loc.x += unscaledBackgroundArea.right - unscaledBackgroundArea.left;
 	// "min" text
 	labelMin.sPos = { loc.x, loc.y, loc.x + 50, loc.y + 30 };
 	labelMin.Create( "MIN", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMin.sPos, parent, id++ );
@@ -35,7 +36,7 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 	editMin.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMin.sPos, parent, IDC_MIN_SLIDER_EDIT );
 	editMin.SetWindowText( "0" );
 	// minimum slider
-	sliderMin.sPos = { loc.x, loc.y + 60, loc.x + 50, loc.y + originalBackgroundArea.bottom - originalBackgroundArea.top };
+	sliderMin.sPos = { loc.x, loc.y + 60, loc.x + 50, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMin.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, id++ );
 	sliderMin.SetRange( 0, 1024 );
 	sliderMin.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
@@ -48,13 +49,13 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 	editMax.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, IDC_MAX_SLIDER_EDIT );
 	editMax.SetWindowText( "1024" );
 	// maximum slider
-	sliderMax.sPos = { loc.x + 50, loc.y + 60, loc.x + 100, loc.y + originalBackgroundArea.bottom - originalBackgroundArea.top };
+	sliderMax.sPos = { loc.x + 50, loc.y + 60, loc.x + 100, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMax.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, id++ );
 	sliderMax.SetRange( 0, 1024 );
 	sliderMax.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
 	sliderMax.SetPos( 1024 );
 	// reset this.
-	loc.x -= originalBackgroundArea.right - originalBackgroundArea.left;
+	loc.x -= unscaledBackgroundArea.right - unscaledBackgroundArea.left;
 	// manually scroll the objects to initial positions.
 	handleScroll( sliderMin.GetDlgCtrlID( ), 0 );
 	handleScroll( sliderMax.GetDlgCtrlID( ), 1024 );
@@ -114,10 +115,40 @@ bool PictureControl::isActive()
 void PictureControl::setPictureArea( POINT loc, int width, int height )
 {
 	// this is important for the control to know where it should draw controls.
-	originalBackgroundArea = { loc.x, loc.y, loc.x + width, loc.y + height };
+	unscaledBackgroundArea = { loc.x, loc.y, loc.x + width, loc.y + height };
 	// reserve some area for the texts.
-	originalBackgroundArea.right -= 100;
-	currentBackgroundArea = originalBackgroundArea;
+	unscaledBackgroundArea.right -= 100;
+	scaledBackgroundArea = unscaledBackgroundArea;
+	scaledBackgroundArea.left *= width;
+	scaledBackgroundArea.right *= width;
+	scaledBackgroundArea.top *= height;
+	scaledBackgroundArea.bottom *= height;
+
+	double widthPicScale;
+	double heightPicScale;
+	auto imHeight = unofficialImageParameters.bottomBorder - unofficialImageParameters.topBorder;
+	auto imWidth = unofficialImageParameters.rightBorder - unofficialImageParameters.leftBorder;
+	double normRatio = 512.0 / 673;
+	double currRatio = double( imHeight ) / (imWidth + 1);
+	if ( currRatio > normRatio )
+	{
+		widthPicScale = 1;
+		heightPicScale = normRatio / currRatio;
+	}
+	else
+	{
+		heightPicScale = 1;
+		widthPicScale = currRatio / normRatio;
+	}
+
+	ULONG picWidth = ULONG( (scaledBackgroundArea.right - scaledBackgroundArea.left)*widthPicScale );
+	ULONG picHeight = scaledBackgroundArea.bottom - scaledBackgroundArea.top;
+	POINT mid = { (scaledBackgroundArea.left + scaledBackgroundArea.right) / 2,
+		(scaledBackgroundArea.top + scaledBackgroundArea.bottom) / 2 };
+	pictureArea.left = mid.x - picWidth / 2;
+	pictureArea.right = mid.x + picWidth / 2;
+	pictureArea.top = mid.y - picHeight / 2;
+	pictureArea.bottom = mid.y + picHeight / 2;
 }
 
 
@@ -282,21 +313,53 @@ void PictureControl::handleButtonClick()
 
 void PictureControl::recalculateGrid(imageDimensions newParameters)
 {
-	grid.clear();
-	grid.resize(newParameters.horBinNumber);
-	for (int widthInc = 0; widthInc < grid.size(); widthInc++)
+	// not strictly necessary.
+	grid.clear( );
+	// find the maximum dimension.
+	unofficialImageParameters = newParameters;
+	double widthPicScale;
+	double heightPicScale;
+	auto height = unofficialImageParameters.bottomBorder - unofficialImageParameters.topBorder+1;
+	auto width = unofficialImageParameters.rightBorder - unofficialImageParameters.leftBorder+1;
+	double normRatio = 512.0 / 673;
+	double currRatio = double( height ) / (width + 1);
+	if ( currRatio > normRatio )
 	{
-		grid[widthInc].resize(newParameters.vertBinNumber);
-		for (int heightInc = 0; heightInc < grid[widthInc].size(); heightInc++)
+		widthPicScale = 1;
+		heightPicScale = normRatio / currRatio;
+	}
+	else
+	{
+		heightPicScale = 1;
+		widthPicScale = currRatio / normRatio;
+	}
+
+	long scaledWidth = long( (scaledBackgroundArea.right - scaledBackgroundArea.left)*widthPicScale );
+	long scaledHeight = long( (scaledBackgroundArea.bottom - scaledBackgroundArea.top)*heightPicScale );
+	POINT mid = { (scaledBackgroundArea.left + scaledBackgroundArea.right) / 2,
+		(scaledBackgroundArea.top + scaledBackgroundArea.bottom) / 2 };
+	pictureArea.left = mid.x - scaledWidth / 2;
+	pictureArea.right = mid.x + scaledWidth / 2;
+	pictureArea.top = mid.y - scaledHeight / 2;
+	pictureArea.bottom = mid.y + scaledHeight / 2;
+	//
+
+	grid.resize( width );
+	for ( UINT colInc = 0; colInc < grid.size( ); colInc++ )
+	{
+		grid[colInc].resize( height );
+		for ( UINT rowInc = 0; rowInc < grid[colInc].size( ); rowInc++ )
 		{
-			grid[widthInc][heightInc].left = (int)(currentBackgroundArea.left
-												   + (double)widthInc * (currentBackgroundArea.right - currentBackgroundArea.left) / (double)grid.size() + 2);
-			grid[widthInc][heightInc].right = (int)(currentBackgroundArea.left
-													+ (double)(widthInc + 1) * (currentBackgroundArea.right - currentBackgroundArea.left) / (double)grid.size() + 2);
-			grid[widthInc][heightInc].top = (int)(currentBackgroundArea.top
-												  + (double)(grid[widthInc].size()-heightInc-1)* (currentBackgroundArea.bottom - currentBackgroundArea.top) / (double)grid[widthInc].size());
-			grid[widthInc][heightInc].bottom = (int)(currentBackgroundArea.top
-													 + (double)(grid[widthInc].size()-heightInc)* (currentBackgroundArea.bottom - currentBackgroundArea.top) / (double)grid[widthInc].size());
+			// for all 4 pictures...
+			grid[colInc][rowInc].left = int( pictureArea.left
+											 + (double)colInc * (pictureArea.right - pictureArea.left)
+											 / (double)grid.size( ) + 2 );
+			grid[colInc][rowInc].right = int( pictureArea.left
+											  + (double)(colInc + 1) * (pictureArea.right - pictureArea.left) / (double)grid.size( ) + 2 );
+			grid[colInc][rowInc].top = int( pictureArea.top
+											+ (double)(rowInc)* (pictureArea.bottom - pictureArea.top) / (double)grid[colInc].size( ) );
+			grid[colInc][rowInc].bottom = int( pictureArea.top
+											   + (double)(rowInc + 1)* (pictureArea.bottom - pictureArea.top) / (double)grid[colInc].size( ) );
 		}
 	}
 }
@@ -357,8 +420,8 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 	unsigned int maxColor = maxSliderPosition;
 	dc->SelectPalette( CPalette::FromHandle(imagePalette), true );
 	dc->RealizePalette();
-	int pixelsAreaWidth = currentBackgroundArea.right - currentBackgroundArea.left + 1;
-	int pixelsAreaHeight = currentBackgroundArea.bottom - currentBackgroundArea.top + 1;
+	int pixelsAreaWidth = pictureArea.right - pictureArea.left + 1;
+	int pixelsAreaHeight = pictureArea.bottom - pictureArea.top + 1;
 	int dataWidth = grid.size();
 	// assumes non-zero size...
 	int dataHeight = grid[0].size();
@@ -395,15 +458,7 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 	{
 		for (int widthInc = 0; widthInc < dataWidth; widthInc++)
 		{
-			if (false)
-			{
-				//dTemp = ceil( yscale * (eImagesOfExperiment[experimentImagesInc][widthInc + heightInc * tempParam.horBinNumber] - minValue) );
-			}
-			else
-			{
-				//dTemp = ceil( yscale * (picData[widthInc + heightInc * dataWidth] - minColor) );
-				dTemp = ceil( yscale * (picData( widthInc, heightInc ) - minColor) );
-			}
+			dTemp = ceil( yscale * (picData( widthInc, heightInc ) - minColor) );
 			if (dTemp < 0)
 			{
 				// raise value to zero which is the floor of values this parameter can take.
@@ -423,18 +478,14 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 			dataArray[widthInc + heightInc * dataWidth] = (BYTE)iTemp;
 		}
 	}
-	SetStretchBltMode( dc->GetSafeHdc(), COLORONCOLOR );
-	//deviceContext->SetStretchBltMode( COLORONCOLOR );
-	// eCurrentAccumulationNumber starts at 1.
-	
-	//BYTE *finalDataArray = NULL;
+	SetStretchBltMode( dc->GetSafeHdc(), COLORONCOLOR );	
 	switch (dataWidth)
 	{
 		case 0:
 		{
 			pbmi->bmiHeader.biWidth = dataWidth;
 			pbmi->bmiHeader.biSizeImage = 1;
-			StretchDIBits( dc->GetSafeHdc(), currentBackgroundArea.left, currentBackgroundArea.top,
+			StretchDIBits( dc->GetSafeHdc(), pictureArea.left, pictureArea.top,
 						   pixelsAreaWidth, pixelsAreaHeight, 0, 0, dataWidth,
 						   dataHeight, dataArray.data(), (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
 			break;
@@ -449,7 +500,7 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 				finalDataArray[2 * dataInc + 1] = dataArray[dataInc];
 			}
 			pbmi->bmiHeader.biWidth = dataWidth * 2;
-			StretchDIBits( *dc, currentBackgroundArea.left, currentBackgroundArea.top, pixelsAreaWidth,
+			StretchDIBits( *dc, pictureArea.left, pictureArea.top, pixelsAreaWidth,
 						   pixelsAreaHeight, 0, 0, dataWidth * 2, dataHeight, finalDataArray.data(), 
 						   (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
 			break;
@@ -467,7 +518,7 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 				finalDataArray[4 * dataInc + 3] = data;
 			}
 			pbmi->bmiHeader.biWidth = dataWidth * 4;
-			StretchDIBits( *dc, currentBackgroundArea.left, currentBackgroundArea.top, pixelsAreaWidth,
+			StretchDIBits( *dc, pictureArea.left, pictureArea.top, pixelsAreaWidth,
 						   pixelsAreaHeight, 0, 0, dataWidth * 4, dataHeight, finalDataArray.data(), 
 						   (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
 			break;
@@ -490,8 +541,8 @@ void PictureControl::drawBackground( CDC* parentCdc )
 	// Set the Pen to White
 	parentCdc->SetDCPenColor(RGB(255, 255, 255));
 	// Drawing a rectangle with the current Device Context (slightly larger than the image zone).
-	RECT rectArea = { currentBackgroundArea.left, currentBackgroundArea.top, currentBackgroundArea.right, 
-		currentBackgroundArea.bottom};
+	RECT rectArea = { scaledBackgroundArea.left, scaledBackgroundArea.top, scaledBackgroundArea.right, 
+		scaledBackgroundArea.bottom};
 	parentCdc->Rectangle(&rectArea);
 }
 
@@ -509,7 +560,6 @@ void PictureControl::drawGrid( CDC* parentCdc, CBrush* brush)
 		}
 	}
 }
-
 
 
 /*
@@ -647,6 +697,8 @@ void PictureControl::drawPixelCircle(CWnd* parent)
 }
 */
 
+
+
 void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, int width, int height, fontMap fonts)
 {
 	editMax.rearrange(cameraMode, triggerMode, width, height, fonts);
@@ -662,10 +714,38 @@ void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, 
 	setLocationsButton.rearrange( cameraMode, triggerMode, width, height, fonts );
 	circleSizeText.rearrange( cameraMode, triggerMode, width, height, fonts );
 	circleSizeEdit.rearrange( cameraMode, triggerMode, width, height, fonts );
-	currentBackgroundArea.bottom =  originalBackgroundArea.bottom * height / 997.0;
-	currentBackgroundArea.top = originalBackgroundArea.top * height / 997.0;
-	currentBackgroundArea.left = originalBackgroundArea.left * width / 1920.0;
-	currentBackgroundArea.right = originalBackgroundArea.right * width / 1920.0;
+
+	double widthPicScale;
+	double heightPicScale;
+	auto imHeight = unofficialImageParameters.bottomBorder - unofficialImageParameters.topBorder;
+	auto imWidth = unofficialImageParameters.rightBorder - unofficialImageParameters.leftBorder;
+	double normRatio = 512.0 / 673;
+	double currRatio = double(imHeight) / (imWidth + 1); 
+	if ( currRatio > normRatio )
+	{
+		widthPicScale = 1;
+		heightPicScale = normRatio / currRatio;
+	}
+	else
+	{
+		heightPicScale = 1;
+		widthPicScale = currRatio / normRatio;
+	}
+	long scaledWidth = long( (scaledBackgroundArea.right - scaledBackgroundArea.left)*widthPicScale );
+	// why isn't this scaled???
+	long scaledHeight = scaledBackgroundArea.bottom - scaledBackgroundArea.top;
+	POINT mid = { (scaledBackgroundArea.left + scaledBackgroundArea.right) / 2,
+		(scaledBackgroundArea.top + scaledBackgroundArea.bottom) / 2 };
+
+	pictureArea.left = mid.x - imWidth / 2;
+	pictureArea.right = mid.x + imWidth / 2;
+	pictureArea.top = mid.y - imHeight / 2;
+	pictureArea.bottom = mid.y + imHeight / 2;
+
+	scaledBackgroundArea.bottom =  unscaledBackgroundArea.bottom * height / 997.0;
+	scaledBackgroundArea.top = unscaledBackgroundArea.top * height / 997.0;
+	scaledBackgroundArea.left = unscaledBackgroundArea.left * width / 1920.0;
+	scaledBackgroundArea.right = unscaledBackgroundArea.right * width / 1920.0;
 }
 
 

@@ -353,11 +353,11 @@ void BaslerWindow::handleArmPress()
 		baslerSettings tempSettings = settings.loadCurrentSettings(cameraController->getCameraDimensions());
 		cameraController->setParameters( tempSettings );
 		picture.recalculateGrid( tempSettings.dimensions );
+		auto* dc = GetDC( );
+		picture.drawBackground( dc );
+		ReleaseDC( dc );
 		runExposureMode = tempSettings.exposureMode;
 		imageWidth = tempSettings.dimensions.horBinNumber;
-
-		//HWND* win = new HWND;
-		//win = &m_hWnd;
 		triggerThreadFlag = true;
 
 		triggerThreadInput* input = new triggerThreadInput;

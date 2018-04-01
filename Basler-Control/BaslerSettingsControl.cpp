@@ -178,8 +178,11 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 
 	frameRateEdit.sPos = { pos.x + 150, pos.y, pos.x + 225, pos.y + 25 };
 	frameRateEdit.Create( WS_CHILD | WS_VISIBLE, frameRateEdit.sPos, parent, id++ );
-	frameRateEdit.SetWindowTextA( "30" );
-
+	#ifdef _DEBUG
+		frameRateEdit.SetWindowTextA( "0.1" );
+	#else
+		frameRateEdit.SetWindowTextA( "30" );
+	#endif
 
 	realFrameRate.sPos = { pos.x + 225, pos.y, pos.x + 300, pos.y += 25 };
 	realFrameRate.Create( "", WS_CHILD | WS_VISIBLE, realFrameRate.sPos, parent, id++ );

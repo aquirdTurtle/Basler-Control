@@ -86,7 +86,6 @@ baslerSettings BaslerCameras::getDefaultSettings()
 	defaultSettings.exposureTime = 1000; 
 	defaultSettings.frameRate = 2;
 	defaultSettings.rawGain = camera->getMinGain();
-	//defaultSettings.triggerMode = ???
 	return defaultSettings;
 }
 

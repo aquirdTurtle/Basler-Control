@@ -3,11 +3,13 @@
 #include "BaslerSettingsControl.h"
 #include <array>
 #include "Matrix.h"
+#include "CameraImageDimensions.h"
+
 
 class PictureControl
 {
 	public:
-		PictureControl::PictureControl();
+		PictureControl();
 		void initialize(POINT& loc, CWnd* parent, int& id, int width, int height, CBrush* defaultGridBrush);
 		void recalculateGrid( imageDimensions newParameters );
 		void setPictureArea( POINT loc, int width, int height );
@@ -36,6 +38,7 @@ class PictureControl
 		CBrush* gridBrush;
 		CFont pictureTextFont;
 		POINT mouseCoordinates;
+		UINT maxWidth, maxHeight;
 		// for replotting.
 		Matrix<long> mostRecentImage;
 		//std::vector<long> mostRecentImage;
@@ -45,8 +48,12 @@ class PictureControl
 		bool currentlySettingLocations;
 		std::vector<POINT> analysisLocations;
 		// Arguably I should make these static controls instead of keeping track explicitly of these things.
-		RECT originalBackgroundArea;
-		RECT currentBackgroundArea;
+		RECT unscaledBackgroundArea;
+		// scaled for the size of the window
+		RECT scaledBackgroundArea;
+		// scaled for the dimensions of the picture
+		RECT pictureArea;
+
 		// 
 		int maxSliderPosition;
 		int minSliderPosition;
@@ -73,4 +80,7 @@ class PictureControl
 		Control<CStatic> circleSizeText;
 		Control<CEdit> circleSizeEdit;
 		std::array<HPALETTE, 3> palettes;
+
+		// unofficial; these are just parameters this uses to keep track of grid size on redraws.
+		imageDimensions unofficialImageParameters;
 };
