@@ -4,6 +4,5 @@ Features:
 
 Bugs:
 - handle changing options while the system is running. Grey things.
-- fix hover value
 - usb dynamic range seems wrong
 
