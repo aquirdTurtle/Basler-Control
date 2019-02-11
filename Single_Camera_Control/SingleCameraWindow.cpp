@@ -3,13 +3,13 @@
 //
 
 #include "stdafx.h"
-#include "BaslerControlApp.h"
-#include "BaslerWindow.h"
+#include "Single_Camera_Control_App.h"
+#include "SingleCameraWindow.h"
 #include "afxdialogex.h"
 #include "constants.h"
 
 
-BaslerWindow::BaslerWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx( IDD_BASLERCONTROL_DIALOG, pParent )
+SingleCameraWindow::SingleCameraWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx( IDD_BASLERCONTROL_DIALOG, pParent )
 {
 	for ( auto elem : GIST_RAINBOW_RGB )
 	{
@@ -151,7 +151,7 @@ BaslerWindow::BaslerWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx( IDD_BASLERCON
 }
 
 // the message map. Allows me to handle various events in the system using functions I write myself.
-BEGIN_MESSAGE_MAP( BaslerWindow, CDialogEx )
+BEGIN_MESSAGE_MAP( SingleCameraWindow, CDialogEx )
 	ON_WM_CTLCOLOR()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
@@ -159,33 +159,33 @@ BEGIN_MESSAGE_MAP( BaslerWindow, CDialogEx )
 	ON_WM_VSCROLL()
 	ON_WM_MOUSEMOVE()
 
-	ON_COMMAND( ID_SOFTWARE_TRIGGER, BaslerWindow::handleSoftwareTrigger )
-	ON_COMMAND( ID_FILE_ARMCAMERA, BaslerWindow::handleArmPress)
-	ON_COMMAND( ID_FILE_DISARMCAMERA, BaslerWindow::handleDisarmPress)
-	ON_COMMAND( IDOK, &BaslerWindow::handleEnter )
-	ON_COMMAND( IDC_SET_ANALYSIS_LOCATIONS, &BaslerWindow::passSetLocationsButton)
+	ON_COMMAND( ID_SOFTWARE_TRIGGER, SingleCameraWindow::handleSoftwareTrigger )
+	ON_COMMAND( ID_FILE_ARMCAMERA, SingleCameraWindow::handleArmPress)
+	ON_COMMAND( ID_FILE_DISARMCAMERA, SingleCameraWindow::handleDisarmPress)
+	ON_COMMAND( IDOK, &SingleCameraWindow::handleEnter )
+	ON_COMMAND( IDC_SET_ANALYSIS_LOCATIONS, &SingleCameraWindow::passSetLocationsButton)
 
-	ON_CONTROL_RANGE(EN_CHANGE, IDC_MIN_SLIDER_EDIT, IDC_MIN_SLIDER_EDIT, &BaslerWindow::pictureRangeEditChange)
-	ON_CONTROL_RANGE(EN_CHANGE, IDC_MAX_SLIDER_EDIT, IDC_MAX_SLIDER_EDIT, &BaslerWindow::pictureRangeEditChange)
+	ON_CONTROL_RANGE(EN_CHANGE, IDC_MIN_SLIDER_EDIT, IDC_MIN_SLIDER_EDIT, &SingleCameraWindow::pictureRangeEditChange)
+	ON_CONTROL_RANGE(EN_CHANGE, IDC_MAX_SLIDER_EDIT, IDC_MAX_SLIDER_EDIT, &SingleCameraWindow::pictureRangeEditChange)
 
-	ON_REGISTERED_MESSAGE( ACE_PIC_READY, &BaslerWindow::handleNewPics )
+	ON_REGISTERED_MESSAGE( ACE_PIC_READY, &SingleCameraWindow::handleNewPics )
 	
-	ON_CBN_SELENDOK( IDC_EXPOSURE_MODE_COMBO, BaslerWindow::passExposureMode )
-	ON_CBN_SELENDOK( IDC_CAMERA_MODE_COMBO, BaslerWindow::passCameraMode)
+	ON_CBN_SELENDOK( IDC_EXPOSURE_MODE_COMBO, SingleCameraWindow::passExposureMode )
+	ON_CBN_SELENDOK( IDC_CAMERA_MODE_COMBO, SingleCameraWindow::passCameraMode)
 
-	ON_COMMAND( IDCANCEL, &BaslerWindow::handleClose )
+	ON_COMMAND( IDCANCEL, &SingleCameraWindow::handleClose )
 
 	ON_WM_RBUTTONUP()	
 END_MESSAGE_MAP()
 
 
-void BaslerWindow::DoDataExchange( CDataExchange* pDX )
+void SingleCameraWindow::DoDataExchange( CDataExchange* pDX )
 {
 	CDialog::DoDataExchange( pDX );
 }
 
 
-void BaslerWindow::handleClose( )
+void SingleCameraWindow::handleClose( )
 {
 	auto res = promptBox("Close the Camera Application?", MB_OKCANCEL );
 	if ( res == IDOK )
@@ -195,13 +195,13 @@ void BaslerWindow::handleClose( )
 }
 
 
-void BaslerWindow::passSetLocationsButton()
+void SingleCameraWindow::passSetLocationsButton()
 {
 	picture.handleButtonClick();
 }
 
 
-void BaslerWindow::OnRButtonUp( UINT stuff, CPoint clickLocation )
+void SingleCameraWindow::OnRButtonUp( UINT stuff, CPoint clickLocation )
 {
 	CDC* cdc = GetDC( );
 	picture.handleRightClick(clickLocation, cdc);
@@ -209,11 +209,11 @@ void BaslerWindow::OnRButtonUp( UINT stuff, CPoint clickLocation )
 }
 
 
-void BaslerWindow::handleEnter( ) { errBox( "hi!" ); }
+void SingleCameraWindow::handleEnter( ) { errBox( "hi!" ); }
 
 
 // this is suppose see where the mouse is at a given time so that if it is hovering over a pixel I can display the pixel count.
-void BaslerWindow::OnMouseMove( UINT flags, CPoint point )
+void SingleCameraWindow::OnMouseMove( UINT flags, CPoint point )
 {
 	try
 	{
@@ -226,7 +226,7 @@ void BaslerWindow::OnMouseMove( UINT flags, CPoint point )
 }
 
 
-void BaslerWindow::handleSoftwareTrigger()
+void SingleCameraWindow::handleSoftwareTrigger()
 {
 	try
 	{
@@ -239,7 +239,7 @@ void BaslerWindow::handleSoftwareTrigger()
 }
 
 
-void BaslerWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scrollbar )
+void SingleCameraWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scrollbar )
 {
 	if (nSBCode == SB_THUMBPOSITION || nSBCode == SB_THUMBTRACK)
 	{
@@ -259,7 +259,7 @@ void BaslerWindow::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* scrollbar )
 }
 
 
-void BaslerWindow::pictureRangeEditChange( UINT id )
+void SingleCameraWindow::pictureRangeEditChange( UINT id )
 {
 	try
 	{
@@ -272,7 +272,7 @@ void BaslerWindow::pictureRangeEditChange( UINT id )
 }
 
 
-void BaslerWindow::handleDisarmPress()
+void SingleCameraWindow::handleDisarmPress()
 {
 	try
 	{
@@ -289,7 +289,7 @@ void BaslerWindow::handleDisarmPress()
 }
 
 
-LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
+LRESULT SingleCameraWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 {
 	Matrix<long>* imageMatrix = (Matrix<long>*)lParam;
 	//std::vector<long>* image = (std::vector<long>*) lParam;
@@ -342,7 +342,7 @@ LRESULT BaslerWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 	return 0;
 }
 
-void BaslerWindow::passCameraMode()
+void SingleCameraWindow::passCameraMode()
 {
 	try
 	{
@@ -356,7 +356,7 @@ void BaslerWindow::passCameraMode()
 }
 
 
-void BaslerWindow::passExposureMode()
+void SingleCameraWindow::passExposureMode()
 {
 	try
 	{
@@ -369,7 +369,7 @@ void BaslerWindow::passExposureMode()
 }
 
 
-void BaslerWindow::handleArmPress()
+void SingleCameraWindow::handleArmPress()
 {
 	try
 	{
@@ -402,7 +402,7 @@ void BaslerWindow::handleArmPress()
 }
 
 
-void BaslerWindow::OnSize( UINT nType, int cx, int cy )
+void SingleCameraWindow::OnSize( UINT nType, int cx, int cy )
 {
 	picture.rearrange("", "", cx, cy, mainFonts);
 	settings.rearrange(cx, cy, mainFonts);
@@ -419,7 +419,7 @@ void BaslerWindow::OnSize( UINT nType, int cx, int cy )
 }
 
 
-HBRUSH BaslerWindow::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+HBRUSH SingleCameraWindow::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	switch (nCtlColor)
 	{
@@ -449,7 +449,7 @@ HBRUSH BaslerWindow::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 }
 
 
-BOOL BaslerWindow::OnInitDialog()
+BOOL SingleCameraWindow::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 	// Set the icon for this dialog.  The framework does this automatically
@@ -478,7 +478,7 @@ BOOL BaslerWindow::OnInitDialog()
 // If you add a minimize button to your dialog, you will need the code below
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
-void BaslerWindow::OnPaint()
+void SingleCameraWindow::OnPaint()
 {
 	if (IsIconic())
 	{
@@ -510,13 +510,13 @@ void BaslerWindow::OnPaint()
 
 // The system calls this function to obtain the cursor to display while the user drags
 //  the minimized window.
-HCURSOR BaslerWindow::OnQueryDragIcon()
+HCURSOR SingleCameraWindow::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
 
-void BaslerWindow::initializeControls()
+void SingleCameraWindow::initializeControls()
 {
 	#ifdef FIREWIRE_CAMERA
 		SetWindowText("Firewire Basler Camera Control");

@@ -14,10 +14,10 @@
 extern UINT ACE_PIC_READY;
 extern long num;
 
-class CBaslerControlApp : public CWinApp
+class CSingle_Camera_Control_App : public CWinApp
 {
 	public:
-		CBaslerControlApp();
+		CSingle_Camera_Control_App();
 		BOOL ExitInstance( );
 		ULONG_PTR gdip_token;
 		// Overrides
@@ -26,4 +26,4 @@ class CBaslerControlApp : public CWinApp
 	DECLARE_MESSAGE_MAP()
 };
 
-extern CBaslerControlApp theApp;
+extern CSingle_Camera_Control_App theApp;

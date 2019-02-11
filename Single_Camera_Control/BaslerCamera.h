@@ -5,7 +5,7 @@
 #include <pylon/PylonGUI.h>
 #include <pylon/usb/BaslerUsbInstantCamera.h>
 #include <pylon/1394/Basler1394InstantCamera.h>
-#include "BaslerControlApp.h"
+#include "Single_Camera_Control_App.h"
 #include "constants.h"
 #include <atomic>
 

@@ -7,8 +7,8 @@
 //		the stuff in this file however, I don't really know what it does.
 
 #include "stdafx.h"
-#include "BaslerControlApp.h"
-#include "BaslerWindow.h"
+#include "Single_Camera_Control_App.h"
+#include "SingleCameraWindow.h"
 #include "Resource.h"
 // something windows programs often do for debugging purposes.
 #ifdef _DEBUG
@@ -18,15 +18,15 @@
 // a few globals... could probably do this better...
 UINT ACE_PIC_READY = ::RegisterWindowMessageA( "ACE_PIC_READY" );
 
-// CBaslerControlApp
+// CSingle_Camera_Control_App
 // TODO: Remove this. I think I should be able to remove the following couple lines.
-BEGIN_MESSAGE_MAP(CBaslerControlApp, CWinApp)
+BEGIN_MESSAGE_MAP(CSingle_Camera_Control_App, CWinApp)
 	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 
 // constructor for the main app.
-CBaslerControlApp::CBaslerControlApp()
+CSingle_Camera_Control_App::CSingle_Camera_Control_App()
 {
 	// support Restart Manager
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
@@ -36,13 +36,13 @@ CBaslerControlApp::CBaslerControlApp()
 }
 
 
-// The one and only CBaslerControlApp object. The entire program runs from the construction of this object.
-CBaslerControlApp theApp;
+// The one and only CSingle_Camera_Control_App object. The entire program runs from the construction of this object.
+CSingle_Camera_Control_App theApp;
 long num;
 
 
 // this initialization function is called after the constructor.
-BOOL CBaslerControlApp::InitInstance()
+BOOL CSingle_Camera_Control_App::InitInstance()
 {
 	Gdiplus::GdiplusStartupInput input;
 	Gdiplus::GdiplusStartup( &gdip_token, &input, NULL );
@@ -77,7 +77,7 @@ BOOL CBaslerControlApp::InitInstance()
 	SetRegistryKey(_T("Basler Control Code"));
 
 	// create the main window object.
-	BaslerWindow dlg;
+	SingleCameraWindow dlg;
 	// the app class gets a reference.
 	m_pMainWnd = &dlg;
 	// create the main dialog. Most of the code sits inside this function, including the main gui looping.
@@ -100,7 +100,7 @@ BOOL CBaslerControlApp::InitInstance()
 }
 
 
-BOOL CBaslerControlApp::ExitInstance( )
+BOOL CSingle_Camera_Control_App::ExitInstance( )
 {
 	Gdiplus::GdiplusShutdown( gdip_token );
 	return CWinApp::ExitInstance( );

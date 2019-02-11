@@ -3,7 +3,7 @@
 #include "PictureControl.h"
 #include <algorithm>
 #include <functional>
-#include "BaslerControlApp.h"
+#include "Single_Camera_Control_App.h"
 #include "stdint.h"
 #include "constants.h"
 #include <cmath>

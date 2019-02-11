@@ -9,10 +9,10 @@
 #include "commonTypes.h"
 #include "PlotCtrl.h"
 
-class BaslerWindow : public CDialogEx
+class SingleCameraWindow : public CDialogEx
 {
 	public:
-		BaslerWindow(CWnd* pParent = NULL);	
+		SingleCameraWindow(CWnd* pParent = NULL);	
 		BOOL OnInitDialog();
 		void handleEnter();
 		void OnPaint();
