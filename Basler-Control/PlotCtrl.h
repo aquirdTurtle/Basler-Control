@@ -28,6 +28,7 @@ struct dataPoint
 	double err;
 };
 
+
 typedef std::vector<dataPoint> plotDataVec; 
 typedef std::shared_ptr<plotDataVec> pPlotDataVec;
 
@@ -99,5 +100,4 @@ class PlotCtrl
 		// legend on off
 		// yscale dynamic or 0->1
 		// ...?
-		void PlotCtrl::paint( CDC* cdc );
 };

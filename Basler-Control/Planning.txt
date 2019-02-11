@@ -1,8 +1,9 @@
 Features:
 - be able to actually control the gain.
-- Being able to see pixel counts
+- be able to toggle real-time plots between displaying integrating and single line
 
 Bugs:
 - handle changing options while the system is running. Grey things.
 - usb dynamic range seems wrong
-
+- bottom of horizontal plot is getting cut off?
+- initial size of image area is wrong, need to resize to correct
