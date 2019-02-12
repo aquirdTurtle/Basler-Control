@@ -11,8 +11,8 @@
 
 // The code compiles fairly differently for Firewire (1384) cameras vs. USB cameras.
 const std::string mainColor = "Dark Grey";
-const std::string DATA_SAVE_LOCATION = "J:\\Data Repository\\New Data Repository\\";
-const std::string DATA_SAVE_LOCATION2 = "\\Raw Data\\PixisData_";
+const std::string DATA_SAVE_LOCATION = "C:\\Users\\NanoControl\\Desktop\\Raw Data\\";
+const std::string DATA_SAVE_LOCATION2 = "Raw Data\\PixisData_";
 
 // constants for various controls that I need to reference in the basler window message map. Boring controls start at 
 // 1000.

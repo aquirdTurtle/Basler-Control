@@ -90,16 +90,11 @@ void CameraSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	
 	exposureText.sPos = { pos.x, pos.y, pos.x + 200, pos.y + 25 };
 	std::string exposureTimeText;
-	#ifdef USB_CAMERA
-		exposureTimeText = "Exposure Time (us):";
-	#elif defined FIREWIRE_CAMERA
-		exposureTimeText = "Raw Time (# X 20 = us):";
-	#endif
 	exposureText.Create(exposureTimeText.c_str(), WS_CHILD | WS_VISIBLE, exposureText.sPos, parent, id++ );
 
 	exposureEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
 	exposureEdit.Create( WS_CHILD | WS_VISIBLE, exposureEdit.sPos, parent, id++ );
-	exposureEdit.SetWindowTextA( "1000" );
+	exposureEdit.SetWindowTextA( "100" );
 
 	exposureModeCombo.sPos = { pos.x, pos.y, pos.x + 300, pos.y + 100 };
 	exposureModeCombo.Create( WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_SORT, exposureModeCombo.sPos, parent, 

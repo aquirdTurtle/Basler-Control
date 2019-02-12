@@ -8,7 +8,7 @@ class PicamFlume
 		
 		void InitializeLibrary ( );
 		void UninitializeLibrary ( );
-		PicamHandle OpenFirstCamera ( );
+		void OpenFirstCamera ( );
 		PicamCameraID GetCameraID (  );
 		void CloseCamera ( );
 		void ConnectAndOpenDemoCamera ( PicamCameraID& id );
