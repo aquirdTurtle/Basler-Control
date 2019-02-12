@@ -255,7 +255,7 @@ CameraSettings CameraSettingsControl::loadCurrentSettings(POINT cameraDims)
 				throw std::invalid_argument( "err!" );
 			}
 		}
-		catch (std::invalid_argument& err)
+		catch (std::invalid_argument&)
 		{
 			thrower( "Error! Please input a valid double for the exposure time." );
 		}
@@ -275,7 +275,7 @@ CameraSettings CameraSettingsControl::loadCurrentSettings(POINT cameraDims)
 				thrower( "ERROR! Repetition count must be strictly positive." );
 			}
 		}
-		catch (std::invalid_argument& err)
+		catch (std::invalid_argument&)
 		{
 			thrower( "Error! Please input a valid positive integer for the rep count." );
 		}

@@ -113,7 +113,7 @@ void PixisCamera::initialize ( CWnd* parent )
 	}
 	catch ( Error& err )
 	{
-		errBox ( "No Pixis Camera Detected, opening demo camera!" );
+		errBox ( "No Pixis Camera Detected (" + err.whatStr() + "), opening demo camera!" );
 		flume.ConnectAndOpenDemoCamera ( camID );
 	}
 }

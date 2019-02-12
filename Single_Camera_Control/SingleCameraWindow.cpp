@@ -265,6 +265,9 @@ void SingleCameraWindow::pictureRangeEditChange( UINT id )
 	try
 	{
 		picture.handleEditChange( id );
+		CDC* cdc = GetDC ( );
+		picture.redrawImage ( cdc );
+		ReleaseDC ( cdc );
 	}
 	catch (Error& err)
 	{
@@ -521,10 +524,6 @@ void SingleCameraWindow::initializeControls()
 {
 	#ifdef PIXIS_CAMERA
 		SetWindowText ( "Pixis Camera Control" );
-	#elif defined FIREWIRE_CAMERA
-		SetWindowText("Firewire Basler Camera Control");
-	#elif defined USB_CAMERA
-		SetWindowText("USB Basler Camera Control");
 	#endif
 
 	CMenu menu;
