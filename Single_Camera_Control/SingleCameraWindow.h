@@ -1,9 +1,9 @@
 #pragma once
 #include <atomic>
+#include "PixisCamera.h"
 #include "PictureControl.h"
 #include "Control.h"
-#include "BaslerSettingsControl.h"
-#include "BaslerCamera.h"
+#include "CameraSettingsControl.h"
 #include "PictureStats.h"
 #include "PictureSaver.h"
 #include "commonTypes.h"
@@ -33,11 +33,11 @@ class SingleCameraWindow : public CDialogEx
 		void OnRButtonUp( UINT stuff, CPoint clickLocation );
 		void passSetLocationsButton();
 		void DoDataExchange( CDataExchange* pDX );
-
+		
 	private:
 		PictureControl picture;
-		BaslerSettingsControl settings;
-		BaslerCameras* cameraController;
+		CameraSettingsControl settings;
+		PixisCamera cameraController;
 		PictureStats stats;
 		PictureSaver saver;
 		unsigned int currentRepNumber;

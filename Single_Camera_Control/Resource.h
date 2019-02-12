@@ -5,7 +5,8 @@
 
 // which type of camera
 //#define FIREWIRE_CAMERA
-#define USB_CAMERA
+//#define USB_CAMERA
+#define PIXIS_CAMERA
 
 #define IDD_BASLERCONTROL_DIALOG        102
 #define IDI_FIREWIRE_ICON               128

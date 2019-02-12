@@ -9,7 +9,8 @@
 #include "constants.h"
 
 
-SingleCameraWindow::SingleCameraWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx( IDD_BASLERCONTROL_DIALOG, pParent )
+SingleCameraWindow::SingleCameraWindow( CWnd* pParent /*=NULL*/ ) : CDialogEx( IDD_BASLERCONTROL_DIALOG, pParent ), 
+																	cameraController ( PIXIS_SAFEMODE )
 {
 	for ( auto elem : GIST_RAINBOW_RGB )
 	{
@@ -168,7 +169,7 @@ BEGIN_MESSAGE_MAP( SingleCameraWindow, CDialogEx )
 	ON_CONTROL_RANGE(EN_CHANGE, IDC_MIN_SLIDER_EDIT, IDC_MIN_SLIDER_EDIT, &SingleCameraWindow::pictureRangeEditChange)
 	ON_CONTROL_RANGE(EN_CHANGE, IDC_MAX_SLIDER_EDIT, IDC_MAX_SLIDER_EDIT, &SingleCameraWindow::pictureRangeEditChange)
 
-	ON_REGISTERED_MESSAGE( ACE_PIC_READY, &SingleCameraWindow::handleNewPics )
+	ON_REGISTERED_MESSAGE( PIC_READY, &SingleCameraWindow::handleNewPics )
 	
 	ON_CBN_SELENDOK( IDC_EXPOSURE_MODE_COMBO, SingleCameraWindow::passExposureMode )
 	ON_CBN_SELENDOK( IDC_CAMERA_MODE_COMBO, SingleCameraWindow::passCameraMode)
@@ -230,7 +231,7 @@ void SingleCameraWindow::handleSoftwareTrigger()
 {
 	try
 	{
-		cameraController->softwareTrigger();
+		//cameraController.softwareTrigger();
 	}
 	catch (Pylon::TimeoutException& err)
 	{
@@ -276,7 +277,7 @@ void SingleCameraWindow::handleDisarmPress()
 {
 	try
 	{
-		cameraController->disarm();
+		cameraController.disarm();
 		triggerThreadFlag = false;
 		isRunning = false;
 		settings.setStatus("Camera Status: Idle");
@@ -291,7 +292,7 @@ void SingleCameraWindow::handleDisarmPress()
 
 LRESULT SingleCameraWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 {
-	Matrix<long>* imageMatrix = (Matrix<long>*)lParam;
+	Matrix<long>* imageMatrix(reinterpret_cast<Matrix<long>*>(lParam));
 	//std::vector<long>* image = (std::vector<long>*) lParam;
  	long size = long( wParam );
  	try
@@ -305,27 +306,27 @@ LRESULT SingleCameraWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 		picture.setHoverValue();
 		if (runExposureMode == "Auto Exposure Continuous")
 		{
-			settings.updateExposure( cameraController->getCurrentExposure() );
+			settings.updateExposure( cameraController.getExposure() );
 		}
 		
 		stats.update( *imageMatrix, 0, { 0,0 }, settings.getCurrentSettings().dimensions.horBinNumber, currentRepNumber,
-					  cameraController->getRepCounts() );
+					  cameraController.getRepCounts() );
 		settings.setStatus("Camera Status: Acquiring Pictures.");
 		if (currentRepNumber % 10 == 0)
 		{
 			settings.handleFrameRate();
 		}
-		if (currentRepNumber == 1 && !cameraController->isContinuous())
+		if (currentRepNumber == 1)// && !cameraController.isContinuous())
 		{
 			saver.save( *imageMatrix, imageWidth );
 		}
-		else if (!cameraController->isContinuous())
+		else// if (!cameraController.isContinuous())
 		{
 			saver.append( *imageMatrix, imageWidth );
 		}
-		if (currentRepNumber == cameraController->getRepCounts())
+		if (currentRepNumber == cameraController.getRepCounts())
 		{
-			cameraController->disarm();
+			cameraController.disarm();
 			saver.close();
 			isRunning = false;
 			settings.setStatus("Camera Status: Finished finite acquisition.");
@@ -338,7 +339,7 @@ LRESULT SingleCameraWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 	}
 	OnPaint( );
 	// always delete
-	delete imageMatrix;
+	//delete imageMatrix;
 	return 0;
 }
 
@@ -347,7 +348,7 @@ void SingleCameraWindow::passCameraMode()
 	try
 	{
 		settings.handleCameraMode();
-		saver.handleModeChange(settings.loadCurrentSettings(cameraController->getCameraDimensions()).cameraMode);
+		saver.handleModeChange(settings.loadCurrentSettings(cameraController.getCameraDimensions()).cameraMode);
 	}
 	catch (Error& err)
 	{
@@ -374,8 +375,8 @@ void SingleCameraWindow::handleArmPress()
 	try
 	{
 		currentRepNumber = 0;
-		baslerSettings tempSettings = settings.loadCurrentSettings(cameraController->getCameraDimensions());
-		cameraController->setParameters( tempSettings );
+		CameraSettings tempSettings = settings.loadCurrentSettings(cameraController.getCameraDimensions());
+		cameraController.setParameters( tempSettings );
 		picture.recalculateGrid( tempSettings.dimensions );
 		auto* dc = GetDC( );
 		picture.drawBackground( dc );
@@ -384,14 +385,14 @@ void SingleCameraWindow::handleArmPress()
 		imageWidth = tempSettings.dimensions.horBinNumber;
 		triggerThreadFlag = true;
 
-		triggerThreadInput* input = new triggerThreadInput;
+		/*triggerThreadInput* input = new triggerThreadInput;
 		input->width = tempSettings.dimensions.horBinNumber;
 		input->height = tempSettings.dimensions.vertBinNumber;
 		input->frameRate = tempSettings.frameRate;
 		input->parent = this;
-		input->runningFlag = &triggerThreadFlag;
+		input->runningFlag = &triggerThreadFlag;*/
 
-		cameraController->armCamera( input);
+		cameraController.armCamera();
 		settings.setStatus("Camera Status: Armed...");
 		isRunning = true;
 	}
@@ -518,7 +519,9 @@ HCURSOR SingleCameraWindow::OnQueryDragIcon()
 
 void SingleCameraWindow::initializeControls()
 {
-	#ifdef FIREWIRE_CAMERA
+	#ifdef PIXIS_CAMERA
+		SetWindowText ( "Pixis Camera Control" );
+	#elif defined FIREWIRE_CAMERA
 		SetWindowText("Firewire Basler Camera Control");
 	#elif defined USB_CAMERA
 		SetWindowText("USB Basler Camera Control");
@@ -527,31 +530,27 @@ void SingleCameraWindow::initializeControls()
 	CMenu menu;
 	menu.LoadMenu( IDR_MENU1 );
 	SetMenu( &menu );
-	cameraController = new BaslerCameras( this );
-	if (!cameraController->isInitialized())
-	{
-		thrower("ERROR: Camera not connected! Exiting program..." );
-	}
+	cameraController.initialize ( this );
 	int id = 1000;
 	POINT pos = { 0,0 };
-	POINT cameraDims = cameraController->getCameraDimensions();
+	POINT cameraDims = cameraController.getCameraDimensions();
 	settings.initialize( pos, id, this, cameraDims.x, cameraDims.y, cameraDims);
-	settings.setSettings( cameraController->getDefaultSettings() );
+	settings.setSettings( cameraController.getDefaultSettings() );
 	std::unordered_map<std::string, CFont*> fontDummy;
 	std::vector<CToolTipCtrl*> toolTipDummy;
 	stats.initialize( pos, this, id, fontDummy, toolTipDummy );
 	saver.initialize( pos, id, this );
 
 	POINT picPos = { 300, 0 };
-	POINT dims = cameraController->getCameraDimensions();
+	//POINT dims = cameraController.getCameraDimensions();
 
 	// scale to fill the window (approximately).
-	dims.x *= 1.7;
-	dims.y *= 1.7;
+	cameraDims.x *= 0.8;
+	cameraDims.y *= 0.8;
 
-	picture.initialize( picPos, this, id, dims.x + picPos.x + 115, dims.y + picPos.y, mainBrushes["Red"], 
+	picture.initialize( picPos, this, id, cameraDims.x + picPos.x + 115, cameraDims.y + picPos.y, mainBrushes["Red"],
 						brightPlotPens, plotfont, brightPlotBrushes );
-	picture.recalculateGrid( cameraController->getDefaultSettings().dimensions );
+	picture.recalculateGrid( cameraController.getDefaultSettings().dimensions );
 	CDC* cdc = GetDC( );
 	picture.drawBackground( cdc );
 	ReleaseDC( cdc );

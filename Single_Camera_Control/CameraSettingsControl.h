@@ -27,7 +27,7 @@ struct imageDimensions
 };
 
 
-struct baslerSettings
+struct CameraSettings
 {
 	unsigned int rawGain;
 	std::string exposureMode;
@@ -40,7 +40,7 @@ struct baslerSettings
 };
 
 
-class BaslerSettingsControl
+class CameraSettingsControl
 {
 	public:
 		void initialize(POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight, POINT cameraDims);
@@ -49,16 +49,16 @@ class BaslerSettingsControl
 		void handleExposureMode();
 		void handleCameraMode();
 		void handleFrameRate();
-		baslerSettings loadCurrentSettings(POINT cameraDims);
-		baslerSettings getCurrentSettings();		
+		CameraSettings loadCurrentSettings(POINT cameraDims);
+		CameraSettings getCurrentSettings();		
 		// change all the settings.
-		void setSettings( baslerSettings settings);
+		void setSettings( CameraSettings settings);
 		void updateExposure( double exposure );
 		void rearrange(int width, int height, fontMap fonts);
 
 	private:
 		ULONG lastTime;
-		baslerSettings currentSettings;
+		CameraSettings currentSettings;
 		Control<CStatic> statusText;
 		// exposure
 		Control<CStatic> exposureText;

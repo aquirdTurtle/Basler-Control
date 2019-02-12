@@ -23,21 +23,27 @@ void PictureControl::paint( CDC* cdc, CRect size, CBrush* bgdBrush )
 	long width = size.right - size.left, height = size.bottom - size.top;
 	// each dc gets initialized with the rect for the corresponding plot. That way, each dc only overwrites the area 
 	// for a single plot.
-	horGraph->setCurrentDims( width, height );
+	if ( horGraph != NULL )
 	{
-		memDC ttlDC( cdc, &horGraph->GetPlotRect( ) );
-		horGraph->drawBackground( ttlDC, bgdBrush, bgdBrush );
-		horGraph->drawTitle( ttlDC );
-		horGraph->drawBorder( ttlDC );
-		horGraph->plotPoints( &ttlDC );
+		horGraph->setCurrentDims ( width, height );
+		{
+			memDC ttlDC ( cdc, &horGraph->GetPlotRect ( ) );
+			horGraph->drawBackground ( ttlDC, bgdBrush, bgdBrush );
+			horGraph->drawTitle ( ttlDC );
+			horGraph->drawBorder ( ttlDC );
+			horGraph->plotPoints ( &ttlDC );
+		}
 	}
-	vertGraph->setCurrentDims( width, height );
+	if ( vertGraph != NULL )
 	{
-		memDC ttlDC( cdc, &vertGraph->GetPlotRect( ) );
-		vertGraph->drawBackground( ttlDC, bgdBrush, bgdBrush );
-		vertGraph->drawTitle( ttlDC );
-		vertGraph->drawBorder( ttlDC );
-		vertGraph->plotPoints( &ttlDC );
+		vertGraph->setCurrentDims ( width, height );
+		{
+			memDC ttlDC ( cdc, &vertGraph->GetPlotRect ( ) );
+			vertGraph->drawBackground ( ttlDC, bgdBrush, bgdBrush );
+			vertGraph->drawTitle ( ttlDC );
+			vertGraph->drawBorder ( ttlDC );
+			vertGraph->plotPoints ( &ttlDC );
+		}
 	}
 }
 
@@ -363,9 +369,9 @@ void PictureControl::recalculateGrid(imageDimensions newParameters)
 	double heightPicScale;
 	auto height = unofficialImageParameters.bottomBorder - unofficialImageParameters.topBorder+1;
 	auto width = unofficialImageParameters.rightBorder - unofficialImageParameters.leftBorder+1;
-	double normRatio = 512.0 / 673;
+	double normRatio = 1;
 	double currRatio = double( height ) / (width + 1);
-	if ( currRatio > normRatio )
+	if ( currRatio < normRatio )
 	{
 		widthPicScale = 1;
 		heightPicScale = normRatio / currRatio;
@@ -505,7 +511,7 @@ void PictureControl::addIntegrationText(const Matrix<long>& pic, CDC* parentCdc)
 // input is the 2D array which gets mapped to the image.
 void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 {
-	mostRecentImage = picData;
+	//mostRecentImage = picData;
 	unsigned int minColor = minSliderPosition;
 	unsigned int maxColor = maxSliderPosition;
 	dc->SelectPalette( CPalette::FromHandle(imagePalette), true );
@@ -548,7 +554,8 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 	{
 		for (int widthInc = 0; widthInc < dataWidth; widthInc++)
 		{
-			dTemp = ceil( yscale * (picData( heightInc, widthInc ) - minColor) );
+			auto val = picData ( heightInc, widthInc );
+			dTemp = ceil( yscale * (val - minColor) );
 			if (dTemp < 0)
 			{
 				// raise value to zero which is the floor of values this parameter can take.
@@ -569,7 +576,7 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 		}
 	}
 	SetStretchBltMode( dc->GetSafeHdc(), COLORONCOLOR );	
-	switch (dataWidth)
+	switch (dataWidth%4)
 	{
 		case 0:
 		{

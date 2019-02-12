@@ -1,9 +1,9 @@
 #include "stdafx.h"
-#include "BaslerSettingsControl.h"
+#include "CameraSettingsControl.h"
 #include "constants.h"
 
 
-void BaslerSettingsControl::rearrange(int width, int height, fontMap fonts)
+void CameraSettingsControl::rearrange(int width, int height, fontMap fonts)
 {
 	statusText.rearrange("", "", width, height, fonts);
 	// exposure
@@ -46,7 +46,7 @@ void BaslerSettingsControl::rearrange(int width, int height, fontMap fonts)
 
 
 // assumes called on every 10 pics.
-void BaslerSettingsControl::handleFrameRate()
+void CameraSettingsControl::handleFrameRate()
 {
 	ULONG currentTime = GetTickCount();
 	ULONG timePerPic = (currentTime - lastTime)/10.0;
@@ -60,12 +60,12 @@ void BaslerSettingsControl::handleFrameRate()
 }
 
 
-void BaslerSettingsControl::setStatus(std::string status)
+void CameraSettingsControl::setStatus(std::string status)
 {
 	statusText.SetWindowTextA(status.c_str());
 }
 
-void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight, POINT cameraDims )
+void CameraSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int picWidth, int picHeight, POINT cameraDims )
 {
 	int width = 300;
 	lastTime = 0;
@@ -169,7 +169,7 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 						 IDC_TRIGGER_MODE_COMBO );
 	triggerCombo.AddString( "External Trigger" );
 	triggerCombo.AddString( "Automatic Software Trigger" );
-	triggerCombo.AddString( "Manual Software Trigger" );
+	//triggerCombo.AddString( "Manual Software Trigger" );
 	triggerCombo.SelectString( 0, "Automatic Software Trigger" );
 	pos.y += 25;
 
@@ -209,12 +209,12 @@ void BaslerSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	realGainStatus.Create( "", WS_CHILD | WS_VISIBLE, realGainStatus.sPos, parent, id++ );
 }
 
-void BaslerSettingsControl::updateExposure( double exposure )
+void CameraSettingsControl::updateExposure( double exposure )
 {
 	exposureEdit.SetWindowTextA( cstr( exposure ) );
 }
 
-void BaslerSettingsControl::handleCameraMode()
+void CameraSettingsControl::handleCameraMode()
 {
 	int sel = cameraMode.GetCurSel();
 	CString text;
@@ -231,18 +231,18 @@ void BaslerSettingsControl::handleCameraMode()
 
 // care, this only sets the settings that this control sees, not the settings that the camera itself sees. 
 // (see BaslerCamera class for the latter)
-void BaslerSettingsControl::setSettings( baslerSettings settings )
+void CameraSettingsControl::setSettings( CameraSettings settings )
 {
 	currentSettings = settings;
 }
 
 
-baslerSettings BaslerSettingsControl::getCurrentSettings()
+CameraSettings CameraSettingsControl::getCurrentSettings()
 {
 	return currentSettings;
 }
 
-baslerSettings BaslerSettingsControl::loadCurrentSettings(POINT cameraDims)
+CameraSettings CameraSettingsControl::loadCurrentSettings(POINT cameraDims)
 {	
 	isReady = false;
 	int selection = exposureModeCombo.GetCurSel();
@@ -298,11 +298,6 @@ baslerSettings BaslerSettingsControl::loadCurrentSettings(POINT cameraDims)
 	try
 	{
 		int val = currentSettings.dimensions.leftBorder = std::stoi( std::string( tempStr ) );
-		#ifdef USB_CAMERA
-			// round down to nearest multiple of 16
-			currentSettings.dimensions.leftBorder = int(val / 16) * 16;
-			leftEdit.SetWindowTextA(cstr(currentSettings.dimensions.leftBorder));
-		#endif
 	}
 	catch (std::invalid_argument&)
 	{
@@ -326,31 +321,6 @@ baslerSettings BaslerSettingsControl::loadCurrentSettings(POINT cameraDims)
 	try
 	{
 		currentSettings.dimensions.rightBorder = std::stoi( std::string( tempStr ) );
-			#ifdef USB_CAMERA
-			int roundVal = 1;
-			if (currentSettings.dimensions.horPixelsPerBin == 1)
-			{
-				roundVal = 16;
-			}
-			else if (currentSettings.dimensions.horPixelsPerBin == 2)
-			{
-				roundVal = 32;
-			}
-			else if (currentSettings.dimensions.horPixelsPerBin == 4)
-			{
-				roundVal = 64;
-			}
-			// round up to nearest multiple of 16 or 32 or 64 depending on binning.
-			int width = currentSettings.dimensions.rightBorder - currentSettings.dimensions.leftBorder + 1;
-			width = ((width + roundVal - 1) / roundVal) * roundVal;
-			currentSettings.dimensions.rightBorder = currentSettings.dimensions.leftBorder + width - 1;
-			// compensate in case the extra rounding over-shoots, which is possible if roundVal > 16.
-			if (currentSettings.dimensions.rightBorder > cameraDims.x-1)
-			{
-				currentSettings.dimensions.rightBorder -= roundVal;
-			}
-			rightEdit.SetWindowTextA( cstr( currentSettings.dimensions.rightBorder ) );
-		#endif
 	}
 	catch (std::invalid_argument&)
 	{
@@ -362,11 +332,6 @@ baslerSettings BaslerSettingsControl::loadCurrentSettings(POINT cameraDims)
 	try
 	{
 		int val = currentSettings.dimensions.topBorder = std::stoi(std::string(tempStr));
-		#ifdef USB_CAMERA
-			// round down to nearest multiple of 16
-			currentSettings.dimensions.topBorder = int(val / 16) * 16;
-			topEdit.SetWindowTextA(cstr(currentSettings.dimensions.topBorder));
-		#endif
 	}
 	catch (std::invalid_argument&)
 	{
@@ -389,32 +354,6 @@ baslerSettings BaslerSettingsControl::loadCurrentSettings(POINT cameraDims)
 	try
 	{
 		currentSettings.dimensions.bottomBorder = std::stoi( std::string( tempStr ) );
-
-		#ifdef USB_CAMERA
-			// round up to nearest multiple of 16 or 32 or 64 depending on binning.
-			int roundVal = 1;
-			if (currentSettings.dimensions.vertPixelsPerBin == 1)
-			{
-				roundVal = 16;
-			}
-			else if (currentSettings.dimensions.vertPixelsPerBin == 2)
-			{
-				roundVal = 32;
-			}
-			else if (currentSettings.dimensions.vertPixelsPerBin == 4)
-			{
-				roundVal = 64;
-			}
-			int height = currentSettings.dimensions.bottomBorder - currentSettings.dimensions.topBorder + 1;
-			height = ((height + roundVal - 1) / roundVal) * roundVal;
-			currentSettings.dimensions.bottomBorder = currentSettings.dimensions.topBorder + height - 1;
-			// compensate in case the extra rounding over-shoots, which is possible if roundVal > 16.
-			if (currentSettings.dimensions.bottomBorder > cameraDims.y-1)
-			{
-				currentSettings.dimensions.bottomBorder -= roundVal;
-			}
-			bottomEdit.SetWindowTextA( cstr(currentSettings.dimensions.bottomBorder) );
-		#endif
 	}
 	catch (std::invalid_argument&)
 	{
@@ -422,8 +361,6 @@ baslerSettings BaslerSettingsControl::loadCurrentSettings(POINT cameraDims)
 	}
 	bottomEdit.RedrawWindow();
 
-
-	
 	currentSettings.dimensions.horRawPixelNumber = currentSettings.dimensions.rightBorder - currentSettings.dimensions.leftBorder + 1;
 	currentSettings.dimensions.vertRawPixelNumber = currentSettings.dimensions.bottomBorder - currentSettings.dimensions.topBorder + 1;
 
@@ -452,12 +389,6 @@ baslerSettings BaslerSettingsControl::loadCurrentSettings(POINT cameraDims)
 	{
 		thrower( "ERROR: Image height must be a multiple of Vertical Binning\r\n" );
 	}
-	#ifdef USB_CAMERA
-		if (currentSettings.dimensions.horRawPixelNumber % 16 != 0 || currentSettings.dimensions.vertRawPixelNumber % 16 != 0)
-		{
-			thrower( "ERROR: In a basler camera, the number of pixels in each dimension must be a multiple of 16!\r\n" );
-		}
-	#endif
 	if (currentSettings.dimensions.horPixelsPerBin > 4 || currentSettings.dimensions.vertPixelsPerBin > 4)
 	{
 		thrower( "ERROR: Binning on a camera cannot exceed 4 pixels per bin!\r\n" );
@@ -481,13 +412,13 @@ baslerSettings BaslerSettingsControl::loadCurrentSettings(POINT cameraDims)
 	return currentSettings;
 }
 
-void BaslerSettingsControl::handleGain()
+void CameraSettingsControl::handleGain()
 {
 
 }
 
 
-void BaslerSettingsControl::handleExposureMode()
+void CameraSettingsControl::handleExposureMode()
 {
 	int sel = exposureModeCombo.GetCurSel();
 	CString text;

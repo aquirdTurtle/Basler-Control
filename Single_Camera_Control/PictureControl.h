@@ -1,6 +1,6 @@
 #pragma once
 #include "Control.h"
-#include "BaslerSettingsControl.h"
+#include "CameraSettingsControl.h"
 #include <array>
 #include "Matrix.h"
 #include "CameraImageDimensions.h"

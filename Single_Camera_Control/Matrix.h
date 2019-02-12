@@ -116,17 +116,17 @@ Matrix<type> Matrix<type>::submatrix( UINT rowOffset, UINT rowSubSpan, UINT colO
 template <class type>
 std::string Matrix<type>::print( )
 {
-	std::string printStr;
 	UINT counter = 0;
+	currMatrix = "";
 	for ( auto elem : *this )
 	{
-		printStr += str( elem ) + ", ";
+		currMatrix += str( elem ) + ", ";
 		if ( ++counter % cols == 0 )
 		{
-			printStr += ";\n";
+			currMatrix += ";\n";
 		}
 	}
-	return printStr;
+	return currMatrix;
 }
 
 

@@ -16,7 +16,7 @@
 #endif
 
 // a few globals... could probably do this better...
-UINT ACE_PIC_READY = ::RegisterWindowMessageA( "ACE_PIC_READY" );
+UINT PIC_READY = ::RegisterWindowMessageA( "PIC_READY" );
 
 // CSingle_Camera_Control_App
 // TODO: Remove this. I think I should be able to remove the following couple lines.

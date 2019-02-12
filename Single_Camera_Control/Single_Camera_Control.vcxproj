@@ -81,8 +81,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Basler\pylon 5\Development\include;$(IncludePath);C:\Users\Mark-Brown\Code\Chimera-Control\Packages\boost_1_64_0</IncludePath>
-    <LibraryPath>C:\Program Files\Basler\pylon 5\Development\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files\Basler\pylon 5\Development\include;$(IncludePath);C:\Users\Mark-Brown\Code\Chimera-Control\Packages\boost_1_64_0;$(PicamRoot)Includes</IncludePath>
+    <LibraryPath>C:\Program Files\Basler\pylon 5\Development\lib\x64;$(PicamRoot)Libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -91,8 +91,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\Basler\pylon 5\Development\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Users\Mark-Brown\Code\Chimera-Control\Packages\boost_1_64_0</IncludePath>
-    <LibraryPath>C:\Program Files\Basler\pylon 5\Development\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>C:\Program Files\Basler\pylon 5\Development\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Users\Mark-Brown\Code\Chimera-Control\Packages\boost_1_64_0;$(PicamRoot)Includes</IncludePath>
+    <LibraryPath>C:\Program Files\Basler\pylon 5\Development\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(PicamRoot)Libraries</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -126,6 +126,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>picam.lib;</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -178,6 +179,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>picam.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -196,10 +198,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnalysisControl.h" />
-    <ClInclude Include="BaslerCamera.h" />
+    <ClInclude Include="PicamFlume.h" />
+    <ClInclude Include="PixisCamera.h" />
     <ClInclude Include="Single_Camera_Control_App.h" />
     <ClInclude Include="SingleCameraWindow.h" />
-    <ClInclude Include="BaslerSettingsControl.h" />
+    <ClInclude Include="CameraSettingsControl.h" />
     <ClInclude Include="CameraImageDimensions.h" />
     <ClInclude Include="commonTypes.h" />
     <ClInclude Include="constants.h" />
@@ -216,10 +219,11 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BaslerCamera.cpp" />
+    <ClCompile Include="PicamFlume.cpp" />
+    <ClCompile Include="PixisCamera.cpp" />
     <ClCompile Include="Single_Camera_Control_App.cpp" />
     <ClCompile Include="SingleCameraWindow.cpp" />
-    <ClCompile Include="BaslerSettingsControl.cpp" />
+    <ClCompile Include="CameraSettingsControl.cpp" />
     <ClCompile Include="CameraImageDimensions.cpp" />
     <ClCompile Include="miscellaneousCommonFunctions.cpp" />
     <ClCompile Include="PictureControl.cpp" />

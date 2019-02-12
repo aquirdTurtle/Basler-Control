@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 #include "CameraImageDimensions.h"
-#include "BaslerSettingsControl.h"
+#include "CameraSettingsControl.h"
 #include "SingleCameraWindow.h"
 
 void CameraImageDimensionsControl::cameraIsOn( bool state )

@@ -11,7 +11,7 @@
 #include "resource.h"		// main symbols
 
 // some hap-hazardly placed globals.
-extern UINT ACE_PIC_READY;
+extern UINT PIC_READY;
 extern long num;
 
 class CSingle_Camera_Control_App : public CWinApp

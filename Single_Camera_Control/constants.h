@@ -7,28 +7,12 @@
 #include <vector>
 #include <array>
 
-#define BASLER_SAFEMODE true
+#define PIXIS_SAFEMODE false
 
 // The code compiles fairly differently for Firewire (1384) cameras vs. USB cameras.
-#ifdef FIREWIRE_CAMERA 
-	typedef Pylon::CBasler1394InstantCamera cameraType;
-	typedef Pylon::CBasler1394GrabResultPtr grabPtr;
-	namespace cameraParams = Basler_IIDC1394CameraParams;
-	const std::string mainColor = "Dark Orange";
-#elif defined USB_CAMERA
-	typedef Pylon::CBaslerUsbInstantCamera cameraType;
-	typedef Pylon::CBaslerUsbGrabResultPtr grabPtr;
-	namespace cameraParams = Basler_UsbCameraParams;
-	const std::string mainColor = "Dark Indigo";
-#endif
-
+const std::string mainColor = "Dark Grey";
 const std::string DATA_SAVE_LOCATION = "J:\\Data Repository\\New Data Repository\\";
-
-#ifdef FIREWIRE_CAMERA
-	const std::string DATA_SAVE_LOCATION2 = "\\Raw Data\\ScoutData";
-#elif defined USB_CAMERA
-	const std::string DATA_SAVE_LOCATION2 = "\\Raw Data\\AceData_";
-#endif
+const std::string DATA_SAVE_LOCATION2 = "\\Raw Data\\PixisData_";
 
 // constants for various controls that I need to reference in the basler window message map. Boring controls start at 
 // 1000.
