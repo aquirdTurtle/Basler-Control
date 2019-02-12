@@ -57,18 +57,16 @@ PicamAvailableData PicamFlume::Aquire ( )
 	return data;
 }
 
-PicamHandle PicamFlume::OpenFirstCamera ( )
+void PicamFlume::OpenFirstCamera ( )
 {
-	PicamHandle cam = NULL;
 	if ( !safemode )
 	{
-		auto err = Picam_OpenFirstCamera(&cam);
+		auto err = Picam_OpenFirstCamera(&camera);
 		if ( err != PicamError_None )
 		{
 			thrower ( getErrMsg ( err ) );
 		}
 	}
-	return cam;
 }
 
 PicamCameraID PicamFlume::GetCameraID ( )

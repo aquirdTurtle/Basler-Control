@@ -26,7 +26,7 @@ double PixisCamera::getExposure ( )
 POINT PixisCamera::getCameraDimensions ( )
 {
 	// hard coded right now, probably query-able though.
-	return { 1340, 100 };
+	return { 1024, 1024 };
 }
 
 
@@ -45,8 +45,8 @@ void PixisCamera::armCamera ( )
 		auto data = flume.Aquire ( );
 		Matrix<long>* dataM;
 		std::vector<long> dataV ( (USHORT*) data.initial_readout, (USHORT*) data.initial_readout + stride / sizeof ( USHORT ) );
-		dataM = new Matrix<long> ( 100, 1340, dataV );
-		parentWindow->PostMessageA ( PIC_READY, 1340 * 100, reinterpret_cast<LPARAM> (dataM) );
+		dataM = new Matrix<long> ( 1024, 1024, dataV );
+		parentWindow->PostMessageA ( PIC_READY, 1024*1024, reinterpret_cast<LPARAM> (dataM) );
 	}
 	// todo properly...
 }
