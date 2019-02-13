@@ -366,7 +366,7 @@ LRESULT SingleCameraWindow::handleNewPics( WPARAM wParam, LPARAM lParam )
 	}
 	OnPaint( );
 	// always delete
-	//delete imageMatrix;
+	delete imageMatrix;
 	return 0;
 }
 

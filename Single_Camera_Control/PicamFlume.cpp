@@ -54,6 +54,7 @@ void PicamFlume::InitializeLibrary ( )
 	}
 }
 
+
 PicamAvailableData PicamFlume::Aquire ( )
 {
 	PicamAvailableData data;
@@ -64,6 +65,10 @@ PicamAvailableData PicamFlume::Aquire ( )
 		if ( err != PicamError_None )
 		{
 			thrower ( getErrMsg ( err ) );
+		}
+		if ( data.readout_count == 0 )
+		{
+			thrower ( "No Error, but no picture from Picam_Acquire???" );
 		}
 	}
 	return data;
@@ -132,11 +137,8 @@ void PicamFlume::StopAquisition ( )
 		{
 			thrower ( getErrMsg ( err ) );
 		}
-	}
-	
-}
-
-
+	}	
+} 
 
 
 void PicamFlume::ConnectAndOpenDemoCamera ( PicamCameraID& id )

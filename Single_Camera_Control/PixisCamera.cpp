@@ -4,6 +4,7 @@
 #include "Single_Camera_Control_App.h"
 #include <memory> 
 
+
 PixisCamera::PixisCamera ( bool safemode ) : flume ( safemode )
 {
 	flume.InitializeLibrary ( );
@@ -26,8 +27,6 @@ double PixisCamera::getExposure ( )
 POINT PixisCamera::getCameraDimensions ( )
 {
 	auto constraint = flume.getCameraRoiConstraints ( );
-	//PicamRoisConstraint
-	// hard coded right now, probably query-able though.
 	return { (long)constraint->width_constraint.maximum, (long)constraint->height_constraint.maximum };
 }
 
@@ -38,25 +37,54 @@ UINT PixisCamera::getRepCounts ( )
 }
 
 
+UINT __stdcall PixisCamera::pictureWatcherProcedure ( void* inputPtr )
+{
+	pictureWatcherInput* input = ( pictureWatcherInput* ) inputPtr;
+	auto stride = input->flume->getReadoutStride ( );
+	auto rois = input->flume->getRois ( );
+	try
+	{
+		while ( *input->running )
+		{
+			auto data = input->flume->Aquire ( );
+			Matrix<long>* dataM = new Matrix<long> (
+				int ( rois[ 0 ].height / rois[ 0 ].y_binning ), int ( rois[ 0 ].width / rois[ 0 ].x_binning ),
+				std::vector<long> ( (USHORT*) data.initial_readout,
+				(USHORT*) data.initial_readout + stride / sizeof ( USHORT ) ) );
+			dataM->print ( );
+			input->parent->PostMessageA ( PIC_READY, dataM->size ( ), reinterpret_cast<LPARAM> ( dataM ) );
+		}
+	}
+	catch ( Error& err )
+	{
+		if ( *input->running )
+		{
+			errBox ( err.what ( ) );
+		}
+		// else probably just something related to stopAcquisition timing not working out.
+	}
+	return 0;
+}
+
+
 void PixisCamera::armCamera ( )
 {
-	repCounts = 0;
-	auto stride = flume.getReadoutStride ( );
-	auto rois = flume.getRois ( );	
-	for ( auto i : range(1) )
-	{
-		auto data = flume.Aquire ( );
-		Matrix<long>* dataM;
-		std::vector<long> dataV ( (USHORT*) data.initial_readout, (USHORT*) data.initial_readout + stride / sizeof ( USHORT ) );
-		dataM = new Matrix<long> ( int(rois[0].height / rois[ 0 ].y_binning), int(rois[ 0 ].width / rois[0].x_binning), dataV );
-		parentWindow->PostMessageA ( PIC_READY, dataM->size(), reinterpret_cast<LPARAM> (dataM) );
-	}
-	// todo properly...
+	pictureWatcherInput* input;
+	input = new pictureWatcherInput;
+	input->flume = &flume;
+	input->parent = parentWindow;
+	input->repCounts = &repCounts;
+	input->running = &runningFlag;
+	UINT threadID;
+	runningFlag = true;
+	auto threadHandle = (HANDLE)_beginthreadex ( 0, 0, PixisCamera::pictureWatcherProcedure, (void*) input, 0, &threadID );
+	//WaitForSingleObject ( threadHandle, INFINITE );
 }
+
 
 void PixisCamera::disarm ( )
 {
-	repCounts = 0;
+	runningFlag = false;
 	flume.StopAquisition ( );
 }
 
@@ -66,6 +94,7 @@ void PixisCamera::setParameters ( CameraSettings settings )
 	// todo
 	try
 	{
+		repCounts = settings.repCount;
 		flume.setExposure ( settings.exposureTime );
 		//
 		if ( settings.triggerMode == "External Trigger" )
@@ -95,25 +124,30 @@ void PixisCamera::setParameters ( CameraSettings settings )
 	}
 }
 
+
 void PixisCamera::setTemperatureSetPoint ( double temperature )
 {
 	flume.setTemperatureSetPoint ( temperature );
 }
+
 
 double PixisCamera::getCurrentTemperature ( )
 {
 	return flume.getCurrentTemperature ( );
 }
 
+
 std::string PixisCamera::getTemperatureStatus ( )
 {
 	return flume.getTemperatureStatus ( );
 }
 
+
 double PixisCamera::getSetTemperature ( )
 {
 	return flume.getTemperatureSetPoint ( );
 }
+
 
 
 CameraSettings PixisCamera::getDefaultSettings ( )

@@ -91,7 +91,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\Basler\pylon 5\Development\include;C:\Users\NanoControl\Documents\Visual Studio 2017\CLibraries\boost_1_69_0;$(IncludePath);$(PicamRoot)Includes</IncludePath>
+    <IncludePath>C:\Program Files\Basler\pylon 5\Development\include;C:\Users\NanoControl\Documents\Visual Studio 2017\CLibraries\boost_1_69_0;$(IncludePath);$(PicamRoot)Includes;C:\Users\Mark-Brown\Code\Chimera-Control\Packages\boost_1_64_0</IncludePath>
     <LibraryPath>C:\Program Files\Basler\pylon 5\Development\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(PicamRoot)Libraries</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

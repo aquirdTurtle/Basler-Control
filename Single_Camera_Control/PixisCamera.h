@@ -2,6 +2,15 @@
 #include "picam.h"
 #include "PicamFlume.h"
 #include "CameraSettingsControl.h"
+#include <atomic>
+
+struct pictureWatcherInput
+{
+	CWnd* parent;
+	PicamFlume* flume;
+	std::atomic<bool>* running;
+	std::atomic<UINT>* repCounts;
+};
 
 class PixisCamera
 {
@@ -13,6 +22,7 @@ class PixisCamera
 		double getSetTemperature ( );
 		void setTemperatureSetPoint ( double temperature );
 		double getCurrentTemperature ( );
+		static UINT __stdcall pictureWatcherProcedure ( void* inputPtr );
 		std::string getTemperatureStatus ( );
 		CameraSettings getDefaultSettings ( );
 		void setParameters ( CameraSettings settings );
@@ -25,5 +35,6 @@ class PixisCamera
 		//PicamHandle camera;
 		PicamCameraID camID;
 		CWnd* parentWindow;
-		UINT repCounts = 0;
+		std::atomic<UINT> repCounts = 0;
+		std::atomic<bool> runningFlag;
 };
