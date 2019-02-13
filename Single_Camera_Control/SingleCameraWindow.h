@@ -21,6 +21,7 @@ class SingleCameraWindow : public CDialogEx
 		void OnSize( UINT nType, int cx, int cy );
 		void handleArmPress();
 		void handleClose();
+		void OnTimer ( UINT_PTR id );
 		void handleDisarmPress();
 		void initializeControls();
 		void passExposureMode();
@@ -33,6 +34,7 @@ class SingleCameraWindow : public CDialogEx
 		void OnRButtonUp( UINT stuff, CPoint clickLocation );
 		void passSetLocationsButton();
 		void DoDataExchange( CDataExchange* pDX );
+		void handleSetTemperature ( );
 		
 	private:
 		PictureControl picture;

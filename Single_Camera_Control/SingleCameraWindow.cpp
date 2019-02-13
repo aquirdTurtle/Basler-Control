@@ -165,6 +165,7 @@ BEGIN_MESSAGE_MAP( SingleCameraWindow, CDialogEx )
 	ON_COMMAND( ID_FILE_DISARMCAMERA, SingleCameraWindow::handleDisarmPress)
 	ON_COMMAND( IDOK, &SingleCameraWindow::handleEnter )
 	ON_COMMAND( IDC_SET_ANALYSIS_LOCATIONS, &SingleCameraWindow::passSetLocationsButton)
+	ON_COMMAND ( IDC_SET_TEMPERATURE_BUTTON, &SingleCameraWindow::handleSetTemperature )
 
 	ON_CONTROL_RANGE(EN_CHANGE, IDC_MIN_SLIDER_EDIT, IDC_MIN_SLIDER_EDIT, &SingleCameraWindow::pictureRangeEditChange)
 	ON_CONTROL_RANGE(EN_CHANGE, IDC_MAX_SLIDER_EDIT, IDC_MAX_SLIDER_EDIT, &SingleCameraWindow::pictureRangeEditChange)
@@ -177,7 +178,24 @@ BEGIN_MESSAGE_MAP( SingleCameraWindow, CDialogEx )
 	ON_COMMAND( IDCANCEL, &SingleCameraWindow::handleClose )
 
 	ON_WM_RBUTTONUP()	
+	ON_WM_TIMER ( )
+
 END_MESSAGE_MAP()
+
+
+void SingleCameraWindow::handleSetTemperature ( )
+{
+	try
+	{
+		settings.loadCurrentSettings ( cameraController.getCameraDimensions ( ) );
+		auto currSettings = settings.getCurrentSettings ( );
+		cameraController.setTemperatureSetPoint ( currSettings.currentTemperatureVal );
+	}
+	catch ( Error& err )
+	{
+		errBox ( err.what ( ) );
+	}
+}
 
 
 void SingleCameraWindow::DoDataExchange( CDataExchange* pDX )
@@ -199,6 +217,12 @@ void SingleCameraWindow::handleClose( )
 void SingleCameraWindow::passSetLocationsButton()
 {
 	picture.handleButtonClick();
+}
+
+
+void SingleCameraWindow::OnTimer ( UINT_PTR id )
+{
+	settings.handleTimer ( &cameraController );
 }
 
 
@@ -475,6 +499,7 @@ BOOL SingleCameraWindow::OnInitDialog()
 	CRect rect;
 	GetWindowRect(&rect);
 	OnSize(0, rect.right - rect.left, rect.bottom - rect.top);
+	SetTimer ( NULL, 1000, NULL );
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 

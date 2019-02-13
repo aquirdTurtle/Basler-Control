@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "CameraSettingsControl.h"
 #include "constants.h"
-
+#include "PixisCamera.h"
+#include <boost/lexical_cast.hpp>
 
 void CameraSettingsControl::rearrange(int width, int height, fontMap fonts)
 {
@@ -42,6 +43,28 @@ void CameraSettingsControl::rearrange(int width, int height, fontMap fonts)
 	gainEdit.rearrange("", "", width, height, fonts);
 	realGainText.rearrange("", "", width, height, fonts);
 	realGainStatus.rearrange("", "", width, height, fonts);
+
+	setTemperatureButton.rearrange ( "", "", width, height, fonts );
+	temperatureOffButton.rearrange ( "", "", width, height, fonts );
+	temperatureEdit.rearrange ( "", "", width, height, fonts );
+	temperatureDisplay.rearrange ( "", "", width, height, fonts );
+	temperatureMsg.rearrange ( "", "", width, height, fonts );
+}
+
+
+void CameraSettingsControl::handleTimer ( PixisCamera* cam )
+{
+	// This case displays the current temperature in the main window. When the temp stabilizes at the desired 
+	// level the appropriate message is displayed.
+	// initial value is only relevant for safemode.
+	int currentTemperature = INT_MAX;
+	int setTemperature = INT_MAX;
+	// in this case you expect it to throw.
+	setTemperature = cam->getSetTemperature ( );
+	currentTemperature = cam->getCurrentTemperature ( );
+	auto msg = cam->getTemperatureStatus ( );
+	temperatureDisplay.SetWindowTextA ( cstr ( setTemperature ) );
+	temperatureMsg.SetWindowTextA ( cstr ( "Current Temperature: " + str ( currentTemperature ) + " (C)\r\n" + msg ) );
 }
 
 
@@ -202,6 +225,19 @@ void CameraSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 
 	realGainStatus.sPos = { pos.x + 150, pos.y, pos.x + 300, pos.y += 25 };
 	realGainStatus.Create( "", WS_CHILD | WS_VISIBLE, realGainStatus.sPos, parent, id++ );
+	// temperature controls
+	setTemperatureButton.sPos = { pos.x, pos.y, pos.x + 150, pos.y + 25 };
+	setTemperatureButton.Create ( "Set Cam. Temp. (C)", NORM_PUSH_OPTIONS, setTemperatureButton.seriesPos,
+								  parent, IDC_SET_TEMPERATURE_BUTTON );
+	temperatureEdit.sPos = { pos.x + 150, pos.y, pos.x + 200, pos.y + 25 };
+	temperatureEdit.Create ( NORM_EDIT_OPTIONS, temperatureEdit.seriesPos, parent, id++ );
+	temperatureEdit.SetWindowTextA ( "0" );
+	temperatureDisplay.sPos = { pos.x + 200, pos.y, pos.x + 250, pos.y + 25 };
+	temperatureDisplay.Create ( "", NORM_STATIC_OPTIONS, temperatureDisplay.seriesPos, parent, id++ );
+	temperatureOffButton.sPos = { pos.x + 250, pos.y, pos.x + 300, pos.y += 25 };
+	temperatureOffButton.Create ( "OFF", NORM_PUSH_OPTIONS, temperatureOffButton.seriesPos, parent, id++ );
+	temperatureMsg.sPos = { pos.x, pos.y, pos.x + 300, pos.y += 50 };
+	temperatureMsg.Create ( "Temperature control is disabled", NORM_STATIC_OPTIONS, temperatureMsg.seriesPos, parent, id++ );
 }
 
 void CameraSettingsControl::updateExposure( double exposure )
@@ -281,6 +317,17 @@ CameraSettings CameraSettingsControl::loadCurrentSettings(POINT cameraDims)
 		}
 	}
 
+	CString tempStr;
+	temperatureEdit.GetWindowTextA ( tempStr );
+	try
+	{
+		currentSettings.currentTemperatureVal = boost::lexical_cast<double>( str ( tempStr ) );
+	}
+	catch ( boost::bad_lexical_cast& err )
+	{
+		thrower ( "ERROR! Failed to convert temperature text to double!" );
+	}
+
 	// in case called before initialized
 	if (!leftEdit)
 	{
@@ -288,15 +335,13 @@ CameraSettings CameraSettingsControl::loadCurrentSettings(POINT cameraDims)
 	}
 	// If new dimensions are set, we don't have data for the new dimensions.
 	// set all of the image parameters
-	CString tempStr;
 	leftEdit.GetWindowTextA( tempStr );
 	try
 	{
 		int val = currentSettings.dimensions.leftBorder = std::stoi( std::string( tempStr ) );
 	}
 	catch (std::invalid_argument&)
-	{
-		
+	{		
 		thrower( "Left border argument not an integer!\r\n" );
 	}
 	leftEdit.RedrawWindow();

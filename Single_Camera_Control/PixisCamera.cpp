@@ -25,8 +25,10 @@ double PixisCamera::getExposure ( )
 
 POINT PixisCamera::getCameraDimensions ( )
 {
+	auto constraint = flume.getCameraRoiConstraints ( );
+	//PicamRoisConstraint
 	// hard coded right now, probably query-able though.
-	return { 1024, 1024 };
+	return { (long)constraint->width_constraint.maximum, (long)constraint->height_constraint.maximum };
 }
 
 
@@ -40,13 +42,14 @@ void PixisCamera::armCamera ( )
 {
 	repCounts = 0;
 	auto stride = flume.getReadoutStride ( );
+	auto rois = flume.getRois ( );	
 	for ( auto i : range(1) )
 	{
 		auto data = flume.Aquire ( );
 		Matrix<long>* dataM;
 		std::vector<long> dataV ( (USHORT*) data.initial_readout, (USHORT*) data.initial_readout + stride / sizeof ( USHORT ) );
-		dataM = new Matrix<long> ( 1024, 1024, dataV );
-		parentWindow->PostMessageA ( PIC_READY, 1024*1024, reinterpret_cast<LPARAM> (dataM) );
+		dataM = new Matrix<long> ( int(rois[0].height / rois[ 0 ].y_binning), int(rois[ 0 ].width / rois[0].x_binning), dataV );
+		parentWindow->PostMessageA ( PIC_READY, dataM->size(), reinterpret_cast<LPARAM> (dataM) );
 	}
 	// todo properly...
 }
@@ -75,17 +78,14 @@ void PixisCamera::setParameters ( CameraSettings settings )
 		}
 		// Handle Region of Interest
 		auto region = flume.getRois ( );
-		if ( region->roi_count == 1 )
-		{
-			region->roi_array[ 0 ].height = settings.dimensions.vertRawPixelNumber;
-			region->roi_array[ 0 ].width = settings.dimensions.horRawPixelNumber;
+		region[ 0 ].height = settings.dimensions.vertRawPixelNumber;
+		region[ 0 ].width = settings.dimensions.horRawPixelNumber;
 
-			region->roi_array[ 0 ].x = settings.dimensions.leftBorder;
-			region->roi_array[ 0 ].y = settings.dimensions.topBorder;
+		region[ 0 ].x = settings.dimensions.leftBorder;
+		region[ 0 ].y = settings.dimensions.topBorder;
 
-			region->roi_array[ 0 ].x_binning = settings.dimensions.horPixelsPerBin;
-			region->roi_array[ 0 ].y_binning = settings.dimensions.vertPixelsPerBin;
-		}
+		region[ 0 ].x_binning = settings.dimensions.horPixelsPerBin;
+		region[ 0 ].y_binning = settings.dimensions.vertPixelsPerBin;
 		flume.setRois ( region );		
 		flume.commitParams ( );
 	}
@@ -93,6 +93,26 @@ void PixisCamera::setParameters ( CameraSettings settings )
 	{
 		errBox ( err.what ( ) );
 	}
+}
+
+void PixisCamera::setTemperatureSetPoint ( double temperature )
+{
+	flume.setTemperatureSetPoint ( temperature );
+}
+
+double PixisCamera::getCurrentTemperature ( )
+{
+	return flume.getCurrentTemperature ( );
+}
+
+std::string PixisCamera::getTemperatureStatus ( )
+{
+	return flume.getTemperatureStatus ( );
+}
+
+double PixisCamera::getSetTemperature ( )
+{
+	return flume.getTemperatureSetPoint ( );
 }
 
 

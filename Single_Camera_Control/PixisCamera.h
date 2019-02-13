@@ -10,6 +10,10 @@ class PixisCamera
 		~PixisCamera ( );
 		void initialize ( CWnd* parent );
 		POINT getCameraDimensions ( );
+		double getSetTemperature ( );
+		void setTemperatureSetPoint ( double temperature );
+		double getCurrentTemperature ( );
+		std::string getTemperatureStatus ( );
 		CameraSettings getDefaultSettings ( );
 		void setParameters ( CameraSettings settings );
 		void armCamera ( );

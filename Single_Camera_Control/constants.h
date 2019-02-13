@@ -23,6 +23,7 @@ const std::string DATA_SAVE_LOCATION2 = "Raw Data\\PixisData_";
 #define IDC_REPETITIONS_EDIT 10005
 #define IDC_TRIGGER_MODE_COMBO 10006
 #define IDC_SET_ANALYSIS_LOCATIONS 10007
+#define IDC_SET_TEMPERATURE_BUTTON 10008
 // the basler has a 10 bit dac, but the data is compressed to 256 for visualization (visualization only!)
 #define PICTURE_PALETTE_SIZE 256
 

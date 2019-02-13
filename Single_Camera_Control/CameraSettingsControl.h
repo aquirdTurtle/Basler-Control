@@ -4,6 +4,7 @@
 #include "Control.h"
 #include "commonTypes.h"
 
+class PixisCamera;
 
 struct imageDimensions
 {
@@ -29,6 +30,7 @@ struct imageDimensions
 
 struct CameraSettings
 {
+	double currentTemperatureVal;
 	unsigned int rawGain;
 	std::string exposureMode;
 	double exposureTime;
@@ -55,7 +57,7 @@ class CameraSettingsControl
 		void setSettings( CameraSettings settings);
 		void updateExposure( double exposure );
 		void rearrange(int width, int height, fontMap fonts);
-
+		void handleTimer ( PixisCamera* cam );
 	private:
 		ULONG lastTime;
 		CameraSettings currentSettings;
@@ -95,6 +97,12 @@ class CameraSettingsControl
 		Control<CEdit> gainEdit;
 		Control<CStatic> realGainText;
 		Control<CStatic> realGainStatus;
+		// temperature
+		Control<CButton> setTemperatureButton;
+		Control<CButton> temperatureOffButton;
+		Control<CEdit> temperatureEdit;
+		Control<CStatic> temperatureDisplay;
+		Control<CStatic> temperatureMsg;
 
 		bool isReady;
 };

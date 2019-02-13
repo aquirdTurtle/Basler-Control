@@ -12,6 +12,18 @@ void PicamFlume::CloseCamera ( )
 	Picam_CloseCamera ( camera );
 }
 
+void PicamFlume::setTemperatureSetPoint ( double temp )
+{
+	SetParameterFloatingPointValue ( PicamParameter_SensorTemperatureSetPoint, temp );
+}
+
+
+double PicamFlume::getTemperatureSetPoint ( )
+{
+	return GetParameterFloatingPointValue ( PicamParameter_SensorTemperatureSetPoint );
+}
+
+
 void PicamFlume::UninitializeLibrary ( )
 {
 	if ( !safemode )
@@ -84,6 +96,33 @@ PicamCameraID PicamFlume::GetCameraID ( )
 }
 
 
+double PicamFlume::getCurrentTemperature ( )
+{
+	return GetParameterFloatingPointValue ( PicamParameter_SensorTemperatureReading );
+}
+
+
+std::string PicamFlume::getTemperatureStatus ( )
+{
+	PicamSensorTemperatureStatus status;
+	if ( !safemode )
+	{
+		auto err = Picam_ReadParameterIntegerValue ( camera, PicamParameter_SensorTemperatureStatus,
+													 reinterpret_cast<piint*>( &status ) );		
+		if ( err != PicamError_None )
+		{
+			thrower ( getErrMsg ( err ) );
+		}
+		const pichar* string;
+		Picam_GetEnumerationString ( PicamEnumeratedType_SensorTemperatureStatus, status, &string );
+		std::string msg ( string );
+		Picam_DestroyString ( string );
+		return msg;
+	}
+	return "";
+}
+
+
 void PicamFlume::StopAquisition ( )
 {
 	if ( !safemode )
@@ -139,26 +178,48 @@ int PicamFlume::GetParameterIntegerValue ( PicamParameter param )
 }
 
 
-const PicamRois* PicamFlume::getRois ( )
+std::vector<PicamRoi> PicamFlume::getRois ( )
 {
-	const PicamRois* regions = NULL;
+	std::vector<PicamRoi> roisV;// ( rois, rois + rois->roi_count );
 	if ( !safemode )
 	{
+		const PicamRois* regions;
 		PicamError err = Picam_GetParameterRoisValue ( camera, PicamParameter_Rois, &regions );
 		if ( err != PicamError_None )
 		{
 			thrower ( getErrMsg ( err ) );
 		}
+		roisV  = std::vector<PicamRoi>( regions->roi_array, regions->roi_array + regions->roi_count );
 	}
-	return regions;
+	return roisV;
 }
 
 
-void PicamFlume::setRois ( const PicamRois* region )
+const PicamRoisConstraint* PicamFlume::getCameraRoiConstraints ( )
 {
+	const PicamRoisConstraint* constraint = NULL;
 	if ( !safemode )
 	{
-		auto err = Picam_SetParameterRoisValue ( camera, PicamParameter_Rois, region );
+		auto err = Picam_GetParameterRoisConstraint ( camera, PicamParameter_Rois, PicamConstraintCategory_Required,
+													  &constraint );
+		if ( err != PicamError_None )
+		{
+			thrower ( getErrMsg ( err ) );
+		}
+	}
+	return constraint;
+}
+
+
+
+void PicamFlume::setRois ( std::vector<PicamRoi> regions )
+{
+	PicamRois rois;
+	rois.roi_array = regions.data ( );
+	rois.roi_count = regions.size ( );
+	if ( !safemode )
+	{
+		auto err = Picam_SetParameterRoisValue ( camera, PicamParameter_Rois, &rois );
 		if ( err != PicamError_None )
 		{
 			thrower ( getErrMsg ( err ) );

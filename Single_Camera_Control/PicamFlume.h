@@ -11,18 +11,23 @@ class PicamFlume
 		void OpenFirstCamera ( );
 		PicamCameraID GetCameraID (  );
 		void CloseCamera ( );
+		std::string getTemperatureStatus ( );
 		void ConnectAndOpenDemoCamera ( PicamCameraID& id );
+		void setTemperatureSetPoint ( double temp );
 		PicamAvailableData Aquire ( );
 		PicamHandle getCamera ( );
+		double getCurrentTemperature ( );
 		void StopAquisition ( );
 		double getExposure ( );
 		int getReadoutStride ( );
+		double getTemperatureSetPoint ( );
 		void setExposure ( double time_Miliseconds );
 		void turnOffTrigger ( );
 		void setStandardTrigger ( );
 		void commitParams ( );
-		const PicamRois* getRois ( );
-		void setRois ( const PicamRois* );
+		std::vector<PicamRoi> getRois ( );
+		void setRois ( std::vector<PicamRoi> regions );
+		const PicamRoisConstraint* getCameraRoiConstraints ( );
 	private:
 		bool safemode;
 		PicamHandle camera;

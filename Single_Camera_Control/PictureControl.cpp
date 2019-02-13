@@ -89,25 +89,25 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 
 	editMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y += 20 };
 	editMax.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, IDC_MAX_SLIDER_EDIT );
-	editMax.SetWindowText( "1024" );	
+	editMax.SetWindowText( cstr( std::pow ( 2, 16 ) - 1) );	
 	editMax.fontType = fontTypes::Small;
 	// minimum slider
 	sliderMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMin.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, id++ );
-	sliderMin.SetRange( 0, 1024 );
+	sliderMin.SetRange( 0, std::pow ( 2, 16 ) - 1 );
 	sliderMin.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
 	sliderMin.SetPos( 0 );
 	// maximum slider
 	sliderMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMax.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, id++ );
-	sliderMax.SetRange( 0, 1024 );
+	sliderMax.SetRange( 0, std::pow ( 2, 16 ) - 1 );
 	sliderMax.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
-	sliderMax.SetPos( 1024 );
+	sliderMax.SetPos( std::pow ( 2, 16 ) - 1 );
 	// reset this.
 	loc.x -= unscaledBackgroundArea.right - unscaledBackgroundArea.left;
 	// manually scroll the objects to initial positions.
 	handleScroll( sliderMin.GetDlgCtrlID( ), 0 );
-	handleScroll( sliderMax.GetDlgCtrlID( ), 1024 );
+	handleScroll( sliderMax.GetDlgCtrlID( ), std::pow(2,16)-1);
 	createPalettes( parent->GetDC( ) );
 	updatePalette( palettes[0] );
 	loc.y += height+60;
@@ -139,6 +139,10 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 long PictureControl::getIntegrationSize( )
 {
 	CString txt;
+	if ( circleSizeEdit.m_hWnd == NULL )
+	{
+		return 0;
+	}
 	circleSizeEdit.GetWindowText( txt );
 	try
 	{
@@ -367,8 +371,10 @@ void PictureControl::recalculateGrid(imageDimensions newParameters)
 	unofficialImageParameters = newParameters;
 	double widthPicScale;
 	double heightPicScale;
-	auto height = unofficialImageParameters.bottomBorder - unofficialImageParameters.topBorder+1;
-	auto width = unofficialImageParameters.rightBorder - unofficialImageParameters.leftBorder+1;
+	unofficialImageParameters.vertPixelsPerBin = unofficialImageParameters.vertPixelsPerBin == 0 ? 1 : unofficialImageParameters.vertPixelsPerBin;
+	unofficialImageParameters.horPixelsPerBin = unofficialImageParameters.horPixelsPerBin == 0 ? 1 : unofficialImageParameters.horPixelsPerBin;
+	auto height = (unofficialImageParameters.bottomBorder - unofficialImageParameters.topBorder+1)/unofficialImageParameters.vertPixelsPerBin;
+	auto width = (unofficialImageParameters.rightBorder - unofficialImageParameters.leftBorder+1)/unofficialImageParameters.horPixelsPerBin;
 	double normRatio = 1;
 	double currRatio = double( height ) / (width + 1);
 	if ( currRatio < normRatio )
@@ -391,7 +397,6 @@ void PictureControl::recalculateGrid(imageDimensions newParameters)
 	pictureArea.top = mid.y - scaledHeight / 2;
 	pictureArea.bottom = mid.y + scaledHeight / 2;
 	//
-
 	grid.resize( width );
 	for ( UINT colInc = 0; colInc < grid.size( ); colInc++ )
 	{
@@ -499,7 +504,6 @@ void PictureControl::addIntegrationText(const Matrix<long>& pic, CDC* parentCdc)
 		drawLocation.left = center.x - 75;
 		drawLocation.top = center.y - 15;
 		drawLocation.bottom = center.y + 15;
-		// 150 X 30
 		parentCdc->SetBkMode( TRANSPARENT );
 		parentCdc->SelectObject( pictureTextFont );
 		parentCdc->SetTextColor( RGB( 255, 0, 0 ) );
@@ -850,6 +854,9 @@ void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, 
 	scaledBackgroundArea.top = unscaledBackgroundArea.top * height / 997.0;
 	scaledBackgroundArea.left = unscaledBackgroundArea.left * width / 1920.0;
 	scaledBackgroundArea.right = unscaledBackgroundArea.right * width / 1920.0;
+
+
+
 }
 
 
