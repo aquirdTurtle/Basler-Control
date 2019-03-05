@@ -89,25 +89,25 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 
 	editMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y += 20 };
 	editMax.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, IDC_MAX_SLIDER_EDIT );
-	editMax.SetWindowText( cstr( std::pow ( 2, 16 ) - 1) );	
+	editMax.SetWindowText( "1024" );	
 	editMax.fontType = fontTypes::Small;
 	// minimum slider
 	sliderMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMin.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, id++ );
-	sliderMin.SetRange( 0, std::pow ( 2, 16 ) - 1 );
+	sliderMin.SetRange( 0, 1024);
 	sliderMin.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
 	sliderMin.SetPos( 0 );
 	// maximum slider
 	sliderMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMax.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, id++ );
-	sliderMax.SetRange( 0, std::pow ( 2, 16 ) - 1 );
+	sliderMax.SetRange( 0, 1024);
 	sliderMax.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
-	sliderMax.SetPos( std::pow ( 2, 16 ) - 1 );
+	sliderMax.SetPos(1024);
 	// reset this.
 	loc.x -= unscaledBackgroundArea.right - unscaledBackgroundArea.left;
 	// manually scroll the objects to initial positions.
 	handleScroll( sliderMin.GetDlgCtrlID( ), 0 );
-	handleScroll( sliderMax.GetDlgCtrlID( ), std::pow(2,16)-1);
+	handleScroll( sliderMax.GetDlgCtrlID( ), 1024);
 	createPalettes( parent->GetDC( ) );
 	updatePalette( palettes[0] );
 	loc.y += height+60;
@@ -515,7 +515,7 @@ void PictureControl::addIntegrationText(const Matrix<long>& pic, CDC* parentCdc)
 // input is the 2D array which gets mapped to the image.
 void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 {
-	//mostRecentImage = picData;
+	mostRecentImage = picData;
 	unsigned int minColor = minSliderPosition;
 	unsigned int maxColor = maxSliderPosition;
 	dc->SelectPalette( CPalette::FromHandle(imagePalette), true );
@@ -586,8 +586,8 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 		{
 			pbmi->bmiHeader.biWidth = dataWidth;
 			pbmi->bmiHeader.biSizeImage = 1;
-			StretchDIBits( dc->GetSafeHdc(), pictureArea.left, pictureArea.top,
-						   pixelsAreaWidth, pixelsAreaHeight, 0, 0, dataWidth,
+			StretchDIBits( dc->GetSafeHdc(), pictureArea.left, pictureArea.bottom,
+						   pixelsAreaWidth, -pixelsAreaHeight, 0, 0, dataWidth,
 						   dataHeight, dataArray.data(), (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
 			break;
 		}
@@ -601,8 +601,8 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 				finalDataArray[2 * dataInc + 1] = dataArray[dataInc];
 			}
 			pbmi->bmiHeader.biWidth = dataWidth * 2;
-			StretchDIBits( *dc, pictureArea.left, pictureArea.top, pixelsAreaWidth,
-						   pixelsAreaHeight, 0, 0, dataWidth * 2, dataHeight, finalDataArray.data(), 
+			StretchDIBits( *dc, pictureArea.left, pictureArea.bottom, pixelsAreaWidth,
+						   -pixelsAreaHeight, 0, 0, dataWidth * 2, dataHeight, finalDataArray.data(), 
 						   (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
 			break;
 		}
@@ -619,8 +619,8 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 				finalDataArray[4 * dataInc + 3] = data;
 			}
 			pbmi->bmiHeader.biWidth = dataWidth * 4;
-			StretchDIBits( *dc, pictureArea.left, pictureArea.top, pixelsAreaWidth,
-						   pixelsAreaHeight, 0, 0, dataWidth * 4, dataHeight, finalDataArray.data(), 
+			StretchDIBits( *dc, pictureArea.left, pictureArea.bottom, pixelsAreaWidth,
+						   -pixelsAreaHeight, 0, 0, dataWidth * 4, dataHeight, finalDataArray.data(), 
 						   (BITMAPINFO FAR*)pbmi, DIB_PAL_COLORS, SRCCOPY );
 			break;
 		}

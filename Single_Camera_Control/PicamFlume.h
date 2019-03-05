@@ -9,6 +9,7 @@ class PicamFlume
 		void InitializeLibrary ( );
 		void UninitializeLibrary ( );
 		void OpenFirstCamera ( );
+		void unlockTemperature();
 		PicamCameraID GetCameraID (  );
 		void CloseCamera ( );
 		std::string getTemperatureStatus ( );

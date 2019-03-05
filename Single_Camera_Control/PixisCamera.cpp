@@ -51,7 +51,7 @@ UINT __stdcall PixisCamera::pictureWatcherProcedure ( void* inputPtr )
 				int ( rois[ 0 ].height / rois[ 0 ].y_binning ), int ( rois[ 0 ].width / rois[ 0 ].x_binning ),
 				std::vector<long> ( (USHORT*) data.initial_readout,
 				(USHORT*) data.initial_readout + stride / sizeof ( USHORT ) ) );
-			dataM->print ( );
+			//dataM->print ( );
 			input->parent->PostMessageA ( PIC_READY, dataM->size ( ), reinterpret_cast<LPARAM> ( dataM ) );
 		}
 	}
@@ -127,12 +127,14 @@ void PixisCamera::setParameters ( CameraSettings settings )
 
 void PixisCamera::setTemperatureSetPoint ( double temperature )
 {
+	//flume.unlockTemperature();
 	flume.setTemperatureSetPoint ( temperature );
 }
 
 
 double PixisCamera::getCurrentTemperature ( )
 {
+	flume.commitParams();
 	return flume.getCurrentTemperature ( );
 }
 
@@ -145,6 +147,7 @@ std::string PixisCamera::getTemperatureStatus ( )
 
 double PixisCamera::getSetTemperature ( )
 {
+	
 	return flume.getTemperatureSetPoint ( );
 }
 

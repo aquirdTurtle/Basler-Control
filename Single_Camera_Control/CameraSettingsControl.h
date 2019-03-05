@@ -104,5 +104,6 @@ class CameraSettingsControl
 		Control<CStatic> temperatureDisplay;
 		Control<CStatic> temperatureMsg;
 
+		ULONG mostRecentTemp = 0;
 		bool isReady;
 };

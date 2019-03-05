@@ -107,6 +107,21 @@ double PicamFlume::getCurrentTemperature ( )
 }
 
 
+void PicamFlume::unlockTemperature()
+{
+	PicamSensorTemperatureStatus status = PicamSensorTemperatureStatus_Unlocked;
+	if (!safemode)
+	{
+		auto err = Picam_SetParameterIntegerValue(camera, PicamParameter_SensorTemperatureStatus,
+			reinterpret_cast<piint>(&status));
+		if (err != PicamError_None)
+		{
+			thrower(getErrMsg(err));
+		}
+	}
+}
+
+
 std::string PicamFlume::getTemperatureStatus ( )
 {
 	PicamSensorTemperatureStatus status;

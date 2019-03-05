@@ -61,8 +61,19 @@ void CameraSettingsControl::handleTimer ( PixisCamera* cam )
 	int setTemperature = INT_MAX;
 	// in this case you expect it to throw.
 	setTemperature = cam->getSetTemperature ( );
-	currentTemperature = cam->getCurrentTemperature ( );
-	auto msg = cam->getTemperatureStatus ( );
+	std::string msg;
+	try
+	{
+		currentTemperature = cam->getCurrentTemperature();
+		msg = cam->getTemperatureStatus();
+		mostRecentTemp = currentTemperature;
+	}
+	catch (Error& err)
+	{
+		currentTemperature = mostRecentTemp;
+		msg = "Aquiring, no temperature updates";
+	}
+
 	temperatureDisplay.SetWindowTextA ( cstr ( setTemperature ) );
 	temperatureMsg.SetWindowTextA ( cstr ( "Current Temperature: " + str ( currentTemperature ) + " (C)\r\n" + msg ) );
 }
@@ -429,10 +440,10 @@ CameraSettings CameraSettingsControl::loadCurrentSettings(POINT cameraDims)
 	{
 		thrower( "ERROR: Image height must be a multiple of Vertical Binning\r\n" );
 	}
-	if (currentSettings.dimensions.horPixelsPerBin > 4 || currentSettings.dimensions.vertPixelsPerBin > 4)
-	{
-		thrower( "ERROR: Binning on a camera cannot exceed 4 pixels per bin!\r\n" );
-	}
+	//if (currentSettings.dimensions.horPixelsPerBin > 4 || currentSettings.dimensions.vertPixelsPerBin > 4)
+	//{
+	//	thrower( "ERROR: Binning on a camera cannot exceed 4 pixels per bin!\r\n" );
+	//}
 
 	selection = triggerCombo.GetCurSel();
 	triggerCombo.GetLBText( selection, text );

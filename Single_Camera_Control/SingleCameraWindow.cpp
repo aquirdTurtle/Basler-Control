@@ -290,7 +290,7 @@ void SingleCameraWindow::pictureRangeEditChange( UINT id )
 	{
 		picture.handleEditChange( id );
 		CDC* cdc = GetDC ( );
-		picture.redrawImage ( cdc );
+		picture.redrawImage ( cdc );  
 		ReleaseDC ( cdc );
 	}
 	catch (Error& err)
