@@ -1,3 +1,4 @@
+// Created by Mark Brown
 #include "stdafx.h"
 #include "PictureStats.h"
 #include "Matrix.h"

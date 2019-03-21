@@ -1,4 +1,6 @@
 ﻿#pragma once
+// Created by Mark Brown
+
 #include "boost/container/vector.hpp"
 #include "windows.h"
 
@@ -79,7 +81,7 @@ template <class type>
 void Matrix<type>::updateString( )
 {
 #ifdef _DEBUG
-	currMatrix = print( );
+	//currMatrix = print( );
 #endif
 	return;
 }

@@ -3,7 +3,7 @@
 #include "constants.h"
 #include <cmath>
 #include <numeric>
-
+// Created by Mark Brown
 // constructor
 PictureControl::PictureControl()
 {
@@ -71,43 +71,19 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 	horGraph = new PlotCtrl( horData, plotStyle::HistPlot, graphPens, font, graphBrushes, "", true );
 	horGraph->init( { loc.x, loc.y + height }, width - 50, 60, parent );
 
-
 	loc.x += unscaledBackgroundArea.right - unscaledBackgroundArea.left;
 	
-	labelMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + 20 };
-	labelMin.Create( "MIN", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMin.sPos, parent, id++ );
-	labelMin.fontType = fontTypes::Small;
-
-	labelMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y += 20 };
-	labelMax.Create( "MAX", WS_CHILD | WS_VISIBLE | SS_CENTER, labelMax.sPos, parent, id++ );
-	labelMax.fontType = fontTypes::Small;
-
-	editMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + 20 };
-	editMin.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMin.sPos, parent, IDC_MIN_SLIDER_EDIT );
-	editMin.SetWindowText( "0" );
-	editMin.fontType = fontTypes::Small;
-
-	editMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y += 20 };
-	editMax.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, IDC_MAX_SLIDER_EDIT );
-	editMax.SetWindowText( "1024" );	
-	editMax.fontType = fontTypes::Small;
-	// minimum slider
-	sliderMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
-	sliderMin.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, id++ );
-	sliderMin.SetRange( 0, 1024);
-	sliderMin.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
-	sliderMin.SetPos( 0 );
-	// maximum slider
-	sliderMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
-	sliderMax.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, id++ );
-	sliderMax.SetRange( 0, 1024);
-	sliderMax.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
-	sliderMax.SetPos(1024);
+	sliderMin.initialize ( loc, parent, id, 25, unscaledBackgroundArea.bottom - unscaledBackgroundArea.top, 
+						   IDC_MIN_SLIDER_EDIT, "MIN" );
+	sliderMin.setValue ( 0 );
+	loc.x += 25;
+	loc.y -= unscaledBackgroundArea.bottom - unscaledBackgroundArea.top;
+	sliderMax.initialize ( loc, parent, id, 25, unscaledBackgroundArea.bottom - unscaledBackgroundArea.top,
+						   IDC_MAX_SLIDER_EDIT, "MAX" );
+	sliderMax.setValue ( 65535 );
 	// reset this.
 	loc.x -= unscaledBackgroundArea.right - unscaledBackgroundArea.left;
 	// manually scroll the objects to initial positions.
-	handleScroll( sliderMin.GetDlgCtrlID( ), 0 );
-	handleScroll( sliderMax.GetDlgCtrlID( ), 1024);
 	createPalettes( parent->GetDC( ) );
 	updatePalette( palettes[0] );
 	loc.y += height+60;
@@ -154,8 +130,6 @@ long PictureControl::getIntegrationSize( )
 		return 0;
 	}
 }
-
-
 
 
 bool PictureControl::isActive()
@@ -232,60 +206,26 @@ void PictureControl::updatePalette( HPALETTE palette )
 
 void PictureControl::handleEditChange( int id )
 {
-	if ( !editMax  || !sliderMax )
+	if (id == IDC_MAX_SLIDER_EDIT )
 	{
-		return;
+		sliderMax.handleEdit ( );
 	}
-	if (id == editMax.GetDlgCtrlID())
+	if (id == IDC_MIN_SLIDER_EDIT )
 	{
-		int max;
-		CString str;
-		editMax.GetWindowTextA( str );
-		try
-		{
-			max = std::stoi( std::string(str) );
-		}
-		catch (std::invalid_argument&)
-		{
-			errBox( "Please enter an integer." ); 
-			return;
-		}
-		sliderMax.SetPos( max );
-		maxSliderPosition = max;
-	}
-	if (id == editMin.GetDlgCtrlID())
-	{
-		int min;
-		CString str;
-		editMin.GetWindowTextA( str );
-		try
-		{
-			min = std::stoi( std::string( str ) );
-		}
-		catch (std::invalid_argument&)
-		{
-			errBox( "Please enter an integer." );
-			return;
-		}
-		sliderMin.SetPos( min );
-		minSliderPosition = min;
+		sliderMin.handleEdit ( );
 	}
 }
 
 
 void PictureControl::handleScroll(int id, UINT nPos)
 {
-	if (id == sliderMax.GetDlgCtrlID())
+	if (id == sliderMax.getSliderId())
 	{
-		sliderMax.SetPos(nPos);
-		editMax.SetWindowTextA(std::to_string(nPos).c_str());
-		maxSliderPosition = nPos;
+		sliderMax.handleSlider ( nPos );
 	}
-	else if (id == sliderMin.GetDlgCtrlID())
+	if ( id == sliderMin.getSliderId ( ) )
 	{
-		sliderMin.SetPos(nPos);
-		editMin.SetWindowTextA(std::to_string(nPos).c_str());
-		minSliderPosition = nPos;
+		sliderMin.handleSlider ( nPos );
 	}
 }
 
@@ -516,8 +456,8 @@ void PictureControl::addIntegrationText(const Matrix<long>& pic, CDC* parentCdc)
 void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 {
 	mostRecentImage = picData;
-	unsigned int minColor = minSliderPosition;
-	unsigned int maxColor = maxSliderPosition;
+	unsigned int minColor = sliderMin.getValue();
+	unsigned int maxColor = sliderMax.getValue();
 	dc->SelectPalette( CPalette::FromHandle(imagePalette), true );
 	dc->RealizePalette();
 	int pixelsAreaWidth = pictureArea.right - pictureArea.left + 1;
@@ -799,28 +739,26 @@ void PictureControl::drawPixelCircle(CWnd* parent)
 */
 
 
-void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, int width, int height, fontMap fonts)
+void PictureControl::rearrange ( std::string cameraMode, std::string triggerMode, int width, int height, fontMap fonts )
 {
-	editMax.rearrange(cameraMode, triggerMode, width, height, fonts);
-	editMin.rearrange(cameraMode, triggerMode, width, height, fonts);
-	labelMax.rearrange(cameraMode, triggerMode, width, height, fonts);
-	labelMin.rearrange(cameraMode, triggerMode, width, height, fonts);
-	sliderMax.rearrange(cameraMode, triggerMode, width, height, fonts);
-	sliderMin.rearrange(cameraMode, triggerMode, width, height, fonts);
-	coordinatesText.rearrange(cameraMode, triggerMode, width, height, fonts);
-	coordinatesDisp.rearrange(cameraMode, triggerMode, width, height, fonts);
-	valueText.rearrange(cameraMode, triggerMode, width, height, fonts);
-	valueDisp.rearrange(cameraMode, triggerMode, width, height, fonts);
-	setLocationsButton.rearrange( cameraMode, triggerMode, width, height, fonts );
-	circleSizeText.rearrange( cameraMode, triggerMode, width, height, fonts );
-	circleSizeEdit.rearrange( cameraMode, triggerMode, width, height, fonts );
+	sliderMax.rearrange ( cameraMode, triggerMode, width, height, fonts );
+	sliderMin.rearrange ( cameraMode, triggerMode, width, height, fonts );
+	sliderMax.rearrange ( cameraMode, triggerMode, width, height, fonts );
+	sliderMin.rearrange ( cameraMode, triggerMode, width, height, fonts );
+	coordinatesText.rearrange ( cameraMode, triggerMode, width, height, fonts );
+	coordinatesDisp.rearrange ( cameraMode, triggerMode, width, height, fonts );
+	valueText.rearrange ( cameraMode, triggerMode, width, height, fonts );
+	valueDisp.rearrange ( cameraMode, triggerMode, width, height, fonts );
+	setLocationsButton.rearrange ( cameraMode, triggerMode, width, height, fonts );
+	circleSizeText.rearrange ( cameraMode, triggerMode, width, height, fonts );
+	circleSizeEdit.rearrange ( cameraMode, triggerMode, width, height, fonts );
 	if ( vertGraph )
 	{
-		vertGraph->rearrange( width, height, fonts );
+		vertGraph->rearrange ( width, height, fonts );
 	}
 	if ( horGraph )
 	{
-		horGraph->rearrange( width, height, fonts );
+		horGraph->rearrange ( width, height, fonts );
 	}
 
 	double widthPicScale;
@@ -828,7 +766,7 @@ void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, 
 	auto imHeight = unofficialImageParameters.bottomBorder - unofficialImageParameters.topBorder;
 	auto imWidth = unofficialImageParameters.rightBorder - unofficialImageParameters.leftBorder;
 	double normRatio = 512.0 / 673;
-	double currRatio = double(imHeight) / (imWidth + 1); 
+	double currRatio = double ( imHeight ) / ( imWidth + 1 );
 	if ( currRatio > normRatio )
 	{
 		widthPicScale = 1;
@@ -839,24 +777,21 @@ void PictureControl::rearrange(std::string cameraMode, std::string triggerMode, 
 		heightPicScale = 1;
 		widthPicScale = currRatio / normRatio;
 	}
-	long scaledWidth = long( (scaledBackgroundArea.right - scaledBackgroundArea.left)*widthPicScale );
+	long scaledWidth = long ( ( scaledBackgroundArea.right - scaledBackgroundArea.left )*widthPicScale );
 	// why isn't this scaled???
 	long scaledHeight = scaledBackgroundArea.bottom - scaledBackgroundArea.top;
-	POINT mid = { (scaledBackgroundArea.left + scaledBackgroundArea.right) / 2,
-		(scaledBackgroundArea.top + scaledBackgroundArea.bottom) / 2 };
+	POINT mid = { ( scaledBackgroundArea.left + scaledBackgroundArea.right ) / 2,
+		( scaledBackgroundArea.top + scaledBackgroundArea.bottom ) / 2 };
 
 	pictureArea.left = mid.x - imWidth / 2;
 	pictureArea.right = mid.x + imWidth / 2;
 	pictureArea.top = mid.y - imHeight / 2;
 	pictureArea.bottom = mid.y + imHeight / 2;
 
-	scaledBackgroundArea.bottom =  unscaledBackgroundArea.bottom * height / 997.0;
+	scaledBackgroundArea.bottom = unscaledBackgroundArea.bottom * height / 997.0;
 	scaledBackgroundArea.top = unscaledBackgroundArea.top * height / 997.0;
 	scaledBackgroundArea.left = unscaledBackgroundArea.left * width / 1920.0;
 	scaledBackgroundArea.right = unscaledBackgroundArea.right * width / 1920.0;
-
-
-
 }
 
 
