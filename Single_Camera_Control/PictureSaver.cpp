@@ -2,7 +2,7 @@
 #include "PictureSaver.h"
 #include "constants.h"
 #include <ctime>
-
+// Created by Mark Brown
 
 ULONG PictureSaver::getNextFileIndex( std::string fileBase, std::string ext )
 {

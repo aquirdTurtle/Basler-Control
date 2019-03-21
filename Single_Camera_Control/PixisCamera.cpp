@@ -1,4 +1,5 @@
-﻿#include "stdafx.h"
+﻿// Created by Mark Brown
+#include "stdafx.h"
 #include "PixisCamera.h"
 #include "Matrix.h"
 #include "Single_Camera_Control_App.h"

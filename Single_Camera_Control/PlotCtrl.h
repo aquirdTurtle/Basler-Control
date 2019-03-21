@@ -1,4 +1,5 @@
 ﻿#pragma once
+// Created by Mark Brown
 #include <vector>
 #include <memory>
 #include "memdc.h"

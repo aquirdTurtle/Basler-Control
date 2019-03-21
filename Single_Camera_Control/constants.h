@@ -1,4 +1,5 @@
 #pragma once
+// Created by Mark Brown
 
 #include <pylon/PylonIncludes.h>
 #include <pylon/usb/BaslerUsbInstantCamera.h>

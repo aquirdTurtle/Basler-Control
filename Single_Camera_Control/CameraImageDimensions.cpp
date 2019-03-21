@@ -1,5 +1,5 @@
 /// This file contains all functiosn for the CameraImageParametersControlParameters singleton class.
-
+// Created by Mark Brown
 #include "stdafx.h"
 #include "CameraImageDimensions.h"
 #include "CameraSettingsControl.h"

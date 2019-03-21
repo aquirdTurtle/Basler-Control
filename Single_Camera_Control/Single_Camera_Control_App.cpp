@@ -1,6 +1,5 @@
+// Created by Mark Brown
 
-// Basler-Control.cpp : Defines the class behaviors for the application.
-//
 /// Important Author's note:
 //		Most of the code in this file (partyicularly this file) was created programatically when I started this project.  
 //		A lot of it is probably superfluous, I've created much simpler apps before, but it does no harm. For a lot of 

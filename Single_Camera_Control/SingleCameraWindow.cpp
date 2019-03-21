@@ -1,3 +1,4 @@
+// Created by Mark Brown
 
 // Basler-ControlDlg.cpp : implementation file
 //

@@ -1,4 +1,5 @@
 #pragma once
+// Created by Mark Brown
 #include <atomic>
 #include "PixisCamera.h"
 #include "PictureControl.h"

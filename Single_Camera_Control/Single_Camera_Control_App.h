@@ -1,5 +1,5 @@
-
-// Basler-Control.h : main header file for the PROJECT_NAME application
+// Created by Mark Brown
+// Single_Camera_Control_App.h : main header file for the Single Camera Controlapplication
 //
 
 #pragma once
