@@ -6,12 +6,15 @@ class PicamFlume
 {
 	public:
 		PicamFlume ( bool safemode_option );
-		
+		void setRepetitions(long long reps);
+		void displayTrigParams();
+		void startAcquisition();
 		void InitializeLibrary ( );
 		void UninitializeLibrary ( );
 		void OpenFirstCamera ( );
 		void unlockTemperature();
 		PicamCameraID GetCameraID (  );
+		PicamAvailableData acquisitionUpdate();
 		void CloseCamera ( );
 		std::string getTemperatureStatus ( );
 		void ConnectAndOpenDemoCamera ( PicamCameraID& id );
@@ -26,6 +29,8 @@ class PicamFlume
 		void setExposure ( double time_Miliseconds );
 		void turnOffTrigger ( );
 		void setStandardTrigger ( );
+		void setAmplifierSettings ( );
+		void setReadoutSettings();
 		void commitParams ( );
 		std::vector<PicamRoi> getRois ( );
 		void setRois ( std::vector<PicamRoi> regions );
@@ -36,6 +41,7 @@ class PicamFlume
 		std::string getErrMsg ( PicamError err );
 		int GetParameterIntegerValue ( PicamParameter picam );
 		void SetParameterIntegerValue ( PicamParameter picam, int val );
+		void SetParameterLargeIntegerValue(PicamParameter picam, long long val);
 		double GetParameterFloatingPointValue ( PicamParameter param );
 		void SetParameterFloatingPointValue ( PicamParameter param, double val );
 };

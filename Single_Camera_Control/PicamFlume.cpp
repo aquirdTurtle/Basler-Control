@@ -56,13 +56,26 @@ void PicamFlume::InitializeLibrary ( )
 }
 
 
+void PicamFlume::startAcquisition()
+{
+	if (!safemode)
+	{
+		auto err = Picam_StartAcquisition(camera);
+		if (err != PicamError_None)
+		{
+			thrower(getErrMsg(err));
+		}
+	}
+}
+
+
 PicamAvailableData PicamFlume::Aquire ( )
 {
 	PicamAvailableData data;
 	PicamAcquisitionErrorsMask errors;
 	if ( !safemode )
 	{		
-		auto err = Picam_Acquire ( camera, 1, -1, &data, &errors );
+		auto err = Picam_Acquire ( camera, 10, -1, &data, &errors );
 		if ( err != PicamError_None )
 		{
 			thrower ( getErrMsg ( err ) );
@@ -70,6 +83,30 @@ PicamAvailableData PicamFlume::Aquire ( )
 		if ( data.readout_count == 0 )
 		{
 			thrower ( "No Error, but no picture from Picam_Acquire???" );
+		}
+	}
+	return data;
+}
+
+void PicamFlume::setRepetitions(long long reps)
+{
+	SetParameterLargeIntegerValue(PicamParameter_ReadoutCount, reps);
+}
+
+PicamAvailableData PicamFlume::acquisitionUpdate()
+{
+	PicamAvailableData data;
+	PicamAcquisitionStatus status;
+	if (!safemode)
+	{
+		auto err = Picam_WaitForAcquisitionUpdate(camera, -1, &data, &status);
+		if (err != PicamError_None)
+		{
+			thrower(getErrMsg(err));
+		}
+		if (data.readout_count > 1)
+		{
+			thrower("Too many pictures returned from acquisition update!");
 		}
 	}
 	return data;
@@ -261,6 +298,27 @@ void PicamFlume::commitParams ( )
 }
 
 
+void PicamFlume::displayTrigParams()
+{
+	errBox(str(GetParameterIntegerValue(PicamParameter_TriggerResponse)) 
+		+ "," + str(GetParameterIntegerValue(PicamParameter_TriggerDetermination))
+		+ "," + str(GetParameterIntegerValue(PicamParameter_ShutterTimingMode)) + "," 
+		+ str(GetParameterIntegerValue(PicamParameter_OutputSignal)));
+}
+
+void PicamFlume::SetParameterLargeIntegerValue(PicamParameter param, long long val)
+{
+	if (!safemode)
+	{
+		pi64s s;
+		auto err = Picam_SetParameterLargeIntegerValue(camera, param, val);
+		if (err != PicamError_None)
+		{
+			thrower(getErrMsg(err));
+		}
+	}
+}
+
 void PicamFlume::SetParameterIntegerValue ( PicamParameter param, int val )
 {
 	if ( !safemode )
@@ -276,14 +334,44 @@ void PicamFlume::SetParameterIntegerValue ( PicamParameter param, int val )
 
 void PicamFlume::turnOffTrigger ( )
 {
-	Picam_SetParameterIntegerValue ( camera, PicamParameter_TriggerResponse, PicamTriggerResponse_NoResponse );
+	SetParameterIntegerValue(PicamParameter_TriggerResponse, PicamTriggerResponse_NoResponse );
 }
+
+void PicamFlume::setAmplifierSettings ( )
+{
+	SetParameterIntegerValue(PicamParameter_AdcAnalogGain, PicamAdcAnalogGain_High);
+	//GetParameterIntegerValue(PicamParameter_AdcAnalogGain);
+	//SetParameterIntegerValue(PicamParameter_AdcQuality, PicamAdcQuality_LowNoise);
+	//GetParameterIntegerValue(PicamParameter_AdcQuality);
+}
+
+void PicamFlume::setReadoutSettings()
+{
+	//SetParameterIntegerValue(PicamParameter_CleanBeforeExposure, 1);
+	SetParameterFloatingPointValue(PicamParameter_AdcSpeed, 2.0);
+	//SetParameterIntegerValue(PicamParameter_CleanUntilTrigger, 1);
+	//errBox(GetParameterIntegerValue(PicamParameter_CleanUntilTrigger));
+	SetParameterFloatingPointValue(PicamParameter_VerticalShiftRate, 48.2);
+	SetParameterFloatingPointValue(PicamParameter_ShutterClosingDelay, 0);
+	SetParameterIntegerValue(PicamParameter_OutputSignal, PicamOutputSignal_ShutterOpen);
+	
+}
+
+
 
 
 void PicamFlume::setStandardTrigger ( )
 {
-	Picam_SetParameterIntegerValue ( camera, PicamParameter_TriggerResponse, PicamTriggerResponse_ReadoutPerTrigger );
-	Picam_SetParameterIntegerValue ( camera, PicamParameter_TriggerDetermination, PicamTriggerDetermination_NegativePolarity );
+	SetParameterIntegerValue(PicamParameter_TriggerResponse, PicamTriggerResponse_ReadoutPerTrigger);
+	SetParameterIntegerValue(PicamParameter_TriggerDetermination, PicamTriggerDetermination_PositivePolarity);
+	SetParameterIntegerValue(PicamParameter_ShutterTimingMode, PicamShutterTimingMode_Normal);
+	//SetParameterIntegerValue(PicamParameter_ShutterTimingMode, PicamShutterTimingMode_OpenBeforeTrigger);
+	//SetParameterIntegerValue(PicamParameter_ShutterTimingMode, PicamShutterTimingMode_AlwaysClosed);
+
+	//errBox(GetParameterIntegerValue(PicamParameter_TriggerResponse));
+	//errBox(GetParameterIntegerValue(PicamParameter_TriggerDetermination));
+	//errBox(GetParameterIntegerValue(PicamParameter_ShutterTimingMode));
+
 }
 
 

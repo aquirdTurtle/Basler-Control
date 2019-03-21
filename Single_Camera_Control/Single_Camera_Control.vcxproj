@@ -197,9 +197,12 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnalysisControl.h" />
+    <ClInclude Include="CodeTimer.h" />
     <ClInclude Include="LongCSlider.h" />
     <ClInclude Include="PicamFlume.h" />
     <ClInclude Include="PixisCamera.h" />
+    <ClInclude Include="range.h" />
     <ClInclude Include="Single_Camera_Control_App.h" />
     <ClInclude Include="SingleCameraWindow.h" />
     <ClInclude Include="CameraSettingsControl.h" />
@@ -219,9 +222,11 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CodeTimer.cpp" />
     <ClCompile Include="LongCSlider.cpp" />
     <ClCompile Include="PicamFlume.cpp" />
     <ClCompile Include="PixisCamera.cpp" />
+    <ClCompile Include="range.cpp" />
     <ClCompile Include="Single_Camera_Control_App.cpp" />
     <ClCompile Include="SingleCameraWindow.cpp" />
     <ClCompile Include="CameraSettingsControl.cpp" />
