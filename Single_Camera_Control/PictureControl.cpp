@@ -89,25 +89,25 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 
 	editMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y += 20 };
 	editMax.Create( WS_CHILD | WS_VISIBLE | SS_LEFT | ES_AUTOHSCROLL, editMax.sPos, parent, IDC_MAX_SLIDER_EDIT );
-	editMax.SetWindowText( "1024" );	
+	editMax.SetWindowText( "32760" );	
 	editMax.fontType = fontTypes::Small;
 	// minimum slider
 	sliderMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMin.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, id++ );
-	sliderMin.SetRange( 0, 1024);
+	sliderMin.SetRange( 0, 32760);
 	sliderMin.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
 	sliderMin.SetPos( 0 );
 	// maximum slider
 	sliderMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMax.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, id++ );
-	sliderMax.SetRange( 0, 1024);
+	sliderMax.SetRange( 0, 32760);
 	sliderMax.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
-	sliderMax.SetPos(1024);
+	sliderMax.SetPos(32760);
 	// reset this.
 	loc.x -= unscaledBackgroundArea.right - unscaledBackgroundArea.left;
 	// manually scroll the objects to initial positions.
 	handleScroll( sliderMin.GetDlgCtrlID( ), 0 );
-	handleScroll( sliderMax.GetDlgCtrlID( ), 1024);
+	handleScroll( sliderMax.GetDlgCtrlID( ), 32760);
 	createPalettes( parent->GetDC( ) );
 	updatePalette( palettes[0] );
 	loc.y += height+60;

@@ -79,6 +79,12 @@
     <ClInclude Include="CameraSettingsControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CodeTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="range.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -115,6 +121,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CameraSettingsControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CodeTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="range.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -79,7 +79,7 @@ template <class type>
 void Matrix<type>::updateString( )
 {
 #ifdef _DEBUG
-	currMatrix = print( );
+	//currMatrix = print( );
 #endif
 	return;
 }
