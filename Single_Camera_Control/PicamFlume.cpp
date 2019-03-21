@@ -297,13 +297,6 @@ void PicamFlume::commitParams ( )
 }
 
 
-void PicamFlume::displayTrigParams()
-{
-	errBox(str(GetParameterIntegerValue(PicamParameter_TriggerResponse)) 
-		+ "," + str(GetParameterIntegerValue(PicamParameter_TriggerDetermination))
-		+ "," + str(GetParameterIntegerValue(PicamParameter_ShutterTimingMode)) + "," 
-		+ str(GetParameterIntegerValue(PicamParameter_OutputSignal)));
-}
 
 void PicamFlume::SetParameterLargeIntegerValue(PicamParameter param, long long val)
 {
@@ -348,7 +341,7 @@ void PicamFlume::setReadoutSettings()
 {
 	//SetParameterIntegerValue(PicamParameter_CleanBeforeExposure, 1);
 	SetParameterFloatingPointValue(PicamParameter_AdcSpeed, 2.0);
-	//SetParameterIntegerValue(PicamParameter_CleanUntilTrigger, 1);
+	SetParameterIntegerValue(PicamParameter_CleanUntilTrigger, 0);
 	//errBox(GetParameterIntegerValue(PicamParameter_CleanUntilTrigger));
 	SetParameterFloatingPointValue(PicamParameter_VerticalShiftRate, 48.2);
 	SetParameterFloatingPointValue(PicamParameter_ShutterClosingDelay, 0);
@@ -357,6 +350,14 @@ void PicamFlume::setReadoutSettings()
 }
 
 
+void PicamFlume::displayTrigParams()
+{
+	errBox(str(GetParameterIntegerValue(PicamParameter_TriggerResponse))
+		+ "," + str(GetParameterIntegerValue(PicamParameter_TriggerDetermination))
+		+ "," + str(GetParameterIntegerValue(PicamParameter_ShutterTimingMode)) + ","
+		+ str(GetParameterIntegerValue(PicamParameter_OutputSignal)) + ","
+		+ str(GetParameterIntegerValue(PicamParameter_CleanUntilTrigger)));
+}
 
 
 void PicamFlume::setStandardTrigger ( )
