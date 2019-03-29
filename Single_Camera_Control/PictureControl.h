@@ -1,10 +1,12 @@
 #pragma once
+// Created by Mark Brown
 #include "Control.h"
 #include "CameraSettingsControl.h"
 #include <array>
 #include "Matrix.h"
 #include "CameraImageDimensions.h"
 #include "PlotCtrl.h"
+#include "LongCSlider.h"
 
 
 class PictureControl
@@ -63,8 +65,6 @@ class PictureControl
 		RECT pictureArea;
 
 		// 
-		int maxSliderPosition;
-		int minSliderPosition;
 		int colorIndicator;
 		HPALETTE imagePalette;
 		std::vector<POINT> locations;
@@ -72,14 +72,8 @@ class PictureControl
 		std::vector<std::vector<RECT>> grid;
 		// Picture location data
 		
-		Control<CSliderCtrl> sliderMax;
-		Control<CSliderCtrl> sliderMin;
-		//
-		Control<CStatic> labelMax;
-		Control<CStatic> labelMin;
-		//
-		Control<CEdit> editMax;
-		Control<CEdit> editMin;
+		LongCSlider sliderMin;
+		LongCSlider sliderMax;
 
 		Control<CStatic> coordinatesText;
 		Control<CStatic> coordinatesDisp;

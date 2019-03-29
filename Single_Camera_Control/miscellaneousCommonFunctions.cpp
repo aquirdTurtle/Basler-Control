@@ -1,3 +1,4 @@
+// Created by Mark Brown
 #include "stdafx.h"
 #include "miscellaneousCommonFunctions.h"
 #include <Windows.h>

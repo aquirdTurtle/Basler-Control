@@ -1,4 +1,5 @@
-﻿#include "stdafx.h"
+﻿// Created by Mark Brown
+#include "stdafx.h"
 #include "PlotCtrl.h"
 
 

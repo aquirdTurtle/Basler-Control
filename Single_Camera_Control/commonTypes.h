@@ -1,4 +1,5 @@
 #pragma once
+// Created by Mark Brown
 
 #include <unordered_map>
 #include <afxwin.h>

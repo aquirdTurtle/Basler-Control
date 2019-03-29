@@ -1,5 +1,6 @@
 #pragma once
 #include "Windows.h"
+// grabed from online by mark brown
 
 //////////////////////////////////////////////////
 // memDC - memory DC

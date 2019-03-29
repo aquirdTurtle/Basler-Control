@@ -58,9 +58,6 @@
     <ClInclude Include="SingleCameraWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AnalysisControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -77,6 +74,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CameraSettingsControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="range.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -115,6 +118,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CameraSettingsControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CodeTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="range.cpp">
+    <ClCompile Include="LongCSlider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
