@@ -6,6 +6,7 @@
 #include "CameraImageDimensions.h"
 #include "PlotCtrl.h"
 
+
 class PictureControl
 {
 	public:

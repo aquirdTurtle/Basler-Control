@@ -71,7 +71,6 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 	horGraph = new PlotCtrl( horData, plotStyle::HistPlot, graphPens, font, graphBrushes, "", true );
 	horGraph->init( { loc.x, loc.y + height }, width - 50, 60, parent );
 
-
 	loc.x += unscaledBackgroundArea.right - unscaledBackgroundArea.left;
 	
 	labelMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + 20 };
@@ -94,13 +93,14 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 	// minimum slider
 	sliderMin.sPos = { loc.x, loc.y, loc.x + 25, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMin.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMin.sPos, parent, id++ );
-	sliderMin.SetRange( 0, 1024);
+	int max = 2*65535+1;
+	sliderMin.SetRange( 0, max );
 	sliderMin.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
 	sliderMin.SetPos( 0 );
 	// maximum slider
 	sliderMax.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y + unscaledBackgroundArea.bottom - unscaledBackgroundArea.top };
 	sliderMax.Create( WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_VERT, sliderMax.sPos, parent, id++ );
-	sliderMax.SetRange( 0, 1024);
+	sliderMax.SetRange( 0, max );
 	sliderMax.SetPageSize( (minSliderPosition - minSliderPosition) / 10.0 );
 	sliderMax.SetPos(1024);
 	// reset this.
@@ -250,6 +250,11 @@ void PictureControl::handleEditChange( int id )
 			errBox( "Please enter an integer." ); 
 			return;
 		}
+		catch ( std::out_of_range& )
+		{
+			errBox ( "Slider number out of integer type range!" );
+			return;
+		}
 		sliderMax.SetPos( max );
 		maxSliderPosition = max;
 	}
@@ -278,13 +283,13 @@ void PictureControl::handleScroll(int id, UINT nPos)
 	if (id == sliderMax.GetDlgCtrlID())
 	{
 		sliderMax.SetPos(nPos);
-		editMax.SetWindowTextA(std::to_string(nPos).c_str());
+		editMax.SetWindowTextA(str(nPos).c_str());
 		maxSliderPosition = nPos;
 	}
 	else if (id == sliderMin.GetDlgCtrlID())
 	{
 		sliderMin.SetPos(nPos);
-		editMin.SetWindowTextA(std::to_string(nPos).c_str());
+		editMin.SetWindowTextA(str(nPos).c_str());
 		minSliderPosition = nPos;
 	}
 }
