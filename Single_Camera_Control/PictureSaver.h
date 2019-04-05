@@ -11,6 +11,7 @@ class PictureSaver
 {
 	public:
 		ULONG getNextFileIndex( std::string fileBase, std::string ext );
+		static void checkCreateFolder ( std::string folderAddress );
 		void initialize( POINT& pos, int& id, CWnd* parent );
 		void save(const Matrix<long>& pic, int width);
 		//void save( const std::vector<Matrix<long>>& pics, int width );
