@@ -237,7 +237,14 @@ void PictureControl::setHoverValue()
 	{
 		return;
 	}
-	valueDisp.SetWindowTextA( cstr( mostRecentImage(mouseCoordinates) ) );
+	try
+	{
+		valueDisp.SetWindowTextA ( cstr ( mostRecentImage ( mouseCoordinates ) ) );
+	}
+	catch ( Error& )
+	{
+		valueDisp.SetWindowTextA ( "???" );
+	}
 }
 
 
@@ -458,6 +465,7 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 	mostRecentImage = picData;
 	unsigned int minColor = sliderMin.getValue();
 	unsigned int maxColor = sliderMax.getValue();
+
 	dc->SelectPalette( CPalette::FromHandle(imagePalette), true );
 	dc->RealizePalette();
 	int pixelsAreaWidth = pictureArea.right - pictureArea.left + 1;
