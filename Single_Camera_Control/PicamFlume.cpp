@@ -1,6 +1,5 @@
 ﻿// Created by Mark Brown
 #include "stdafx.h"
-
 #include "PicamFlume.h"
 
 PicamFlume::PicamFlume ( bool safemode_option )

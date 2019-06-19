@@ -1,155 +1,61 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <ClCompile Include="CodeTimer.cpp" />
+    <ClCompile Include="LongCSlider.cpp" />
+    <ClCompile Include="PicamFlume.cpp" />
+    <ClCompile Include="PixisCamera.cpp" />
+    <ClCompile Include="range.cpp" />
+    <ClCompile Include="Single_Camera_Control_App.cpp" />
+    <ClCompile Include="SingleCameraWindow.cpp" />
+    <ClCompile Include="CameraSettingsControl.cpp" />
+    <ClCompile Include="CameraImageDimensions.cpp" />
+    <ClCompile Include="miscellaneousCommonFunctions.cpp" />
+    <ClCompile Include="PictureControl.cpp" />
+    <ClCompile Include="PictureSaver.cpp" />
+    <ClCompile Include="PictureStats.cpp" />
+    <ClCompile Include="PlotCtrl.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <ClInclude Include="AnalysisControl.h" />
+    <ClInclude Include="CodeTimer.h" />
+    <ClInclude Include="LongCSlider.h" />
+    <ClInclude Include="PicamFlume.h" />
+    <ClInclude Include="PixisCamera.h" />
+    <ClInclude Include="range.h" />
+    <ClInclude Include="Single_Camera_Control_App.h" />
+    <ClInclude Include="SingleCameraWindow.h" />
+    <ClInclude Include="CameraSettingsControl.h" />
+    <ClInclude Include="CameraImageDimensions.h" />
+    <ClInclude Include="commonTypes.h" />
+    <ClInclude Include="constants.h" />
+    <ClInclude Include="Control.h" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="memdc.h" />
+    <ClInclude Include="miscellaneousCommonFunctions.h" />
+    <ClInclude Include="PictureControl.h" />
+    <ClInclude Include="PictureSaver.h" />
+    <ClInclude Include="PictureStats.h" />
+    <ClInclude Include="PlotCtrl.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Single_Camera_Control.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Camera-Firewire-Icon.ico" />
+    <Image Include="..\Camera-USB-Icon.ico" />
+    <Image Include="res\Basler-Control.ico" />
+    <Image Include="res\icon1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Single_Camera_Control.rc2" />
+  </ItemGroup>
+  <ItemGroup>
     <Text Include="Planning.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Single_Camera_Control_App.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PictureControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Control.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="miscellaneousCommonFunctions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="constants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PictureStats.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraImageDimensions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PictureSaver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="commonTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SingleCameraWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrix.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PlotCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="memdc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PixisCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PicamFlume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraSettingsControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CodeTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="range.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Single_Camera_Control_App.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PictureControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="miscellaneousCommonFunctions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PictureStats.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraImageDimensions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PictureSaver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SingleCameraWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PlotCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PixisCamera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PicamFlume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraSettingsControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CodeTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="range.cpp">
-    <ClCompile Include="LongCSlider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Single_Camera_Control.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="res\Single_Camera_Control.rc2">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\Basler-Control.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\icon1.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\Camera-Firewire-Icon.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\Camera-USB-Icon.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
 </Project>

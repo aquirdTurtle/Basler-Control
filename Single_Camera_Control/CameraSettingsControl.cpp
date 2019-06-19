@@ -120,16 +120,15 @@ void CameraSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	pos.y += 25;
 	cameraMode.AddString( "Finite Acquisition" );
 	cameraMode.AddString( "Continuous Acquisition" );
-	cameraMode.SelectString( 0, "Continuous Acquisition" );
+	cameraMode.SelectString( 0, "Finite Acquisition" );
 	repEdit.EnableWindow( false );
 	
 	exposureText.sPos = { pos.x, pos.y, pos.x + 200, pos.y + 25 };
-	std::string exposureTimeText;
-	exposureText.Create(exposureTimeText.c_str(), WS_CHILD | WS_VISIBLE, exposureText.sPos, parent, id++ );
+	exposureText.Create("Exposure Time (ms)", WS_CHILD | WS_VISIBLE, exposureText.sPos, parent, id++ );
 
 	exposureEdit.sPos = { pos.x + 200, pos.y, pos.x + 300, pos.y += 25 };
 	exposureEdit.Create( WS_CHILD | WS_VISIBLE, exposureEdit.sPos, parent, id++ );
-	exposureEdit.SetWindowTextA( "100" );
+	exposureEdit.SetWindowTextA( "50" );
 
 	exposureModeCombo.sPos = { pos.x, pos.y, pos.x + 300, pos.y + 100 };
 	exposureModeCombo.Create( WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_SORT, exposureModeCombo.sPos, parent, 
@@ -200,7 +199,7 @@ void CameraSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	triggerCombo.AddString( "External Trigger" );
 	triggerCombo.AddString( "Automatic Software Trigger" );
 	//triggerCombo.AddString( "Manual Software Trigger" );
-	triggerCombo.SelectString( 0, "Automatic Software Trigger" );
+	triggerCombo.SelectString( 0, "External Trigger" );
 	pos.y += 25;
 
 	frameRateText.sPos = { pos.x, pos.y, pos.x + 150, pos.y + 25 };
