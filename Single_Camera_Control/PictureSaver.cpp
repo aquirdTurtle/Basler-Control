@@ -40,14 +40,8 @@ void PictureSaver::initialize( POINT& pos, int& id, CWnd* parent )
 	struct tm now;
 	localtime_s(&now, &t);
 	std::string dateText;
-	if (now.tm_mon + 1 < 10)
-	{
-		dateText = str(now.tm_year + 1900 - 2000) + "0" + str(now.tm_mon + 1) + str(now.tm_mday);
-	}
-	else
-	{
-		dateText = str(now.tm_year + 1900 - 2000) + str(now.tm_mon + 1) + str(now.tm_mday);
-	}
+	dateText = str ( now.tm_year + 1900 - 2000 ) + ( now.tm_mon + 1 < 10 ? "0" : "" ) + str ( now.tm_mon + 1 )
+		+ ( now.tm_mday + 1 < 10 ? "0" : "" ) + str ( now.tm_mday );
 
 	saveLocationEdit.sPos = { pos.x + 100, pos.y, pos.x + 300, pos.y += 25 };
 	saveLocationEdit.Create( WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, saveLocationEdit.sPos, parent, id++ );
@@ -148,7 +142,17 @@ void PictureSaver::save( const Matrix<long>& pic, int width )
 			monthName = "December";
 			break;
 	}
-
+	try
+	{	
+		checkCreateFolder ( DATA_SAVE_LOCATION + str ( year ) );
+		checkCreateFolder ( DATA_SAVE_LOCATION + str ( year ) + "\\" + monthName );
+		checkCreateFolder ( DATA_SAVE_LOCATION + str ( year ) + "\\" + monthName + "\\" + monthName + " " + str ( day ) );
+		checkCreateFolder ( DATA_SAVE_LOCATION + str ( year ) + "\\" + monthName + "\\" + monthName + " " + str ( day ) + "\\Raw Data");
+	}
+	catch ( Error& )
+	{
+		thrower ( " Failed to create final folder location for save data!" );
+	}
 	std::string address = DATA_SAVE_LOCATION + str(year) + "\\" + monthName +"\\" + monthName + " " + str(day) 
 		+ "\\"  + DATA_SAVE_LOCATION2;
 	if (address == "")
@@ -179,6 +183,26 @@ void PictureSaver::save( const Matrix<long>& pic, int width )
 		}
 	}
 }
+
+
+/*
+Checks if a folder exists and if not, tries to create it.
+*/
+void PictureSaver::checkCreateFolder ( std::string folderAddress )
+{
+	struct stat info;
+	int resultStat = stat ( folderAddress.c_str ( ), &info );
+	if ( resultStat != 0 )
+	{
+		auto success = CreateDirectory ( folderAddress.c_str ( ), 0 );
+		if ( !success )
+		{
+			thrower ( "ERROR: Failed to create folder! Folder address was " + folderAddress );
+		}
+	}
+}
+
+
 
 /*
 // save an array of pictures. Each picture has width of width.

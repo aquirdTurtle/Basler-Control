@@ -7,3 +7,5 @@ Bugs:
 - usb dynamic range seems wrong
 - bottom of horizontal plot is getting cut off?
 - initial size of image area is wrong, need to resize to correct
+- create folders when saving
+- close file at finish of exp
