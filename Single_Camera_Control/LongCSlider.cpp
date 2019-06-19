@@ -5,7 +5,7 @@
 
 void LongCSlider::initialize ( POINT& loc, CWnd* parent, int& id, int width, int height, int editID, std::string headerText )
 {
-	header.sPos = { loc.x + 25, loc.y, loc.x + 50, loc.y += 20 };
+	header.sPos = { loc.x, loc.y, loc.x + 25, loc.y += 20 };
 	header.Create ( headerText.c_str(), WS_CHILD | WS_VISIBLE | SS_CENTER, header.sPos, parent, id++ );
 	header.fontType = fontTypes::Small;
 

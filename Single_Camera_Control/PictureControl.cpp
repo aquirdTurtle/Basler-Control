@@ -69,18 +69,18 @@ void PictureControl::initialize( POINT& loc, CWnd* parent, int& id, int width, i
 	loc.x += 65;
 	setPictureArea( loc, maxWidth, maxHeight );
 	horGraph = new PlotCtrl( horData, plotStyle::HistPlot, graphPens, font, graphBrushes, "", true );
-	horGraph->init( { loc.x, loc.y + height }, width - 50, 60, parent );
+	horGraph->init( { loc.x, loc.y + height + 50 }, width - 50, 60, parent );
 
 	loc.x += unscaledBackgroundArea.right - unscaledBackgroundArea.left;
 	
-	sliderMin.initialize ( loc, parent, id, 25, unscaledBackgroundArea.bottom - unscaledBackgroundArea.top, 
+	sliderMin.initialize ( loc, parent, id, 50, unscaledBackgroundArea.bottom - unscaledBackgroundArea.top, 
 						   IDC_MIN_SLIDER_EDIT, "MIN" );
 	sliderMin.setValue ( 0 );
-	loc.x += 25;
+	loc.x += 50;
 	loc.y -= unscaledBackgroundArea.bottom - unscaledBackgroundArea.top;
-	sliderMax.initialize ( loc, parent, id, 25, unscaledBackgroundArea.bottom - unscaledBackgroundArea.top,
+	sliderMax.initialize ( loc, parent, id, 50, unscaledBackgroundArea.bottom - unscaledBackgroundArea.top,
 						   IDC_MAX_SLIDER_EDIT, "MAX" );
-	sliderMax.setValue ( 65535 );
+	sliderMax.setValue ( 10000 );
 	// reset this.
 	loc.x -= unscaledBackgroundArea.right - unscaledBackgroundArea.left;
 	// manually scroll the objects to initial positions.
@@ -237,7 +237,14 @@ void PictureControl::setHoverValue()
 	{
 		return;
 	}
-	valueDisp.SetWindowTextA( cstr( mostRecentImage(mouseCoordinates) ) );
+	try
+	{
+		valueDisp.SetWindowTextA ( cstr ( mostRecentImage ( mouseCoordinates ) ) );
+	}
+	catch ( Error& )
+	{
+		valueDisp.SetWindowTextA ( "???" );
+	}
 }
 
 
@@ -416,7 +423,7 @@ void PictureControl::updatePlotData( )
 	auto avgCol = std::accumulate( dataCol.begin( ), dataCol.end( ), 0.0 ) / dataCol.size( );
 	for ( auto& data : *vertData[0] )
 	{
-		data.y = dataCol[count++] - avgCol;
+		data.y = dataCol[dataCol.size() - count++ - 1] - avgCol;
 	}
 
 }
@@ -458,6 +465,7 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 	mostRecentImage = picData;
 	unsigned int minColor = sliderMin.getValue();
 	unsigned int maxColor = sliderMax.getValue();
+
 	dc->SelectPalette( CPalette::FromHandle(imagePalette), true );
 	dc->RealizePalette();
 	int pixelsAreaWidth = pictureArea.right - pictureArea.left + 1;
