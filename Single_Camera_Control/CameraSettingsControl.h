@@ -40,6 +40,8 @@ struct CameraSettings
 	std::string triggerMode;
 	double frameRate;
 	imageDimensions dimensions;
+	bool softwareAccum;
+	long accumNum;
 };
 
 
@@ -92,6 +94,10 @@ class CameraSettingsControl
 		Control<CStatic> frameRateText;
 		Control<CEdit> frameRateEdit;
 		Control<CStatic> realFrameRate;
+		// software accumulation option controls
+		Control<CButton> accumulateOption;
+		Control<CEdit> accumulationNumberEdit;
+		
 
 		Control<CStatic> gainText;
 		Control<CComboBox> gainCombo;

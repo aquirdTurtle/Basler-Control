@@ -18,10 +18,11 @@ class Matrix
 		type & operator()( UINT row, UINT col );
 		type operator()( POINT p ) const;
 		type & operator()( POINT p );
-		UINT getRows( );
-		UINT getCols( );
+		UINT getRows( ) const;
+		UINT getCols( ) const;
 		Matrix<type> submatrix( UINT rowOffset, UINT rowSubSpan, UINT colOffset, UINT colSubSpan );
 		std::string print( );
+		std::string printConst ( ) const;
 		void updateString( );
 		UINT size( ) const;
 		// typename tells the compiler that std::vector<type>::iterator will be a type.
@@ -131,6 +132,21 @@ std::string Matrix<type>::print( )
 	return currMatrix;
 }
 
+template <class type>
+std::string Matrix<type>::printConst ( ) const
+{
+	UINT counter = 0;
+	std::string prtMatrix = "";
+	for ( auto elem : *this )
+	{
+		prtMatrix += str ( elem ) + ", ";
+		if ( ++counter % cols == 0 )
+		{
+			prtMatrix += ";\n";
+		}
+	}
+	return prtMatrix;
+}
 
 /*
 	Equivalent to passing row and column explicitly with p.x as the column and p.y as the row. Careful, x counts from 
@@ -205,17 +221,17 @@ type & Matrix<type>::operator()( UINT row, UINT col )
 
 
 template <class type>
-UINT Matrix<type>::getCols( )
+UINT Matrix<type>::getCols( ) const
 {
-	updateString( );
+	//updateString( );
 	return cols;
 }
 
 
 template <class type>
-UINT Matrix<type>::getRows( )
+UINT Matrix<type>::getRows( ) const
 {
-	updateString( );
+	//updateString( );
 	return rows;
 }
 

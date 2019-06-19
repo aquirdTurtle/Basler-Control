@@ -204,6 +204,19 @@ void PictureControl::updatePalette( HPALETTE palette )
 	imagePalette = palette;
 }
 
+
+void PictureControl::setAccumulationOption ( bool accumulate, ULONG accumNumber )
+{
+	// this should be the only place where image record really gets resized. 
+	imageRecord.clear ( );
+	imageRecord.resize ( accumNumber );
+	accumImage = Matrix<long> ( );
+
+	accumulateImages = accumulate;
+	accumulationNumber = accumNumber;
+
+}
+
 void PictureControl::handleEditChange( int id )
 {
 	if (id == IDC_MAX_SLIDER_EDIT )
@@ -478,6 +491,42 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 	{
 		thrower("ERROR: picture data didn't match grid size!");
 	}
+	Matrix<long> drawPic;
+	if ( accumulateImages )
+	{
+		// if first pic of run, this should be empty
+		if ( accumImage.size ( ) == 0 )
+		{
+			accumImage = Matrix<long> ( picData.getRows ( ), picData.getCols ( ), 0 );
+		}
+		// add the new picture to the front of the record.
+		imageRecord.push_front ( picData );
+		// add the new pic to the accum image
+		for ( auto i : range ( imageRecord.front().data.size ( ) ) )
+		{
+			accumImage.data[ i ] += imageRecord.front().data[ i ];
+		}
+		// remove the old pic from the old image
+		for ( auto i : range ( imageRecord.back ( ).data.size ( ) ) )
+		{
+			accumImage.data[ i ] -= imageRecord.back ( ).data[ i ];
+		}
+		imageRecord.pop_back ( );
+		drawPic = accumImage;
+		/*
+		for ( auto pic : imageRecord )
+		{
+			for ( auto i : range ( pic.data.size ( ) ) )
+			{
+				drawPic.data[ i ] += pic.data[ i ];
+			}
+		}
+		*/
+	}
+	else
+	{
+		drawPic = picData;
+	}
 	// imageBoxWidth must be a multiple of 4, otherwise StretchDIBits has problems apparently T.T
 	if (pixelsAreaWidth % 4)
 	{
@@ -506,7 +555,7 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 	{
 		for (int widthInc = 0; widthInc < dataWidth; widthInc++)
 		{
-			auto val = picData ( heightInc, widthInc );
+			auto val = drawPic ( heightInc, widthInc );
 			dTemp = ceil( yscale * (val - minColor) );
 			if (dTemp < 0)
 			{

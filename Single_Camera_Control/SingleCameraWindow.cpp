@@ -405,6 +405,7 @@ void SingleCameraWindow::handleArmPress()
 		currentRepNumber = 0;
 		CameraSettings tempSettings = settings.loadCurrentSettings(cameraController.getCameraDimensions());
 		cameraController.setParameters( tempSettings );
+		picture.setAccumulationOption ( tempSettings.softwareAccum, tempSettings.accumNum );
 		picture.recalculateGrid( tempSettings.dimensions );
 		auto* dc = GetDC( );
 		picture.drawBackground( dc );

@@ -15,6 +15,9 @@ void CameraSettingsControl::rearrange(int width, int height, fontMap fonts)
 	setExposure.rearrange("", "", width, height, fonts);
 	// trigger
 	triggerCombo.rearrange("", "", width, height, fonts);
+	// accumulation options
+	accumulateOption.rearrange("","", width, height, fonts);
+	accumulationNumberEdit.rearrange ( "", "", width, height, fonts );
 
 	// Dimensions & Binning
 	leftText.rearrange("", "", width, height, fonts);
@@ -139,6 +142,13 @@ void CameraSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	exposureModeCombo.AddString( "Auto Exposure Off" );
 	exposureModeCombo.AddString( "Auto Exposure Once" );
 	exposureModeCombo.SelectString( 0, "Auto Exposure Off" );
+	/// accumulation options
+	accumulateOption.sPos = { pos.x, pos.y, pos.x + 200, pos.y + 25 };
+	accumulateOption.Create ( "Software Accumulation", NORM_CHECK_OPTIONS | BS_RIGHT | BS_LEFT, accumulateOption.sPos, parent, id++ );
+	accumulateOption.SetCheck ( 0 );
+	accumulationNumberEdit.sPos = { pos.x+200, pos.y, pos.x + 300, pos.y += 25 };
+	accumulationNumberEdit.Create ( NORM_EDIT_OPTIONS, accumulationNumberEdit.sPos, parent, id++ );
+	accumulationNumberEdit.SetWindowTextA ( "5" );
 
 	/// image dimensions
 	//
@@ -459,6 +469,26 @@ CameraSettings CameraSettingsControl::loadCurrentSettings(POINT cameraDims)
 		thrower( std::string("ERROR! Please enter a valid float for the frame rate. ") + err.what() );
 	}
 	isReady = true;
+
+	currentSettings.softwareAccum = accumulateOption.GetCheck ( );
+	if ( currentSettings.softwareAccum )
+	{
+		CString txt;
+		accumulationNumberEdit.GetWindowTextA ( txt );
+		try
+		{
+			currentSettings.accumNum = boost::lexical_cast<long> ( std::string ( txt ) );
+		}
+		catch ( boost::bad_lexical_cast& err )
+		{
+			thrower ( std::string ( "Please enter a valid long for the software accumulation number. " ) 
+					  + err.what ( ) );
+		}
+	}
+	else
+	{
+		currentSettings.accumNum = 0;
+	}
 
 	return currentSettings;
 }

@@ -7,7 +7,7 @@
 #include "CameraImageDimensions.h"
 #include "PlotCtrl.h"
 #include "LongCSlider.h"
-
+#include <deque>
 
 class PictureControl
 {
@@ -41,6 +41,7 @@ class PictureControl
 		void drawDongles( CDC* parentCdc, const Matrix<long>& pic );
 		void addIntegrationText( const Matrix<long>& pic, CDC* parentCdc );
 		long getIntegrationSize(); 
+		void setAccumulationOption ( bool accumulate, ULONG accumNumber );
 	private:
 		std::vector<pPlotDataVec> horData, vertData;
 		CBrush* gridBrush;
@@ -52,6 +53,10 @@ class PictureControl
 		UINT maxWidth, maxHeight;
 		// for replotting.
 		Matrix<long> mostRecentImage;
+		bool accumulateImages;
+		ULONG accumulationNumber;
+		std::deque<Matrix<long>> imageRecord;
+		Matrix<long> accumImage;
 		// stores info as to whether the control is currently being used in plotting camera data or was used 
 		// in the most recent run.
 		bool active = true;
