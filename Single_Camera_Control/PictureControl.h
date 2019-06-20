@@ -53,6 +53,7 @@ class PictureControl
 		UINT maxWidth, maxHeight;
 		// for replotting.
 		Matrix<long> mostRecentImage;
+
 		bool accumulateImages;
 		ULONG accumulationNumber;
 		std::deque<Matrix<long>> imageRecord;

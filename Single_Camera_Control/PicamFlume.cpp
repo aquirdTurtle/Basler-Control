@@ -302,7 +302,7 @@ void PicamFlume::SetParameterLargeIntegerValue(PicamParameter param, long long v
 {
 	if (!safemode)
 	{
-		pi64s s;
+		//pi64s s;
 		auto err = Picam_SetParameterLargeIntegerValue(camera, param, val);
 		if (err != PicamError_None)
 		{

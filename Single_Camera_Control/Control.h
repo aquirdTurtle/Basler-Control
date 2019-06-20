@@ -6,6 +6,7 @@
 #include <string>
 #include <type_traits>
 #include "commonTypes.h"
+
 /*
  * This is a complex class definition. The first line here declares that this is a template class with a class template
  * argument named ControlType.  I.e. my class is based on a class called ControlType.

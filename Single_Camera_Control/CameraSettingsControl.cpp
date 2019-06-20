@@ -72,7 +72,7 @@ void CameraSettingsControl::handleTimer ( PixisCamera* cam )
 		msg = cam->getTemperatureStatus();
 		mostRecentTemp = currentTemperature;
 	}
-	catch (Error& err)
+	catch (Error&)
 	{
 		currentTemperature = mostRecentTemp;
 		msg = "Aquiring, no temperature updates";
@@ -142,10 +142,12 @@ void CameraSettingsControl::initialize( POINT& pos, int& id, CWnd* parent, int p
 	exposureModeCombo.AddString( "Auto Exposure Off" );
 	exposureModeCombo.AddString( "Auto Exposure Once" );
 	exposureModeCombo.SelectString( 0, "Auto Exposure Off" );
+	
 	/// accumulation options
 	accumulateOption.sPos = { pos.x, pos.y, pos.x + 200, pos.y + 25 };
 	accumulateOption.Create ( "Software Accumulation", NORM_CHECK_OPTIONS | BS_RIGHT | BS_LEFT, accumulateOption.sPos, parent, id++ );
 	accumulateOption.SetCheck ( 0 );
+
 	accumulationNumberEdit.sPos = { pos.x+200, pos.y, pos.x + 300, pos.y += 25 };
 	accumulationNumberEdit.Create ( NORM_EDIT_OPTIONS, accumulationNumberEdit.sPos, parent, id++ );
 	accumulationNumberEdit.SetWindowTextA ( "5" );

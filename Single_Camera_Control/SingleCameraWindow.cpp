@@ -258,7 +258,7 @@ void SingleCameraWindow::handleSoftwareTrigger()
 	{
 		//cameraController.softwareTrigger();
 	}
-	catch (Pylon::TimeoutException& err)
+	catch (Pylon::TimeoutException&)
 	{
 		errBox( "Software trigger timed out!" );
 	}

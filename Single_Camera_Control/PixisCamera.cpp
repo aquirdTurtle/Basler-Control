@@ -45,20 +45,17 @@ UINT __stdcall PixisCamera::pictureWatcherProcedure ( void* inputPtr )
 	auto stride = input->flume->getReadoutStride ( );
 	auto rois = input->flume->getRois ( );
 	input->flume->startAcquisition();
-	CodeTimer timer;
 	UINT counter = 0;
 	try
 	{
 		while ( *input->running )
 		{
-			timer.tick(str(counter));
 			auto data = input->flume->acquisitionUpdate();
 			if (data.readout_count == 0)
 			{
 				continue;
 			}
 			//auto data = input->flume->Aquire ( );
-			timer.tick(str(counter)+"f");
 			Matrix<long>* dataM = new Matrix<long> (
 				int ( rois[ 0 ].height / rois[ 0 ].y_binning ), int ( rois[ 0 ].width / rois[ 0 ].x_binning ),
 				std::vector<long> ( (USHORT*) data.initial_readout,
@@ -74,7 +71,6 @@ UINT __stdcall PixisCamera::pictureWatcherProcedure ( void* inputPtr )
 		}
 		// else probably just something related to stopAcquisition timing not working out.
 	}
-	errBox(timer.getTimingMessage());
 	return 0;
 }
 
@@ -142,7 +138,7 @@ void PixisCamera::setParameters ( CameraSettings settings )
 		flume.setRois ( region );		
 		flume.commitParams ( );
 
-		flume.displayTrigParams();
+		//flume.displayTrigParams();
 		
 	}
 	catch ( Error& err )

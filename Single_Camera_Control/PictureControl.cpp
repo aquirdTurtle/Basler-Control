@@ -214,7 +214,6 @@ void PictureControl::setAccumulationOption ( bool accumulate, ULONG accumNumber 
 
 	accumulateImages = accumulate;
 	accumulationNumber = accumNumber;
-
 }
 
 void PictureControl::handleEditChange( int id )
@@ -511,17 +510,9 @@ void PictureControl::drawBitmap(CDC* dc, const Matrix<long>& picData)
 		{
 			accumImage.data[ i ] -= imageRecord.back ( ).data[ i ];
 		}
+		// remove oldest image
 		imageRecord.pop_back ( );
 		drawPic = accumImage;
-		/*
-		for ( auto pic : imageRecord )
-		{
-			for ( auto i : range ( pic.data.size ( ) ) )
-			{
-				drawPic.data[ i ] += pic.data[ i ];
-			}
-		}
-		*/
 	}
 	else
 	{
